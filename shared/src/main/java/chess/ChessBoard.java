@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -7,7 +10,7 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
-
+    ChessPiece[][] spaces = new ChessPiece[8][8];
     public ChessBoard() {
         
     }
@@ -19,7 +22,8 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+
+        spaces[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
     /**
@@ -30,7 +34,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return spaces[position.getRow()-1][position.getColumn()-1];
     }
 
     /**
@@ -38,6 +42,76 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        spaces = new ChessPiece[8][8];
+        spaces[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        spaces[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        spaces[0][2] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        spaces[0][3] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        spaces[0][4] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
+        spaces[0][5] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        spaces[0][6] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        spaces[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+
+        spaces[7][0] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        spaces[7][1] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+        spaces[7][2] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+        spaces[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+        spaces[7][3] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+        spaces[7][5] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+        spaces[7][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+        spaces[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+
+
+        for (int i = 0; i < spaces.length; i++) {
+            for (int j = 0; j < spaces[i].length; j++) {
+                if (i == 1) {
+                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+                }
+                if (i == 6) {
+                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+                }
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < spaces.length; i++) {
+            sb.append("[ ");
+            for (int j = 0; j < spaces[i].length; j++) {
+                if(spaces[i][j] == null) {
+                    sb.append("null");
+                } else {
+                    sb.append(spaces[i][j]);
+                }
+
+                if (j < spaces[i].length - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(" ]");
+
+            if (i < spaces.length - 1) {
+                sb.append('\n');
+            }
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ChessBoard that)) {
+            return false;
+        }
+        return Objects.deepEquals(spaces, that.spaces);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(spaces);
     }
 }
