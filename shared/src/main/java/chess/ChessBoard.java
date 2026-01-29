@@ -11,6 +11,9 @@ import java.util.Objects;
  */
 public class ChessBoard {
     ChessPiece[][] spaces = new ChessPiece[8][8];
+    public static final int MAX_SIZE = 8;
+    public static final int MIN_SIZE = 1;
+
     public ChessBoard() {
         
     }
@@ -36,6 +39,8 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         return spaces[position.getRow()-1][position.getColumn()-1];
     }
+
+
 
     /**
      * Sets the board to the default starting board
@@ -73,6 +78,16 @@ public class ChessBoard {
             }
         }
     }
+
+
+
+//    public boolean isEmpty(ChessPosition position) {
+//        boolean empty = false;
+//        if (spaces[position.getRow() - 1][position.getColumn() - 1] == null) {
+//            empty = true;
+//        }
+//        return empty;
+//    }
 
     @Override
     public String toString() {
