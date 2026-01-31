@@ -16,7 +16,7 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
     }
@@ -55,7 +55,14 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        PieceMovesCalculator calc = new PawnMovesCalculator();
+        PieceMovesCalculator calc = switch (type) {
+            case PAWN -> new PawnMovesCalculator();
+            case KING -> null;
+            case QUEEN -> null;
+            case BISHOP -> null;
+            case KNIGHT -> null;
+            case ROOK -> new RookMovesCalculator();
+        };
         return calc.calculateMoves(board, myPosition, this);
     }
 

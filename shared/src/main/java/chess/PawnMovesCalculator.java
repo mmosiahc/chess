@@ -26,11 +26,11 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
         return (r >= ChessBoard.MIN_SIZE && r <= ChessBoard.MAX_SIZE) && (c >= ChessBoard.MIN_SIZE && c <= ChessBoard.MAX_SIZE);
     }
 
-    private boolean isBlack(ChessBoard board, ChessPosition position) {
+    public boolean isBlack(ChessBoard board, ChessPosition position) {
         return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.BLACK;
     }
 
-    private boolean isWhite(ChessBoard board, ChessPosition position) {
+    public boolean isWhite(ChessBoard board, ChessPosition position) {
         return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.WHITE;
     }
 

@@ -1,0 +1,122 @@
+package chess;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class RookMovesCalculator implements PieceMovesCalculator{
+    private static final int UP = 1;
+    private static final int DOWN = -1;
+    private static final int RIGHT = 1;
+    private static final int LEFT = -1;
+
+    public boolean checkPosition(ChessBoard board, ChessPosition position) {
+        return board.getPiece(position) == null;
+    }
+
+    public boolean inBounds(ChessPosition position) {
+        int r = position.getRow();
+        int c = position.getColumn();
+        return (r >= ChessBoard.MIN_SIZE && r <= ChessBoard.MAX_SIZE) && (c >= ChessBoard.MIN_SIZE && c <= ChessBoard.MAX_SIZE);
+    }
+
+    public boolean isBlack(ChessBoard board, ChessPosition position) {
+        return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.BLACK;
+    }
+
+    public boolean isWhite(ChessBoard board, ChessPosition position) {
+        return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.WHITE;
+    }
+
+    private void moveToEdgeUP(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+        int i = 1;
+        boolean blocked = false;
+        while (i < ChessBoard.MAX_SIZE) {
+            ChessPosition nextSpace = new ChessPosition(position.getRow() + i, position.getColumn());
+            if(inBounds(nextSpace)) {
+                if(checkPosition(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                }else {blocked = true;}
+            } else {break;}
+            if(blocked) {break;}
+            i++;
+        }
+    }
+
+    private void moveToEdgeDOWN(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+        int i = 1;
+        boolean blocked = false;
+        while (i < ChessBoard.MAX_SIZE) {
+            ChessPosition nextSpace = new ChessPosition(position.getRow() - i, position.getColumn());
+            if(inBounds(nextSpace)) {
+                if(checkPosition(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                }else {blocked = true;}
+            } else {break;}
+            if(blocked) {break;}
+            i++;
+        }
+    }
+
+    private void moveToEdgeRIGHT(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+        int i = 1;
+        boolean blocked = false;
+        while (i < ChessBoard.MAX_SIZE) {
+            ChessPosition nextSpace = new ChessPosition(position.getRow(), position.getColumn() + i);
+            if(inBounds(nextSpace)) {
+                if(checkPosition(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                }else {blocked = true;}
+            } else {break;}
+            if(blocked) {break;}
+            i++;
+        }
+    }
+
+    private void moveToEdgeLEFT(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+        int i = 1;
+        boolean blocked = false;
+        while (i < ChessBoard.MAX_SIZE) {
+            ChessPosition nextSpace = new ChessPosition(position.getRow(), position.getColumn() - i);
+            if(inBounds(nextSpace)) {
+                if(checkPosition(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
+                    moves.add(new ChessMove(position, nextSpace, null));
+                    blocked = true;
+                }else {blocked = true;}
+            } else {break;}
+            if(blocked) {break;}
+            i++;
+        }
+    }
+
+    public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece) {
+        final Collection<ChessMove> moves = new ArrayList<>();
+        moveToEdgeUP(board, position, moves);
+        moveToEdgeDOWN(board, position, moves);
+        moveToEdgeRIGHT(board, position, moves);
+        moveToEdgeLEFT(board, position, moves);
+        return moves;
+    }
+}

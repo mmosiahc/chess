@@ -7,4 +7,6 @@ public interface PieceMovesCalculator {
     public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece);
     public boolean checkPosition(ChessBoard board, ChessPosition position);
     public boolean inBounds(ChessPosition position);
+    public boolean isBlack(ChessBoard board, ChessPosition position);
+    public boolean isWhite(ChessBoard board, ChessPosition position);
 }
