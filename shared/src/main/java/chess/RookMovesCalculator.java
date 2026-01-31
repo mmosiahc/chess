@@ -27,7 +27,7 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         return new ChessPosition(position.getRow() + row, position.getColumn() + col);
     }
 
-    private void moveToEdgeUP(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeUp(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
@@ -48,7 +48,7 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         }
     }
 
-    private void moveToEdgeDOWN(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeDown(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
@@ -69,7 +69,7 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         }
     }
 
-    private void moveToEdgeRIGHT(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
@@ -90,7 +90,7 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         }
     }
 
-    private void moveToEdgeLEFT(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
@@ -113,10 +113,10 @@ public class RookMovesCalculator implements PieceMovesCalculator{
 
     public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece) {
         final Collection<ChessMove> moves = new ArrayList<>();
-        moveToEdgeUP(board, position, moves);
-        moveToEdgeDOWN(board, position, moves);
-        moveToEdgeRIGHT(board, position, moves);
-        moveToEdgeLEFT(board, position, moves);
+        moveToEdgeUp(board, position, moves);
+        moveToEdgeDown(board, position, moves);
+        moveToEdgeRight(board, position, moves);
+        moveToEdgeLeft(board, position, moves);
         return moves;
     }
 }
