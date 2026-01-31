@@ -34,7 +34,7 @@ public class KnightMovesCalculator implements PieceMovesCalculator{
         return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.WHITE;
     }
 
-    ChessPosition getPosition(ChessPosition position, int row, int col) {
+    public ChessPosition getPosition(ChessPosition position, int row, int col) {
         return new ChessPosition(position.getRow() + row, position.getColumn() + col);
     }
 

@@ -15,6 +15,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
     private static final int B_INITIAL = -2;
     private static final int PROMOTE_B_TO_W = 1;
     private static final int PROMOTE_W_TO_B = 8;
+    private static final int NO_MOVE = 0;
 
     public boolean checkPosition(ChessBoard board, ChessPosition position) {
         return board.getPiece(position) == null;
@@ -34,6 +35,10 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
         return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.WHITE;
     }
 
+    public ChessPosition getPosition(ChessPosition position, int row, int col) {
+        return new ChessPosition(position.getRow() + row, position.getColumn() + col);
+    }
+
     private boolean promotionW(ChessPosition position) {
         return position.getRow() == PROMOTE_W_TO_B;
     }
@@ -43,7 +48,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
     }
 
     private void moveForwardW(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpaceW = new ChessPosition(position.getRow() + W_DIRECTION, position.getColumn());
+        ChessPosition nextSpaceW = getPosition(position, W_DIRECTION, NO_MOVE);
         if(inBounds(nextSpaceW)){
             if (checkPosition(board, nextSpaceW) && promotionW(nextSpaceW) ) {
                 moves.add(new ChessMove(position, nextSpaceW, ChessPiece.PieceType.KNIGHT));
@@ -57,7 +62,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
     }
 
     private void moveForwardB(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpaceB = new ChessPosition(position.getRow() + B_DIRECTION, position.getColumn());
+        ChessPosition nextSpaceB = getPosition(position, B_DIRECTION, NO_MOVE);
         if(inBounds(nextSpaceB)) {
             if (checkPosition(board, nextSpaceB) && promotionB(nextSpaceB) ) {
                 moves.add(new ChessMove(position, nextSpaceB, ChessPiece.PieceType.KNIGHT));
@@ -71,8 +76,8 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
     }
 
     private void moveInitialW(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition initialW = new ChessPosition(position.getRow() + W_INITIAL, position.getColumn());
-        ChessPosition nextSpaceW = new ChessPosition(position.getRow() + W_DIRECTION, position.getColumn());
+        ChessPosition initialW = getPosition(position, W_INITIAL, NO_MOVE);
+        ChessPosition nextSpaceW = getPosition(position, W_DIRECTION, NO_MOVE);
         if(position.getRow() == W_START_ROW) {
             if(checkPosition(board, initialW) && checkPosition(board, nextSpaceW)) {
                 moves.add(new ChessMove(position, initialW, null));
@@ -81,8 +86,8 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
     }
 
     private void moveInitialB(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition initialB = new ChessPosition(position.getRow() + B_INITIAL, position.getColumn());
-        ChessPosition nextSpaceB = new ChessPosition(position.getRow() + B_DIRECTION, position.getColumn());
+        ChessPosition initialB = getPosition(position, B_INITIAL, NO_MOVE);
+        ChessPosition nextSpaceB = getPosition(position, B_DIRECTION, NO_MOVE);;
         if(position.getRow() == B_START_ROW) {
             if(checkPosition(board, initialB) && checkPosition(board, nextSpaceB)) {
                 moves.add(new ChessMove(position, initialB, null));
@@ -91,8 +96,8 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
     }
 
     private void captureWhite(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition captureRight = new ChessPosition(position.getRow() + W_DIRECTION, position.getColumn() + RIGHT);
-        ChessPosition captureLeft = new ChessPosition(position.getRow() + W_DIRECTION, position.getColumn() + LEFT);
+        ChessPosition captureRight = getPosition(position, W_DIRECTION, RIGHT);
+        ChessPosition captureLeft = getPosition(position, W_DIRECTION, LEFT);
         if(inBounds(captureRight)) {
             if (!checkPosition(board, captureRight) && isBlack(board, captureRight) && promotionW(captureRight) ) {
                 moves.add(new ChessMove(position, captureRight, ChessPiece.PieceType.KNIGHT));
@@ -117,8 +122,8 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
     }
 
     private void captureBlack(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition captureRight = new ChessPosition(position.getRow() + B_DIRECTION, position.getColumn() + RIGHT);
-        ChessPosition captureLeft = new ChessPosition(position.getRow() + B_DIRECTION, position.getColumn() + LEFT);
+        ChessPosition captureRight = getPosition(position, B_DIRECTION, RIGHT);
+        ChessPosition captureLeft = getPosition(position, B_DIRECTION, LEFT);
         if(inBounds(captureRight)) {
             if (!checkPosition(board, captureRight) && isWhite(board, captureRight) && promotionB(captureRight) ) {
                 moves.add(new ChessMove(position, captureRight, ChessPiece.PieceType.KNIGHT));

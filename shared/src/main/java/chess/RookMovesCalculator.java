@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class RookMovesCalculator implements PieceMovesCalculator{
-
+    private static final int NO_MOVE = 0;
     public boolean checkPosition(ChessBoard board, ChessPosition position) {
         return board.getPiece(position) == null;
     }
@@ -23,11 +23,15 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.WHITE;
     }
 
+    public ChessPosition getPosition(ChessPosition position, int row, int col) {
+        return new ChessPosition(position.getRow() + row, position.getColumn() + col);
+    }
+
     private void moveToEdgeUP(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow() + i, position.getColumn());
+            ChessPosition nextSpace = getPosition(position, i, NO_MOVE);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
@@ -48,7 +52,7 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow() - i, position.getColumn());
+            ChessPosition nextSpace = getPosition(position, -i, NO_MOVE);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
@@ -69,7 +73,7 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow(), position.getColumn() + i);
+            ChessPosition nextSpace = getPosition(position, NO_MOVE, i);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
@@ -90,7 +94,7 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow(), position.getColumn() - i);
+            ChessPosition nextSpace = getPosition(position, NO_MOVE, -i);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
