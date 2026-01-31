@@ -3,8 +3,15 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RookMovesCalculator implements PieceMovesCalculator{
-
+public class BishopMovesCalculator implements PieceMovesCalculator{
+    public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        moveToEdgeUpRight(board, position, moves);
+        moveToEdgeUpLeft(board, position, moves);
+        moveToEdgeDownRight(board, position, moves);
+        moveToEdgeDownLeft(board, position, moves);
+        return moves;
+    }
     public boolean checkPosition(ChessBoard board, ChessPosition position) {
         return board.getPiece(position) == null;
     }
@@ -23,11 +30,11 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         return board.getPiece(position).getTeamColor() == ChessGame.TeamColor.WHITE;
     }
 
-    private void moveToEdgeUP(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeUpRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow() + i, position.getColumn());
+            ChessPosition nextSpace = new ChessPosition(position.getRow() + i, position.getColumn() + i);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
@@ -44,11 +51,11 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         }
     }
 
-    private void moveToEdgeDOWN(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeDownRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow() - i, position.getColumn());
+            ChessPosition nextSpace = new ChessPosition(position.getRow() - i, position.getColumn() + i);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
@@ -65,11 +72,11 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         }
     }
 
-    private void moveToEdgeRIGHT(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeUpLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow(), position.getColumn() + i);
+            ChessPosition nextSpace = new ChessPosition(position.getRow() + i, position.getColumn() - i);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
@@ -86,11 +93,11 @@ public class RookMovesCalculator implements PieceMovesCalculator{
         }
     }
 
-    private void moveToEdgeLEFT(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+    private void moveToEdgeDownLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
         int i = ChessBoard.MIN_SIZE;
         boolean blocked = false;
         while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = new ChessPosition(position.getRow(), position.getColumn() - i);
+            ChessPosition nextSpace = new ChessPosition(position.getRow() - i, position.getColumn() - i);
             if(inBounds(nextSpace)) {
                 if(checkPosition(board, nextSpace)) {
                     moves.add(new ChessMove(position, nextSpace, null));
@@ -105,14 +112,5 @@ public class RookMovesCalculator implements PieceMovesCalculator{
             if(blocked) {break;}
             i++;
         }
-    }
-
-    public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece) {
-        final Collection<ChessMove> moves = new ArrayList<>();
-        moveToEdgeUP(board, position, moves);
-        moveToEdgeDOWN(board, position, moves);
-        moveToEdgeRIGHT(board, position, moves);
-        moveToEdgeLEFT(board, position, moves);
-        return moves;
     }
 }
