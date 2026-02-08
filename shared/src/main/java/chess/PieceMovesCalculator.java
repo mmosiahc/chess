@@ -4,10 +4,10 @@ import java.util.Collection;
 
 public interface PieceMovesCalculator {
 
-    public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece);
-    public boolean checkPosition(ChessBoard board, ChessPosition position);
-    public boolean inBounds(ChessPosition position);
-    public boolean isBlack(ChessBoard board, ChessPosition position);
-    public boolean isWhite(ChessBoard board, ChessPosition position);
-    public ChessPosition getPosition(ChessPosition position, int row, int col);
+    Collection<ChessMove> calculateMoves(ChessBoard board, ChessPosition position, ChessPiece piece);
+    boolean checkPosition(ChessBoard board, ChessPosition position);
+    boolean inBounds(ChessPosition position);
+    boolean isBlack(ChessBoard board, ChessPosition position);
+    boolean isWhite(ChessBoard board, ChessPosition position);
+    ChessPosition getPosition(ChessPosition position, int row, int col);
 }

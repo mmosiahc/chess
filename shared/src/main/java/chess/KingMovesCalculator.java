@@ -4,22 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class KingMovesCalculator implements PieceMovesCalculator{
-    private static final int NO_MOVE = 0;
-    private static final int UP = 1;
-    private static final int DOWN = -1;
-    private static final int RIGHT = 1;
-    private static final int LEFT = -1;
+    private static final int[][] KING_MOVES = {
+            {1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}
+    };
 
     public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
-        moveUp(board, position, moves);
-        moveRight(board, position, moves);
-        moveDown(board, position, moves);
-        moveLeft(board, position, moves);
-        moveUpRight(board, position, moves);
-        moveDownRight(board, position, moves);
-        moveUpLeft(board, position, moves);
-        moveDownLeft(board, position, moves);
+        applyKingMoves(board, position, moves);
         return moves;
     }
     public boolean checkPosition(ChessBoard board, ChessPosition position) {
@@ -44,107 +35,22 @@ public class KingMovesCalculator implements PieceMovesCalculator{
         return new ChessPosition(position.getRow() + row, position.getColumn() + col);
     }
 
-    private void moveUp(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, UP, NO_MOVE);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
+    private void validateAndAddPosition(ChessBoard board, ChessPosition sPosition, ChessPosition ePosition, Collection<ChessMove> moves) {
+        if(inBounds(ePosition)) {
+            if (checkPosition(board, ePosition)) {
+                moves.add(new ChessMove(sPosition, ePosition, null));
+            } else if (isWhite(board, sPosition) && isBlack(board, ePosition)) {
+                moves.add(new ChessMove(sPosition, ePosition, null));
+            } else if (isBlack(board, sPosition) && isWhite(board, ePosition)) {
+                moves.add(new ChessMove(sPosition, ePosition, null));
             }
         }
     }
 
-    private void moveRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, NO_MOVE, RIGHT);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            }
-        }
-    }
-
-    private void moveDown(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, DOWN, NO_MOVE);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            }
-        }
-    }
-
-    private void moveLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, NO_MOVE, LEFT);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            }
-        }
-    }
-
-    private void moveUpRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, UP, RIGHT);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            }
-        }
-    }
-
-    private void moveDownRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, DOWN, RIGHT);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            }
-        }
-    }
-
-    private void moveUpLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, UP, LEFT);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            }
-        }
-    }
-
-    private void moveDownLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        ChessPosition nextSpace = getPosition(position, DOWN, LEFT);
-        if(inBounds(nextSpace)) {
-            if(checkPosition(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                moves.add(new ChessMove(position, nextSpace, null));
-            }
+    private void applyKingMoves(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
+        for(int[] move: KING_MOVES) {
+            ChessPosition nextSpace = getPosition(position, move[0], move[1]);
+            validateAndAddPosition(board, position, nextSpace, moves);
         }
     }
 }

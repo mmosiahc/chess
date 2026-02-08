@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 public class PawnMovesCalculator implements PieceMovesCalculator{
@@ -159,7 +158,6 @@ public class PawnMovesCalculator implements PieceMovesCalculator{
             moveInitialB(board, position, moves);
             captureBlack(board, position, moves);
         }
-//        System.out.println(Arrays.toString(moves.toArray()));
         return moves;
     }
 }

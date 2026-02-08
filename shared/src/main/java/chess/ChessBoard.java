@@ -37,6 +37,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
+
         return spaces[position.getRow()-1][position.getColumn()-1];
     }
 
@@ -77,17 +78,10 @@ public class ChessBoard {
                 }
             }
         }
+
+//        System.out.println(this.toString());
     }
 
-
-
-//    public boolean isEmpty(ChessPosition position) {
-//        boolean empty = false;
-//        if (spaces[position.getRow() - 1][position.getColumn() - 1] == null) {
-//            empty = true;
-//        }
-//        return empty;
-//    }
 
     @Override
     public String toString() {
@@ -98,7 +92,7 @@ public class ChessBoard {
             sb.append("[ ");
             for (int j = 0; j < spaces[i].length; j++) {
                 if(spaces[i][j] == null) {
-                    sb.append("null");
+                    sb.append("n");
                 } else {
                     sb.append(spaces[i][j]);
                 }

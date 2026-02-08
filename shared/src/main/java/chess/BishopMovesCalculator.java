@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class BishopMovesCalculator implements PieceMovesCalculator{
+    private static final int[][] DIRECTIONS = {
+            {1,1}, {-1,1}, {1,-1}, {-1,-1}
+    };
     public Collection<ChessMove> calculateMoves (ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
-        moveToEdgeUpRight(board, position, moves);
-        moveToEdgeUpLeft(board, position, moves);
-        moveToEdgeDownRight(board, position, moves);
-        moveToEdgeDownLeft(board, position, moves);
+        for(int[] dir: DIRECTIONS) {
+            moveInDirection(board, position, dir[0], dir[1], moves);
+        }
         return moves;
     }
     public boolean checkPosition(ChessBoard board, ChessPosition position) {
@@ -34,87 +36,29 @@ public class BishopMovesCalculator implements PieceMovesCalculator{
         return new ChessPosition(position.getRow() + row, position.getColumn() + col);
     }
 
-    private void moveToEdgeUpRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        int i = ChessBoard.MIN_SIZE;
-        boolean blocked = false;
-        while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = getPosition(position, i, i);
-            if(inBounds(nextSpace)) {
-                if(checkPosition(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                }else {blocked = true;}
-            } else {break;}
-            if(blocked) {break;}
-            i++;
+    private boolean validateAndAddPosition(ChessBoard board, ChessPosition sPosition, ChessPosition ePosition, boolean blocked, Collection<ChessMove> moves) {
+        if(inBounds(ePosition)) {
+            if (checkPosition(board, ePosition)) {
+                moves.add(new ChessMove(sPosition, ePosition, null));
+            } else if (isWhite(board, sPosition) && isBlack(board, ePosition)) {
+                moves.add(new ChessMove(sPosition, ePosition, null));
+                blocked = true;
+            } else if (isBlack(board, sPosition) && isWhite(board, ePosition)) {
+                moves.add(new ChessMove(sPosition, ePosition, null));
+                blocked = true;
+            } else {
+                blocked = true;
+            }
         }
+        return blocked;
     }
 
-    private void moveToEdgeDownRight(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        int i = ChessBoard.MIN_SIZE;
-        boolean blocked = false;
-        while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = getPosition(position, -i, i);
-            if(inBounds(nextSpace)) {
-                if(checkPosition(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                }else {blocked = true;}
-            } else {break;}
+    private void moveInDirection(ChessBoard board, ChessPosition position, int rowDir, int colDir, Collection<ChessMove> moves) {
+        boolean blocked;
+        for(int i = ChessBoard.MIN_SIZE; i < ChessBoard.MAX_SIZE; i++) {
+            ChessPosition nextPosition = getPosition(position, i * rowDir, i * colDir);
+            blocked = validateAndAddPosition(board, position, nextPosition, false, moves);
             if(blocked) {break;}
-            i++;
-        }
-    }
-
-    private void moveToEdgeUpLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        int i = ChessBoard.MIN_SIZE;
-        boolean blocked = false;
-        while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = getPosition(position, i, -i);
-            if(inBounds(nextSpace)) {
-                if(checkPosition(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                }else {blocked = true;}
-            } else {break;}
-            if(blocked) {break;}
-            i++;
-        }
-    }
-
-    private void moveToEdgeDownLeft(ChessBoard board, ChessPosition position, Collection<ChessMove> moves) {
-        int i = ChessBoard.MIN_SIZE;
-        boolean blocked = false;
-        while (i < ChessBoard.MAX_SIZE) {
-            ChessPosition nextSpace = getPosition(position, -i, -i);
-            if(inBounds(nextSpace)) {
-                if(checkPosition(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                } else if (isWhite(board, position) && isBlack(board,nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                } else if (isBlack(board, position) && isWhite(board, nextSpace)) {
-                    moves.add(new ChessMove(position, nextSpace, null));
-                    blocked = true;
-                }else {blocked = true;}
-            } else {break;}
-            if(blocked) {break;}
-            i++;
         }
     }
 }
