@@ -52,6 +52,7 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece;
+
         Collection<ChessMove> moves = new ArrayList<>();
         if(board.getPiece(startPosition) != null) {
            piece = board.getPiece(startPosition);
@@ -69,6 +70,9 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
+        if(piece.getTeamColor() != currentTeam) {
+            throw new InvalidMoveException("Not " + piece.getTeamColor() + " turn.");
+        }
         board.addPiece(move.getStartPosition(), null);
         if(move.getPromotionPiece() != null) {
             board.addPiece(move.getEndPosition(), null);
@@ -90,9 +94,13 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = board.locateKing(teamColor);
+        Collection<ChessMove> teamMoves = board.getAllMoves(teamColor);
+        for(ChessMove m: teamMoves) {
+            if (m.getEndPosition().equals(kingPosition)) return true;
+        }
+        return false;
     }
-
     /**
      * Determines if the given team is in checkmate
      *
