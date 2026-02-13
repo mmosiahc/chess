@@ -68,13 +68,13 @@ public class ChessPiece {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (pieceColor == ChessGame.TeamColor.WHITE && type == PieceType.KING) {
-            sb.append("KG");
+            sb.append("K");
         } else if (pieceColor == ChessGame.TeamColor.WHITE && type == PieceType.QUEEN) {
             sb.append("Q");
         } else if (pieceColor == ChessGame.TeamColor.WHITE && type == PieceType.BISHOP) {
             sb.append("B");
         } else if (pieceColor == ChessGame.TeamColor.WHITE && type == PieceType.KNIGHT) {
-            sb.append("KN");
+            sb.append("N");
         } else if (pieceColor == ChessGame.TeamColor.WHITE && type == PieceType.ROOK) {
             sb.append("R");
         } else if (pieceColor == ChessGame.TeamColor.WHITE && type == PieceType.PAWN) {
@@ -82,13 +82,13 @@ public class ChessPiece {
         }
 
         if (pieceColor == ChessGame.TeamColor.BLACK && type == PieceType.KING) {
-            sb.append("kg");
+            sb.append("k");
         } else if (pieceColor == ChessGame.TeamColor.BLACK && type == PieceType.QUEEN) {
             sb.append("q");
         } else if (pieceColor == ChessGame.TeamColor.BLACK && type == PieceType.BISHOP) {
             sb.append("b");
         } else if (pieceColor == ChessGame.TeamColor.BLACK && type == PieceType.KNIGHT) {
-            sb.append("kn");
+            sb.append("n");
         } else if (pieceColor == ChessGame.TeamColor.BLACK && type == PieceType.ROOK) {
             sb.append("r");
         } else if (pieceColor == ChessGame.TeamColor.BLACK && type == PieceType.PAWN) {

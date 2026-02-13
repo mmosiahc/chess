@@ -72,9 +72,33 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if(board.getPiece(move.getStartPosition()) == null) {
+            throw new InvalidMoveException("Invalid Move: No piece at " + move.getStartPosition());
+        }
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if(piece.getTeamColor() != currentTeam) {
-            throw new InvalidMoveException("Not " + piece.getTeamColor() + " turn.");
+            throw new InvalidMoveException("Invalid Move: Not " + piece.getTeamColor() + "'s turn.");
+        }
+        if(piece.getPieceType() == ChessPiece.PieceType.PAWN && (move.getEndPosition().getRow() - move.getStartPosition().getRow()) > 2) {
+            throw new InvalidMoveException("Invalid Move: Pawn " + piece + " moved too far.");
+        }
+        if((piece.getPieceType() == ChessPiece.PieceType.PAWN) && (move.getStartPosition().getColumn() != move.getEndPosition().getColumn())) {
+            if( board.getPiece(move.getEndPosition()) == null ) throw new InvalidMoveException("Invalid Move: No piece at " + move.getEndPosition());
+        }
+        if(piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            if(move.getStartPosition().getRow() < 7  && piece.getTeamColor() == TeamColor.BLACK && (move.getEndPosition().getRow() - move.getStartPosition().getRow()) > 1) {
+                throw new InvalidMoveException("Invalid Move: No double move allowed. Pawn already moved. " + piece + " " + move.getStartPosition());
+            }
+            if(move.getStartPosition().getRow() > 2 && piece.getTeamColor() == TeamColor.WHITE && (move.getEndPosition().getRow() - move.getStartPosition().getRow()) > 1) {
+                throw new InvalidMoveException("Invalid Move: No double move allowed. Pawn already moved. " + piece + " " + move.getStartPosition());
+            }
+        }
+        if(isInCheck(piece.getTeamColor())) {
+            ChessPosition kingPosition = board.locateKing(piece.getTeamColor());
+            throw new InvalidMoveException("Invalid Move: King in check " + kingPosition);
+        }
+        if(board.getPiece(move.getEndPosition()) != null && piece.getTeamColor() == board.getPiece(move.getEndPosition()).getTeamColor()) {
+            throw  new InvalidMoveException("Invalid Move: Can't take piece of same team.");
         }
         board.addPiece(move.getStartPosition(), null);
         if(move.getPromotionPiece() != null) {
@@ -165,10 +189,7 @@ public class ChessGame {
 
     @Override
     public String toString() {
-        return "ChessGame{" +
-                "currentTeam=" + currentTeam +
-                ", board=" + board +
-                '}';
+        return board.toString();
     }
 
     @Override

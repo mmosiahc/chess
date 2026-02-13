@@ -81,7 +81,7 @@ public class ChessBoard {
             }
         }
 
-//        System.out.println(this.toString());
+//        System.out.println(this);
     }
 
     public ChessPosition locateKing(ChessGame.TeamColor team) {
@@ -113,31 +113,36 @@ public class ChessBoard {
         return teamMoves;
     }
 
+
+
     @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
+        String divider = "+---+---+---+---+---+---+---+---+\n";
 
-        for (int i = 0; i < spaces.length; i++) {
-            sb.append("[ ");
+        for (int i = 7; i >= 0; i--) {
+            sb.append(divider);
+            sb.append("|");
             for (int j = 0; j < spaces[i].length; j++) {
                 if(spaces[i][j] == null) {
-                    sb.append("n");
+                    sb.append(" . ");
                 } else {
-                    sb.append(spaces[i][j]);
+                    sb.append(" " + spaces[i][j] + " ");
                 }
 
                 if (j < spaces[i].length - 1) {
-                    sb.append(", ");
+                    sb.append("|");
                 }
             }
-            sb.append(" ]");
-
-            if (i < spaces.length - 1) {
+            sb.append("|");
+            if (i > 0) {
                 sb.append('\n');
+            }else{
+                sb.append('\n');
+                sb.append(divider);
             }
         }
-
         return sb.toString();
     }
 
