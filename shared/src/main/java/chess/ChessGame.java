@@ -52,12 +52,15 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece;
-
         Collection<ChessMove> moves = new ArrayList<>();
+        Collection<ChessMove> validMoves = new ArrayList<>();
         if(board.getPiece(startPosition) != null) {
            piece = board.getPiece(startPosition);
            moves = piece.pieceMoves(board, startPosition);
-           return moves;
+            for (ChessMove m : moves) {
+                if(!testMove(m)) validMoves.add(m);
+            }
+            return validMoves;
         }
         return moves;
     }
@@ -75,7 +78,6 @@ public class ChessGame {
         }
         board.addPiece(move.getStartPosition(), null);
         if(move.getPromotionPiece() != null) {
-            board.addPiece(move.getEndPosition(), null);
             board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
         }else{
             board.addPiece(move.getEndPosition(), piece);
@@ -138,6 +140,27 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    private boolean testMove(ChessMove move) {
+        boolean badMove = false;
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        ChessPiece takenPiece = null;
+        board.addPiece(move.getStartPosition(), null);
+        if(board.getPiece(move.getEndPosition()) != null) {
+            takenPiece = board.getPiece(move.getEndPosition());
+        }
+        if(move.getPromotionPiece() != null) {
+            board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        }else {
+            board.addPiece(move.getEndPosition(), piece);
+        }
+        if(isInCheck(piece.getTeamColor())) {
+            badMove = true;
+        }
+        board.addPiece(move.getStartPosition(), piece);
+        board.addPiece(move.getEndPosition(), takenPiece);
+        return badMove;
     }
 
     @Override
