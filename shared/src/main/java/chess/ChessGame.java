@@ -72,13 +72,40 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        otherHelper(piece, move);
+        pawnHelper(piece, move);
+        moveHelper(move);
+        board.addPiece(move.getStartPosition(), null);
+        if(move.getPromotionPiece() != null) {
+            board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        }else{
+            board.addPiece(move.getEndPosition(), piece);
+        }
+        if(currentTeam == TeamColor.WHITE) {
+            currentTeam = TeamColor.BLACK;
+        }else {
+            currentTeam = TeamColor.WHITE;
+        }
+    }
+
+    public void otherHelper(ChessPiece piece, ChessMove move) throws InvalidMoveException {
         if(board.getPiece(move.getStartPosition()) == null) {
             throw new InvalidMoveException("Invalid Move: No piece at " + move.getStartPosition());
         }
-        ChessPiece piece = board.getPiece(move.getStartPosition());
         if(piece.getTeamColor() != currentTeam) {
             throw new InvalidMoveException("Invalid Move: Not " + piece.getTeamColor() + "'s turn.");
         }
+        if(board.getPiece(move.getEndPosition()) != null && piece.getTeamColor() == board.getPiece(move.getEndPosition()).getTeamColor()) {
+            throw  new InvalidMoveException("Invalid Move: Can't take piece of same team.");
+        }
+        if(isInCheck(piece.getTeamColor())) {
+            ChessPosition kingPosition = board.locateKing(piece.getTeamColor());
+            throw new InvalidMoveException("Invalid Move: King in check " + kingPosition);
+        }
+    }
+
+    public void pawnHelper(ChessPiece piece, ChessMove move) throws InvalidMoveException {
         if(piece.getPieceType() == ChessPiece.PieceType.PAWN && (move.getEndPosition().getRow() - move.getStartPosition().getRow()) > 2) {
             throw new InvalidMoveException("Invalid Move: Pawn " + piece + " moved too far.");
         }
@@ -93,23 +120,59 @@ public class ChessGame {
                 throw new InvalidMoveException("Invalid Move: No double move allowed. Pawn already moved. " + piece + " " + move.getStartPosition());
             }
         }
-        if(isInCheck(piece.getTeamColor())) {
-            ChessPosition kingPosition = board.locateKing(piece.getTeamColor());
-            throw new InvalidMoveException("Invalid Move: King in check " + kingPosition);
-        }
-        if(board.getPiece(move.getEndPosition()) != null && piece.getTeamColor() == board.getPiece(move.getEndPosition()).getTeamColor()) {
-            throw  new InvalidMoveException("Invalid Move: Can't take piece of same team.");
-        }
-        board.addPiece(move.getStartPosition(), null);
-        if(move.getPromotionPiece() != null) {
-            board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
-        }else{
-            board.addPiece(move.getEndPosition(), piece);
-        }
-        if(currentTeam == TeamColor.WHITE) {
-            currentTeam = TeamColor.BLACK;
-        }else {
-            currentTeam = TeamColor.WHITE;
+    }
+
+    public void moveHelper(ChessMove move) throws InvalidMoveException {
+        int rowDiff = move.getEndPosition().getRow() - move.getStartPosition().getRow();
+        int colDiff = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
+        if(rowDiff == 0) {
+            if(colDiff > 0) {
+                for(int i = 1; i < colDiff; i++) {
+                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + i);
+                    ChessPiece stopPiece;
+                    if(board.getPiece(nextSpace) != null) {
+                        stopPiece = board.getPiece(nextSpace);
+                        if(move.getEndPosition() != nextSpace) {
+                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
+                        }
+                    }
+                }
+            }else {
+                for(int i = -1; i > colDiff; i--) {
+                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + i);
+                    ChessPiece stopPiece;
+                    if(board.getPiece(nextSpace) != null) {
+                        stopPiece = board.getPiece(nextSpace);
+                        if(move.getEndPosition() != nextSpace) {
+                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
+                        }
+                    }
+                }
+            }
+        } else {
+            if(rowDiff > 0) {
+                for(int i = 1; i < rowDiff; i++) {
+                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow() + i, move.getStartPosition().getColumn());
+                    ChessPiece stopPiece;
+                    if(board.getPiece(nextSpace) != null) {
+                        stopPiece = board.getPiece(nextSpace);
+                        if(move.getEndPosition() != nextSpace) {
+                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
+                        }
+                    }
+                }
+            }else {
+                for(int i = -1; i > rowDiff; i--) {
+                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow() + i, move.getStartPosition().getColumn());
+                    ChessPiece stopPiece;
+                    if(board.getPiece(nextSpace) != null) {
+                        stopPiece = board.getPiece(nextSpace);
+                        if(move.getEndPosition() != nextSpace) {
+                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
+                        }
+                    }
+                }
+            }
         }
     }
 
