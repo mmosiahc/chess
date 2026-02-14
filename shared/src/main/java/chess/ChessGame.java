@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -208,20 +207,14 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         ChessPosition kingPosition = board.locateKing(teamColor);
         ChessPiece king = board.getPiece(kingPosition);
-        Collection<ChessMove> enemyMoves = board.getEnemyMoves(teamColor);
+        Collection<ChessMove> teamMoves = board.getTeamMoves(teamColor);
         Collection<ChessMove> kingMoves = king.pieceMoves(board, kingPosition);
-        Collection<ChessPosition> kingEndPositions = new ArrayList<>();
-        Collection<ChessPosition> enemyStartPositions = new ArrayList<>();
-        for(ChessMove km : kingMoves) {
-            kingEndPositions.add(km.getEndPosition());
-        }
-        for(ChessMove m: enemyMoves) {
-            enemyStartPositions.add(m.getStartPosition());
-        }
-        for(ChessPosition p : kingEndPositions) {
-            if(enemyStartPositions.contains(p)) {
-                return false;
-            }
+        Collection<ChessMove> validKingMoves = validateMoves(kingMoves);
+        Collection<ChessMove> validTeamMoves = validateMoves(teamMoves);
+        if(!validKingMoves.isEmpty()) {
+            return false;
+        } else if (validTeamMoves.isEmpty()) {
+            return true;
         }
         return false;
     }
