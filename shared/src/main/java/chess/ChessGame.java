@@ -58,7 +58,7 @@ public class ChessGame {
            piece = board.getPiece(startPosition);
            moves = piece.pieceMoves(board, startPosition);
             for (ChessMove m : moves) {
-                if(!testMove(m)) validMoves.add(m);
+                if(testMove(m)) validMoves.add(m);
             }
             return validMoves;
         }
@@ -68,7 +68,7 @@ public class ChessGame {
     public Collection<ChessMove> validateMoves(Collection<ChessMove> moves) {
         Collection<ChessMove> validMoves = new ArrayList<>();
         for (ChessMove m : moves) {
-            if(!testMove(m)) validMoves.add(m);
+            if(testMove(m)) validMoves.add(m);
         }
         return validMoves;
     }
@@ -213,10 +213,7 @@ public class ChessGame {
         Collection<ChessMove> validTeamMoves = validateMoves(teamMoves);
         if(!validKingMoves.isEmpty()) {
             return false;
-        } else if (validTeamMoves.isEmpty()) {
-            return true;
-        }
-        return false;
+        } else return validTeamMoves.isEmpty();
     }
 
     /**
@@ -236,12 +233,9 @@ public class ChessGame {
 
     public boolean checkTeamMoves(TeamColor teamColor) {
         Collection<ChessMove> teamMoves = board.getTeamMoves(teamColor);
-        Collection<ChessMove> validTeamMoves = new ArrayList<>();
+        Collection<ChessMove> validTeamMoves;
         validTeamMoves = validateMoves(teamMoves);
-        if(validTeamMoves.isEmpty()) {
-            return true;
-        }
-        return false;
+        return validTeamMoves.isEmpty();
     }
 
     /**
@@ -280,7 +274,7 @@ public class ChessGame {
         }
         board.addPiece(move.getStartPosition(), piece);
         board.addPiece(move.getEndPosition(), takenPiece);
-        return badMove;
+        return !badMove;
     }
 
     @Override
