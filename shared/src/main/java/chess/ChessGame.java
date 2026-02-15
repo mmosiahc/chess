@@ -119,7 +119,9 @@ public class ChessGame {
             throw new InvalidMoveException("Invalid Move: Pawn " + piece + " moved too far.");
         }
         if((piece.getPieceType() == ChessPiece.PieceType.PAWN) && (move.getStartPosition().getColumn() != move.getEndPosition().getColumn())) {
-            if( board.getPiece(move.getEndPosition()) == null ) {throw new InvalidMoveException("Invalid Move: No piece at " + move.getEndPosition());}
+            if( board.getPiece(move.getEndPosition()) == null ) {
+                throw new InvalidMoveException("Invalid Move: No piece at " + move.getEndPosition());
+            }
         }
         if(piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             if(move.getStartPosition().getRow() < 7  && piece.getTeamColor() == TeamColor.BLACK && rowDiff > 1) {
@@ -158,7 +160,7 @@ public class ChessGame {
         ChessPosition kingPosition = board.locateKing(teamColor);
         Collection<ChessMove> enemyMoves = board.getEnemyMoves(teamColor);
         for(ChessMove m: enemyMoves) {
-            if (m.getEndPosition().equals(kingPosition)) return true;
+            if (m.getEndPosition().equals(kingPosition)) {return true;}
         }
         return false;
     }
@@ -177,7 +179,7 @@ public class ChessGame {
         Collection<ChessMove> validTeamMoves = validateMoves(teamMoves);
         if(!validKingMoves.isEmpty()) {
             return false;
-        } else return validTeamMoves.isEmpty();
+        } else {return validTeamMoves.isEmpty();}
     }
 
     /**

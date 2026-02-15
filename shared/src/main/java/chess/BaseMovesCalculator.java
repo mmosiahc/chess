@@ -50,6 +50,12 @@ public abstract class BaseMovesCalculator {
         }
     }
 
+    protected void addSlidingMoves(ChessBoard board, ChessPosition position, int [][] directions, Collection<ChessMove> moves) {
+        for(int[] d : directions) {
+            moveInDirection(board, position, d[0], d[1], moves);
+        }
+    }
+
     protected void validateAndAddPosition(ChessBoard board, ChessPosition sPosition, ChessPosition ePosition, Collection<ChessMove> moves) {
         if(inBounds(ePosition)) {
             if (checkPosition(board, ePosition)) {
