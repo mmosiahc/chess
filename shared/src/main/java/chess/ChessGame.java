@@ -58,7 +58,7 @@ public class ChessGame {
            piece = board.getPiece(startPosition);
            moves = piece.pieceMoves(board, startPosition);
             for (ChessMove m : moves) {
-                if(testMove(m)) validMoves.add(m);
+                if(testMove(m)) {validMoves.add(m);}
             }
             return validMoves;
         }
@@ -68,7 +68,7 @@ public class ChessGame {
     public Collection<ChessMove> validateMoves(Collection<ChessMove> moves) {
         Collection<ChessMove> validMoves = new ArrayList<>();
         for (ChessMove m : moves) {
-            if(testMove(m)) validMoves.add(m);
+            if(testMove(m)) {validMoves.add(m);}
         }
         return validMoves;
     }
@@ -83,7 +83,7 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         otherHelper(piece, move);
         pawnHelper(piece, move);
-        if(piece.getPieceType() == ChessPiece.PieceType.ROOK) moveHelper(move);
+        if(piece.getPieceType() == ChessPiece.PieceType.ROOK) {isPathClear(move);}
         board.addPiece(move.getStartPosition(), null);
         if(move.getPromotionPiece() != null) {
             board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
@@ -114,73 +114,37 @@ public class ChessGame {
     }
 
     public void pawnHelper(ChessPiece piece, ChessMove move) throws InvalidMoveException {
-        if(piece.getPieceType() == ChessPiece.PieceType.PAWN && (move.getEndPosition().getRow() - move.getStartPosition().getRow()) > 2) {
+        int rowDiff = move.getEndPosition().getRow() - move. getStartPosition().getRow();
+        if(piece.getPieceType() == ChessPiece.PieceType.PAWN && rowDiff > 2) {
             throw new InvalidMoveException("Invalid Move: Pawn " + piece + " moved too far.");
         }
         if((piece.getPieceType() == ChessPiece.PieceType.PAWN) && (move.getStartPosition().getColumn() != move.getEndPosition().getColumn())) {
-            if( board.getPiece(move.getEndPosition()) == null ) throw new InvalidMoveException("Invalid Move: No piece at " + move.getEndPosition());
+            if( board.getPiece(move.getEndPosition()) == null ) {throw new InvalidMoveException("Invalid Move: No piece at " + move.getEndPosition());}
         }
         if(piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            if(move.getStartPosition().getRow() < 7  && piece.getTeamColor() == TeamColor.BLACK && (move.getEndPosition().getRow() - move.getStartPosition().getRow()) > 1) {
+            if(move.getStartPosition().getRow() < 7  && piece.getTeamColor() == TeamColor.BLACK && rowDiff > 1) {
                 throw new InvalidMoveException("Invalid Move: No double move allowed. Pawn already moved. " + piece + " " + move.getStartPosition());
             }
-            if(move.getStartPosition().getRow() > 2 && piece.getTeamColor() == TeamColor.WHITE && (move.getEndPosition().getRow() - move.getStartPosition().getRow()) > 1) {
+            if(move.getStartPosition().getRow() > 2 && piece.getTeamColor() == TeamColor.WHITE && rowDiff > 1) {
                 throw new InvalidMoveException("Invalid Move: No double move allowed. Pawn already moved. " + piece + " " + move.getStartPosition());
             }
         }
     }
 
-    public void moveHelper(ChessMove move) throws InvalidMoveException {
+    public void isPathClear(ChessMove move) throws InvalidMoveException {
         int rowDiff = move.getEndPosition().getRow() - move.getStartPosition().getRow();
         int colDiff = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
-        if(rowDiff == 0) {
-            if(colDiff > 0) {
-                for(int i = 1; i < colDiff; i++) {
-                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + i);
-                    ChessPiece stopPiece;
-                    if(board.getPiece(nextSpace) != null) {
-                        stopPiece = board.getPiece(nextSpace);
-                        if(move.getEndPosition() != nextSpace) {
-                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
-                        }
-                    }
-                }
-            }else {
-                for(int i = -1; i > colDiff; i--) {
-                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + i);
-                    ChessPiece stopPiece;
-                    if(board.getPiece(nextSpace) != null) {
-                        stopPiece = board.getPiece(nextSpace);
-                        if(move.getEndPosition() != nextSpace) {
-                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
-                        }
-                    }
-                }
+        int rowDir = Integer.signum(rowDiff);
+        int colDir = Integer.signum(colDiff);
+        int currRow = move.getStartPosition().getRow() + rowDir;
+        int currCol = move.getStartPosition().getColumn() + colDir;
+        while(currRow != move.getEndPosition().getRow() || currCol != move.getEndPosition().getColumn()) {
+            ChessPosition currSpace = new ChessPosition(currRow, currCol);
+            if(board.getPiece(currSpace) != null) {
+                throw new InvalidMoveException("Invalid Move: Can't move through piece " + board.getPiece(currSpace) + " " + currSpace);
             }
-        } else {
-            if(rowDiff > 0) {
-                for(int i = 1; i < rowDiff; i++) {
-                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow() + i, move.getStartPosition().getColumn());
-                    ChessPiece stopPiece;
-                    if(board.getPiece(nextSpace) != null) {
-                        stopPiece = board.getPiece(nextSpace);
-                        if(move.getEndPosition() != nextSpace) {
-                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
-                        }
-                    }
-                }
-            }else {
-                for(int i = -1; i > rowDiff; i--) {
-                    ChessPosition nextSpace = new ChessPosition(move.getStartPosition().getRow() + i, move.getStartPosition().getColumn());
-                    ChessPiece stopPiece;
-                    if(board.getPiece(nextSpace) != null) {
-                        stopPiece = board.getPiece(nextSpace);
-                        if(move.getEndPosition() != nextSpace) {
-                            throw new InvalidMoveException("Invalid Move: Can't move through piece " + stopPiece + " " + nextSpace);
-                        }
-                    }
-                }
-            }
+            currRow += rowDir;
+            currCol += colDir;
         }
     }
 
