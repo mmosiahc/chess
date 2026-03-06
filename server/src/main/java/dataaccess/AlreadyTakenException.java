@@ -4,10 +4,5 @@ package dataaccess;
  * Indicates there was an error connecting to the database
  */
 public class AlreadyTakenException extends DataAccessException{
-    public AlreadyTakenException(String message) {
-        super(message);
-    }
-    public AlreadyTakenException(String message, Throwable ex) {
-        super(message, ex);
-    }
+    public AlreadyTakenException() {super(403, "already taken");}
 }

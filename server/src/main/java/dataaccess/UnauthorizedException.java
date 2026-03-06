@@ -4,10 +4,6 @@ package dataaccess;
  * Indicates there was an error connecting to the database
  */
 public class UnauthorizedException extends DataAccessException{
-    public UnauthorizedException(String message) {
-        super(message);
-    }
-    public UnauthorizedException(String message, Throwable ex) {
-        super(message, ex);
-    }
+    public UnauthorizedException() {super(401, "unauthorized");}
+
 }

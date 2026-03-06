@@ -13,7 +13,7 @@ public class MemoryGameDAO implements GameDAO {
         if(games.containsKey(gameID)) {
             return games.get(gameID);
         } else {
-            throw new BadRequestException("Error: bad request");
+            throw new BadRequestException();
         }
     }
 

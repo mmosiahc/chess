@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
@@ -23,6 +24,9 @@ public class UserService {
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
+        if(registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
+            throw new BadRequestException();
+        }
         UserData user = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
         userMemory.createUser(user);
 

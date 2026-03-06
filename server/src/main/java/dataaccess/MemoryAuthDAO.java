@@ -12,7 +12,7 @@ public class MemoryAuthDAO implements AuthDAO {
         if(authentications.containsKey(authToken)) {
             return authentications.get(authToken);
         } else {
-            throw new UnauthorizedException("Error: unauthorized");
+            throw new UnauthorizedException();
         }
     }
 
@@ -26,7 +26,7 @@ public class MemoryAuthDAO implements AuthDAO {
         if(authentications.containsKey(authToken)) {
             authentications.remove(authToken);
         } else {
-            throw new BadRequestException("Error: bad request");
+            throw new BadRequestException();
         }
     }
 
