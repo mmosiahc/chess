@@ -2,9 +2,14 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
+import dataaccess.MemoryUserDAO;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
+import service.ClearService;
+import service.UserService;
 
 import java.util.Map;
 
@@ -13,12 +18,22 @@ public class Server {
     private final Javalin javalin;
 
     public Server() {
-        RegisterHandler registerHandler = new RegisterHandler();
+        MemoryAuthDAO authDAO = new MemoryAuthDAO();
+        MemoryUserDAO userDAO = new MemoryUserDAO();
+        MemoryGameDAO gameDAO = new MemoryGameDAO();
+
+        UserService userService = new UserService(userDAO, authDAO);
+        ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
+
+        RegisterHandler registerHandler = new RegisterHandler(userService);
+        ClearHandler clearHandler = new ClearHandler(clearService);
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", registerHandler::register)
                 .exception(DataAccessException.class, this::dataAccessExceptionHandler)
                 .exception(Exception.class, this::exceptionHandler)
-                .error(404, this::notFound);
+                .error(404, this::notFound)
+                .delete("/db", clearHandler::clear);
     }
 
     private void dataAccessExceptionHandler(DataAccessException e, @NotNull Context context) {
