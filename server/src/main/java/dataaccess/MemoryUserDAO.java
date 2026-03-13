@@ -29,4 +29,14 @@ public class MemoryUserDAO implements UserDAO {
     public void clear() {
         users.clear();
     }
+
+    @Override
+    public Map<String, UserData> getUsers() {
+        return users;
+    }
+
+    @Override
+    public String toString() {
+        return users.toString();
+    }
 }

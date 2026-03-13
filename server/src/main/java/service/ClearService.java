@@ -17,7 +17,7 @@ public class ClearService {
         ClearService.gameMemory = gameMemory;
     }
 
-    public static void clear() throws DataAccessException {
+    public void clear() throws DataAccessException {
         try {
             userMemory.clear();
             authMemory.clear();

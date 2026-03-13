@@ -3,6 +3,7 @@ package dataaccess;
 import model.GameData;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface GameDAO {
 
@@ -11,4 +12,6 @@ public interface GameDAO {
     GameData getGame(int gameID) throws BadRequestException;
     void updateGame(GameData gameData);
     void clear();
+    String toString();
+    Map<Integer, GameData> getGames();
 }

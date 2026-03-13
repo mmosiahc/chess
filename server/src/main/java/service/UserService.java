@@ -7,6 +7,7 @@ import dataaccess.MemoryUserDAO;
 import model.AuthData;
 import model.UserData;
 
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -33,5 +34,9 @@ public class UserService {
         AuthData auth = new AuthData(generateToken(), registerRequest.username());
         authMemory.createAuth(auth);
         return new RegisterResult(registerRequest.username(), auth.authToken());
+    }
+
+    public Map<String, UserData> getUsers() {
+        return userMemory.getUsers();
     }
 }

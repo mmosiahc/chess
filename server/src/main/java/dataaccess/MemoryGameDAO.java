@@ -36,4 +36,14 @@ public class MemoryGameDAO implements GameDAO {
     public void clear() {
         games.clear();
     }
+
+    @Override
+    public Map<Integer, GameData> getGames() {
+        return games;
+    }
+
+    @Override
+    public String toString() {
+        return games.toString();
+    }
 }

@@ -7,7 +7,6 @@ import dataaccess.MemoryGameDAO;
 import dataaccess.MemoryUserDAO;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import org.jetbrains.annotations.NotNull;
 import service.ClearService;
 import service.UserService;
 
@@ -36,13 +35,18 @@ public class Server {
                 .delete("/db", clearHandler::clear);
     }
 
-    private void dataAccessExceptionHandler(DataAccessException e, @NotNull Context context) {
-        context.status(e.getStatusCode());
+    private void dataAccessExceptionHandler(DataAccessException e, Context context) {
+        if(e.getStatusCode() == 0) {
+            context.status(500);
+        }else{
+            context.status(e.getStatusCode());
+        }
         context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
     }
 
     private void exceptionHandler(Exception e, Context context) {
-        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
+//        e.printStackTrace();
+        var body = new Gson().toJson(Map.of("message", String.format("Errord %s", e.getMessage())));
         context.status(500);
         context.json(body);
     }

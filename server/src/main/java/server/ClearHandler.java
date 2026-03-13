@@ -8,14 +8,14 @@ import service.ClearService;
 import java.util.Map;
 
 public class ClearHandler extends BaseHandler{
-    final ClearService service;
+    private final ClearService service;
 
     public ClearHandler(ClearService service) {
         this.service = service;
     }
 
     void clear(Context context) throws DataAccessException {
-        ClearService.clear();
+        service.clear();
         context.json(new Gson().toJson(Map.of()));
     }
 }
