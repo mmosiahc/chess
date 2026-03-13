@@ -1,9 +1,6 @@
 package service;
 
-import dataaccess.BadRequestException;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 
@@ -34,6 +31,19 @@ public class UserService {
         AuthData auth = new AuthData(generateToken(), registerRequest.username());
         authMemory.createAuth(auth);
         return new RegisterResult(registerRequest.username(), auth.authToken());
+    }
+
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        if(loginRequest.username() == null || loginRequest.password() == null) {
+            throw new BadRequestException();
+        }
+        UserData user;
+        user = userMemory.getUser(loginRequest.username());
+        if(user.password().equals(loginRequest.password())) throw new UnauthorizedException();
+
+        AuthData auth = new AuthData(generateToken(), loginRequest.username());
+        authMemory.createAuth(auth);
+        return new LoginResult(loginRequest.username(), auth.authToken());
     }
 
     public Map<String, UserData> getUsers() {

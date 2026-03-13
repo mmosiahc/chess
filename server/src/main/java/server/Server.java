@@ -46,7 +46,7 @@ public class Server {
 
     private void exceptionHandler(Exception e, Context context) {
 //        e.printStackTrace();
-        var body = new Gson().toJson(Map.of("message", String.format("Errord %s", e.getMessage())));
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         context.status(500);
         context.json(body);
     }
