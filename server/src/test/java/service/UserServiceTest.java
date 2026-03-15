@@ -23,7 +23,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Registration Successful")
     void registerNewUser() throws DataAccessException {
-        RegisterRequest request = new RegisterRequest("Michael", "password", "Michael@gmail.com");
+        RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
         RegisterResult result = service.register(request);
         assertNotNull(result.authToken());
         assertEquals("Michael", result.username());
@@ -32,8 +32,37 @@ class UserServiceTest {
     @Test
     @DisplayName("Registration - User Already Exists")
     void registerFail() throws DataAccessException {
-        RegisterRequest request = new RegisterRequest("Michael", "password", "Michael@gmail.com");
+        RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
         service.register(request);
         assertThrows(DataAccessException.class, () -> service.register(request));
+    }
+
+    @Test
+    @DisplayName("Login Successful")
+    void loginUser() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
+        service.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("User", "password");
+        LoginResult loginResult = service.login(loginRequest);
+        assertNotNull(loginResult.authToken());
+        assertEquals("User", loginResult.username());
+    }
+
+    @Test
+    @DisplayName("Login - Missing Information")
+    void loginFailNoPassword() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
+        service.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("User", null);
+        assertThrows(DataAccessException.class, () -> service.login(loginRequest));
+    }
+
+    @Test
+    @DisplayName("Login - Bad Password")
+    void loginFailBadPassword() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
+        service.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("User", "badPassword");
+        assertThrows(DataAccessException.class, () -> service.login(loginRequest));
     }
 }
