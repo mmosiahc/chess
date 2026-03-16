@@ -22,31 +22,46 @@ public class UserService {
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
-        if(registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
+        String username = registerRequest.username();
+        String password = registerRequest.password();
+        String email = registerRequest.email();
+
+        if(username == null || password == null || email == null) {
             throw new BadRequestException();
         }
-        UserData user = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+        UserData user = new UserData(username, password, email);
         userMemory.createUser(user);
 
-        AuthData auth = new AuthData(generateToken(), registerRequest.username());
+        AuthData auth = new AuthData(generateToken(), username);
         authMemory.createAuth(auth);
-        return new RegisterResult(registerRequest.username(), auth.authToken());
+        return new RegisterResult(username, auth.authToken());
     }
 
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
-        if(loginRequest.username() == null || loginRequest.password() == null) {
+        String username = loginRequest.username();
+        String password = loginRequest.password();
+
+        if(username == null || password == null) {
             throw new BadRequestException();
         }
         UserData user;
-        user = userMemory.getUser(loginRequest.username());
-        if(!user.password().equals(loginRequest.password())) throw new UnauthorizedException();
+        user = userMemory.getUser(username);
+        if(!user.password().equals(password)) throw new UnauthorizedException();
 
-        AuthData auth = new AuthData(generateToken(), loginRequest.username());
+        AuthData auth = new AuthData(generateToken(), username);
         authMemory.createAuth(auth);
-        return new LoginResult(loginRequest.username(), auth.authToken());
+        return new LoginResult(username, auth.authToken());
     }
 
-    public Map<String, UserData> getUsers() {
-        return userMemory.getUsers();
+    public void logout(LogoutRequest logoutRequest) throws DataAccessException {
+        String authToken = logoutRequest.authToken();
+
+        if (authToken == null) {
+            throw new BadRequestException();
+        }
+        AuthData auth = authMemory.getAuth(authToken);
+        authMemory.deleteAuth(authToken);
     }
+
+        public Map<String, UserData> getUsers() {return userMemory.getUsers();}
 }
