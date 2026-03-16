@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
+import dataaccess.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,5 +65,28 @@ class UserServiceTest {
         service.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("User", "badPassword");
         assertThrows(DataAccessException.class, () -> service.login(loginRequest));
+    }
+
+    @Test
+    @DisplayName("Logout Successful")
+    void logoutUser() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
+        service.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("User", "password");
+        LoginResult loginResult = service.login(loginRequest);
+        LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
+        assertEquals(2, service.getAuthentications().size());
+        service.logout(logoutRequest);
+        assertEquals(1, service.getAuthentications().size());
+    }
+
+    @Test
+    @DisplayName("Logout - Bad Authtoken")
+    void logoutFailBadAuthtoken() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
+        service.register(registerRequest);
+        LogoutRequest logoutRequest = new LogoutRequest("badAuthtoken");
+        assertEquals(1, service.getAuthentications().size());
+        assertThrows(UnauthorizedException.class, () -> service.logout(logoutRequest));
     }
 }

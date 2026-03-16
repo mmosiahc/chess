@@ -59,9 +59,9 @@ public class UserService {
         if (authToken == null) {
             throw new BadRequestException();
         }
-        AuthData auth = authMemory.getAuth(authToken);
         authMemory.deleteAuth(authToken);
     }
 
-        public Map<String, UserData> getUsers() {return userMemory.getUsers();}
+    public Map<String, UserData> getUsers() {return userMemory.getUsers();}
+    public Map<String, AuthData> getAuthentications() {return authMemory.getAuthentications();}
 }

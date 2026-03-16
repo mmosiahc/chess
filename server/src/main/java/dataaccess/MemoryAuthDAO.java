@@ -22,11 +22,11 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void deleteAuth(String authToken) throws BadRequestException {
+    public void deleteAuth(String authToken) throws UnauthorizedException {
         if(authentications.containsKey(authToken)) {
             authentications.remove(authToken);
         } else {
-            throw new BadRequestException();
+            throw new UnauthorizedException();
         }
     }
 
