@@ -14,4 +14,14 @@ public class BaseHandler {
 
         return bodyObject;
     }
+
+    static <T> T getAuthHeaderObject(Context context, Class<T> tClass) throws RuntimeException{
+        var headerObject = new Gson().fromJson(context.header("authorization"), tClass);
+
+        if (headerObject == null) {
+            throw new RuntimeException("missing required header");
+        }
+
+        return headerObject;
+    }
 }
