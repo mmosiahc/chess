@@ -27,6 +27,7 @@ public class Server {
         RegisterHandler registerHandler = new RegisterHandler(userService);
         ClearHandler clearHandler = new ClearHandler(clearService);
         LoginHandler loginHandler = new LoginHandler(userService);
+        LogoutHandler logoutHandler = new LogoutHandler(userService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", registerHandler::register)
@@ -34,7 +35,8 @@ public class Server {
                 .exception(DataAccessException.class, this::dataAccessExceptionHandler)
                 .exception(Exception.class, this::exceptionHandler)
                 .error(404, this::notFound)
-                .delete("/db", clearHandler::clear);
+                .delete("/db", clearHandler::clear)
+                .delete("/session", logoutHandler::logout);
     }
 
     private void dataAccessExceptionHandler(DataAccessException e, Context context) {
