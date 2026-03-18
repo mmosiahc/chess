@@ -22,5 +22,6 @@ public class CreateGameHandler extends BaseHandler{
         CreateGameResult result = service.createGame(request);
         ctx.json(new Gson().toJson(result));
 
+
     }
 }
