@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryGameDAO;
+import dataaccess.UnauthorizedException;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.AfterEach;
@@ -12,8 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
     private MemoryGameDAO gameDAO = new MemoryGameDAO();
@@ -38,19 +38,26 @@ class GameServiceTest {
 //        System.out.println(results);
     }
 
+    @Test
+    @DisplayName("List Games - Unauthorized")
+    void listGamesFailBadAuth() throws DataAccessException {
+        GameData game1 = new GameData(service.generateID(), "white", "black", "normal", new ChessGame());
+        GameData game2 = new GameData(service.generateID(), "will", "blake", "speed", new ChessGame());
+        GameData game3 = new GameData(service.generateID(), "wes", "bob", "test", new ChessGame());
+        service.getGames().put(0, game1);
+        service.getGames().put(1, game2);
+        service.getGames().put(2, game3);
+        ListGamesRequest listGamesRequest = new ListGamesRequest("authToken");
+        assertThrows(UnauthorizedException.class, () -> service.listGames(listGamesRequest));
+    }
+
     @AfterEach
     void tearDown() {
         gameDAO.clear();
         authDAO.clear();
     }
 //
-//    @Test
-//    @DisplayName("Registration - User Already Exists")
-//    void registerFail() throws DataAccessException {
-//        RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
-//        service.register(request);
-//        assertThrows(DataAccessException.class, () -> service.register(request));
-//    }
+
 //
 //    @Test
 //    @DisplayName("Login Successful")

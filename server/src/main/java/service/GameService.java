@@ -25,12 +25,12 @@ public class GameService {
     }
 
     public Collection<ListGamesResult> listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
-        String authToken = listGamesRequest.authToken();
+        String token = listGamesRequest.authToken();
 
-        if(authToken == null) {
+        if(token == null) {
             throw new BadRequestException();
         }
-        authMemory.getAuth(authToken);
+        authMemory.getAuth(token);
         var games = gameMemory.listGames();
         return games.stream()
                 .map(g -> new ListGamesResult(g.gameID(), g.wUsername(), g.bUsername(), g.gameName()))
