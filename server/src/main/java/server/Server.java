@@ -8,6 +8,7 @@ import dataaccess.MemoryUserDAO;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import service.ClearService;
+import service.GameService;
 import service.UserService;
 
 import java.util.Map;
@@ -23,15 +24,18 @@ public class Server {
 
         UserService userService = new UserService(userDAO, authDAO);
         ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
+        GameService gameService = new GameService(gameDAO, authDAO);
 
         RegisterHandler registerHandler = new RegisterHandler(userService);
         ClearHandler clearHandler = new ClearHandler(clearService);
         LoginHandler loginHandler = new LoginHandler(userService);
         LogoutHandler logoutHandler = new LogoutHandler(userService);
+        ListGamesHandler listGamesHandler = new ListGamesHandler(gameService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", registerHandler::register)
                 .post("/session", loginHandler::login)
+                .get("/game", listGamesHandler::listGames)
                 .exception(DataAccessException.class, this::dataAccessExceptionHandler)
                 .exception(Exception.class, this::exceptionHandler)
                 .error(404, this::notFound)
