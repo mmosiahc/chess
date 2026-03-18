@@ -7,26 +7,38 @@ import dataaccess.MemoryGameDAO;
 import model.GameData;
 
 import java.util.Collection;
+import java.util.Map;
 
 
 public class GameService {
     private final MemoryGameDAO gameMemory;
     private final MemoryAuthDAO authMemory;
+    int id = 0;
 
     public GameService(MemoryGameDAO gameMemory, MemoryAuthDAO authMemory) {
         this.gameMemory = gameMemory;
         this.authMemory = authMemory;
     }
 
-    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
+    public int generateID() {
+        return id++;
+    }
+
+    public Collection<ListGamesResult> listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
         String authToken = listGamesRequest.authToken();
 
         if(authToken == null) {
             throw new BadRequestException();
         }
         authMemory.getAuth(authToken);
-        Collection<GameData> games = gameMemory.listGames();
-        return new ListGamesResult(games);
+        var games = gameMemory.listGames();
+        return games.stream()
+                .map(g -> new ListGamesResult(g.gameID(), g.wUsername(), g.bUsername(), g.gameName()))
+                .toList();
+    }
+
+    public Map<Integer, GameData> getGames() {
+        return gameMemory.getGames();
     }
 //
 //    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {

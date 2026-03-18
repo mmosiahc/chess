@@ -1,7 +1,3 @@
 package service;
 
-import model.GameData;
-
-import java.util.Collection;
-
-public record ListGamesResult(Collection<GameData> games) {}
+public record ListGamesResult(int gameID, String wUsername, String bUsername, String gameName) {}
