@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
@@ -37,25 +38,22 @@ public class GameService {
                 .toList();
     }
 
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws DataAccessException {
+        String token = createGameRequest.authToken();
+        String name = createGameRequest.gameName();
+
+        if(name == null || token == null) {
+            throw new BadRequestException();
+        }
+        authMemory.getAuth(token);
+        GameData game = new GameData(generateID(), null, null, name, new ChessGame());
+        gameMemory.createGame(game);
+        return new CreateGameResult(game.gameID());
+    }
+
     public Map<Integer, GameData> getGames() {
         return gameMemory.getGames();
     }
-//
-//    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
-//        String username = loginRequest.username();
-//        String password = loginRequest.password();
-//
-//        if(username == null || password == null) {
-//            throw new BadRequestException();
-//        }
-//        UserData user;
-//        user = userMemory.getUser(username);
-//        if(!user.password().equals(password)) throw new UnauthorizedException();
-//
-//        AuthData auth = new AuthData(generateToken(), username);
-//        authMemory.createAuth(auth);
-//        return new LoginResult(username, auth.authToken());
-//    }
 //
 //    public void logout(LogoutRequest logoutRequest) throws DataAccessException {
 //        String authToken = logoutRequest.authToken();
