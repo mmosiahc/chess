@@ -31,10 +31,12 @@ public class Server {
         LoginHandler loginHandler = new LoginHandler(userService);
         LogoutHandler logoutHandler = new LogoutHandler(userService);
         ListGamesHandler listGamesHandler = new ListGamesHandler(gameService);
+        CreateGameHandler createGameHandler = new CreateGameHandler(gameService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", registerHandler::register)
                 .post("/session", loginHandler::login)
+                .post("/game", createGameHandler::createGame)
                 .get("/game", listGamesHandler::listGames)
                 .exception(DataAccessException.class, this::dataAccessExceptionHandler)
                 .exception(Exception.class, this::exceptionHandler)
