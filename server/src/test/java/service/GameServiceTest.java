@@ -13,9 +13,9 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
-    private MemoryGameDAO gameDAO = new MemoryGameDAO();
-    private MemoryAuthDAO authDAO = new MemoryAuthDAO();
-    private GameService service = new GameService(gameDAO, authDAO);
+    private final MemoryGameDAO gameDAO = new MemoryGameDAO();
+    private final MemoryAuthDAO authDAO = new MemoryAuthDAO();
+    private final GameService service = new GameService(gameDAO, authDAO);
 
     @Test
     @DisplayName("List Games Successful")
@@ -37,7 +37,7 @@ class GameServiceTest {
 
     @Test
     @DisplayName("List Games - Unauthorized")
-    void listGamesFailBadAuth() throws DataAccessException {
+    void listGamesBadAuth() {
         GameData game1 = new GameData(service.generateID(), "white", "black", "normal", new ChessGame());
         GameData game2 = new GameData(service.generateID(), "will", "blake", "speed", new ChessGame());
         GameData game3 = new GameData(service.generateID(), "wes", "bob", "test", new ChessGame());
@@ -50,7 +50,7 @@ class GameServiceTest {
 
     @Test
     @DisplayName("Create Game Successful")
-    void createGame() throws DataAccessException {
+    void createNewGame() throws DataAccessException {
         AuthData auth = new AuthData("authToken", "username");
         authDAO.createAuth(auth);
         CreateGameRequest request = new CreateGameRequest("authToken", "testGame");
@@ -62,11 +62,20 @@ class GameServiceTest {
 
     @Test
     @DisplayName("Create Game - Bad Request")
-    void createGameFailBadRequest() throws DataAccessException {
+    void createGameBadRequest() {
         AuthData auth = new AuthData("authToken", "username");
         authDAO.createAuth(auth);
         CreateGameRequest request = new CreateGameRequest("authToken", null);
         assertThrows(BadRequestException.class, () -> service.createGame(request));
+    }
+
+    @Test
+    @DisplayName("Create Game - Unauthorized")
+    void createGameBadAuthtoken() {
+        AuthData auth = new AuthData("authToken", "username");
+        authDAO.createAuth(auth);
+        CreateGameRequest request = new CreateGameRequest("badAuthtoken", "test");
+        assertThrows(UnauthorizedException.class, () -> service.createGame(request));
     }
 
     @AfterEach

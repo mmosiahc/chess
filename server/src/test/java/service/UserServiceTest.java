@@ -29,10 +29,17 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Registration - User Already Exists")
-    void registerFail() throws DataAccessException {
+    void registerUserAlreadyExists() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
         service.register(request);
         assertThrows(AlreadyTakenException.class, () -> service.register(request));
+    }
+
+    @Test
+    @DisplayName("Registration - Bad Request")
+    void registerBadRequest() throws DataAccessException {
+        RegisterRequest request = new RegisterRequest("User", "password", null);
+        assertThrows(BadRequestException.class, () -> service.register(request));
     }
 
     @Test
@@ -48,20 +55,20 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Login - Missing Information")
-    void loginFailNoPassword() throws DataAccessException {
+    void loginMissingPassword() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
         service.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("User", null);
-        assertThrows(DataAccessException.class, () -> service.login(loginRequest));
+        assertThrows(BadRequestException.class, () -> service.login(loginRequest));
     }
 
     @Test
     @DisplayName("Login - Bad Password")
-    void loginFailBadPassword() throws DataAccessException {
+    void loginBadPassword() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
         service.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("User", "badPassword");
-        assertThrows(DataAccessException.class, () -> service.login(loginRequest));
+        assertThrows(UnauthorizedException.class, () -> service.login(loginRequest));
     }
 
     @Test
@@ -79,7 +86,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Logout - Bad Authtoken")
-    void logoutFailBadAuthtoken() throws DataAccessException {
+    void logoutBadAuthtoken() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
         service.register(registerRequest);
         LogoutRequest logoutRequest = new LogoutRequest("badAuthtoken");
