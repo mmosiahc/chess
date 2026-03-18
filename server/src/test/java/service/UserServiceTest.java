@@ -1,9 +1,6 @@
 package service;
 
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryUserDAO;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +32,7 @@ class UserServiceTest {
     void registerFail() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
         service.register(request);
-        assertThrows(DataAccessException.class, () -> service.register(request));
+        assertThrows(AlreadyTakenException.class, () -> service.register(request));
     }
 
     @Test

@@ -1,10 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.AfterEach;
@@ -47,8 +44,29 @@ class GameServiceTest {
         service.getGames().put(0, game1);
         service.getGames().put(1, game2);
         service.getGames().put(2, game3);
-        ListGamesRequest listGamesRequest = new ListGamesRequest("authToken");
-        assertThrows(UnauthorizedException.class, () -> service.listGames(listGamesRequest));
+        ListGamesRequest request = new ListGamesRequest("authToken");
+        assertThrows(UnauthorizedException.class, () -> service.listGames(request));
+    }
+
+    @Test
+    @DisplayName("Create Game Successful")
+    void createGame() throws DataAccessException {
+        AuthData auth = new AuthData("authToken", "username");
+        authDAO.createAuth(auth);
+        CreateGameRequest request = new CreateGameRequest("authToken", "testGame");
+        CreateGameResult result = service.createGame(request);
+        assertNotNull(result);
+        assertEquals(1, service.getGames().size());
+        assertEquals(0, result.gameID());
+    }
+
+    @Test
+    @DisplayName("Create Game - Bad Request")
+    void createGameFailBadRequest() throws DataAccessException {
+        AuthData auth = new AuthData("authToken", "username");
+        authDAO.createAuth(auth);
+        CreateGameRequest request = new CreateGameRequest("authToken", null);
+        assertThrows(BadRequestException.class, () -> service.createGame(request));
     }
 
     @AfterEach
@@ -56,58 +74,4 @@ class GameServiceTest {
         gameDAO.clear();
         authDAO.clear();
     }
-//
-
-//
-//    @Test
-//    @DisplayName("Login Successful")
-//    void loginUser() throws DataAccessException {
-//        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-//        service.register(registerRequest);
-//        LoginRequest loginRequest = new LoginRequest("User", "password");
-//        LoginResult loginResult = service.login(loginRequest);
-//        assertNotNull(loginResult.authToken());
-//        assertEquals("User", loginResult.username());
-//    }
-//
-//    @Test
-//    @DisplayName("Login - Missing Information")
-//    void loginFailNoPassword() throws DataAccessException {
-//        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-//        service.register(registerRequest);
-//        LoginRequest loginRequest = new LoginRequest("User", null);
-//        assertThrows(DataAccessException.class, () -> service.login(loginRequest));
-//    }
-//
-//    @Test
-//    @DisplayName("Login - Bad Password")
-//    void loginFailBadPassword() throws DataAccessException {
-//        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-//        service.register(registerRequest);
-//        LoginRequest loginRequest = new LoginRequest("User", "badPassword");
-//        assertThrows(DataAccessException.class, () -> service.login(loginRequest));
-//    }
-//
-//    @Test
-//    @DisplayName("Logout Successful")
-//    void logoutUser() throws DataAccessException {
-//        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-//        service.register(registerRequest);
-//        LoginRequest loginRequest = new LoginRequest("User", "password");
-//        LoginResult loginResult = service.login(loginRequest);
-//        LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
-//        assertEquals(2, service.getAuthentications().size());
-//        service.logout(logoutRequest);
-//        assertEquals(1, service.getAuthentications().size());
-//    }
-//
-//    @Test
-//    @DisplayName("Logout - Bad Authtoken")
-//    void logoutFailBadAuthtoken() throws DataAccessException {
-//        RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-//        service.register(registerRequest);
-//        LogoutRequest logoutRequest = new LogoutRequest("badAuthtoken");
-//        assertEquals(1, service.getAuthentications().size());
-//        assertThrows(UnauthorizedException.class, () -> service.logout(logoutRequest));
-//    }
 }
