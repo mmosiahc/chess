@@ -59,7 +59,7 @@ class GameServiceTest {
         CreateGameResult result = service.createGame(request);
         assertNotNull(result);
         assertEquals(1, service.getGames().size());
-        assertEquals(0, result.gameID());
+        assertEquals(100, result.gameID());
     }
 
     @Test

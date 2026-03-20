@@ -67,7 +67,7 @@ public class GameService {
         GameData gameData = gameMemory.getGame(id);
 
         //Check if requested team is taken and assign username to appropriate team if not
-        if(isTeamTaken(color, gameData)) throw new AlreadyTakenException();
+        if(isTeamTaken(color, gameData)) {throw new AlreadyTakenException();}
         switch (color) {
             case WHITE -> gameData = new GameData(id, username, gameData.blackUsername(), gameData.gameName(), gameData.game());
             case BLACK -> gameData = new GameData(id, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());

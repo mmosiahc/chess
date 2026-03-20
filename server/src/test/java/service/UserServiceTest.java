@@ -24,7 +24,7 @@ class UserServiceTest {
         RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
         RegisterResult result = service.register(request);
         assertNotNull(result.authToken());
-        assertEquals("Michael", result.username());
+        assertEquals("User", result.username());
     }
 
     @Test

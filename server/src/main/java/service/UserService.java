@@ -46,7 +46,7 @@ public class UserService {
         }
         UserData user;
         user = userMemory.getUser(username);
-        if(!user.password().equals(password)) throw new UnauthorizedException();
+        if(!user.password().equals(password)) {throw new UnauthorizedException();}
 
         AuthData auth = new AuthData(generateToken(), username);
         authMemory.createAuth(auth);
