@@ -2,4 +2,4 @@ package service;
 
 import chess.ChessGame;
 
-public record JoinGameBody(ChessGame.TeamColor playerRequestColor, int gameID) {}
+public record JoinGameBody(ChessGame.TeamColor playerColor, int gameID) {}

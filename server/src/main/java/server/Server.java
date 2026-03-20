@@ -32,11 +32,13 @@ public class Server {
         LogoutHandler logoutHandler = new LogoutHandler(userService);
         ListGamesHandler listGamesHandler = new ListGamesHandler(gameService);
         CreateGameHandler createGameHandler = new CreateGameHandler(gameService);
+        JoinGameHandler joinGameHandler = new JoinGameHandler(gameService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", registerHandler::register)
                 .post("/session", loginHandler::login)
                 .post("/game", createGameHandler::createGame)
+                .put("/game", joinGameHandler::joinGame)
                 .get("/game", listGamesHandler::listGames)
                 .exception(DataAccessException.class, this::dataAccessExceptionHandler)
                 .exception(Exception.class, this::exceptionHandler)
@@ -46,6 +48,7 @@ public class Server {
     }
 
     private void dataAccessExceptionHandler(DataAccessException e, Context context) {
+//        e.printStackTrace();
         if(e.getStatusCode() == 0) {
             context.status(500);
         }else{
@@ -55,7 +58,7 @@ public class Server {
     }
 
     private void exceptionHandler(Exception e, Context context) {
-        e.printStackTrace();
+//        e.printStackTrace();
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         context.status(500);
         context.json(body);

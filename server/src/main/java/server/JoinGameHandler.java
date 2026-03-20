@@ -19,7 +19,7 @@ public class JoinGameHandler extends BaseHandler{
     void joinGame(Context ctx) throws DataAccessException, RuntimeException {
         String token = getAuthHeaderObject(ctx, String.class);
         JoinGameBody body = getBodyObject(ctx, JoinGameBody.class);
-        JoinGameRequest request = new JoinGameRequest(token, body.playerRequestColor(), body.gameID());
+        JoinGameRequest request = new JoinGameRequest(token, body.playerColor(), body.gameID());
         service.joinGame(request);
         ctx.json(new Gson().toJson(Map.of()));
     }

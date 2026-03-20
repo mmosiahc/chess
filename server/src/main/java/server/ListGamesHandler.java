@@ -8,6 +8,7 @@ import service.ListGamesRequest;
 import service.ListGamesResult;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class ListGamesHandler extends BaseHandler{
     final GameService service;
@@ -20,6 +21,6 @@ public class ListGamesHandler extends BaseHandler{
         String token = getAuthHeaderObject(ctx, String.class);
         ListGamesRequest request = new ListGamesRequest(token);
         Collection<ListGamesResult> results = service.listGames(request);
-        ctx.json(new Gson().toJson(results));
+        ctx.json(new Gson().toJson(Map.of("games:", results)));
     }
 }

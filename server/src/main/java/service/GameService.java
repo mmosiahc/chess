@@ -32,7 +32,7 @@ public class GameService {
         authMemory.getAuth(token);
         var games = gameMemory.listGames();
         return games.stream()
-                .map(g -> new ListGamesResult(g.gameID(), g.wUsername(), g.bUsername(), g.gameName()))
+                .map(g -> new ListGamesResult(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()))
                 .toList();
     }
 
@@ -52,11 +52,11 @@ public class GameService {
 
     public void joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
         String token = joinGameRequest.authToken();
-        ChessGame.TeamColor color = joinGameRequest.playerRequestColor();
+        ChessGame.TeamColor color = joinGameRequest.playerColor();
         int id = joinGameRequest.gameID();
 
         //Check for missing information
-        if (token == null || color == null || id == 0) {
+        if (token == null || color == null || id < 100) {
             throw new BadRequestException();
         }
 
@@ -70,15 +70,15 @@ public class GameService {
         //Check if requested team is taken and assign username to appropriate team if not
         if(isTeamTaken(color, gameData)) throw new AlreadyTakenException();
         switch (color) {
-            case WHITE -> gameData = new GameData(id, username, gameData.bUsername(), gameData.gameName(), gameData.game());
-            case BLACK -> gameData = new GameData(id, gameData.wUsername(), username, gameData.gameName(), gameData.game());
+            case WHITE -> gameData = new GameData(id, username, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            case BLACK -> gameData = new GameData(id, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
         }
         gameMemory.updateGame(gameData);
     }
 
     public boolean isTeamTaken (ChessGame.TeamColor color, GameData gameData) {
-        String wUser = gameData.wUsername();
-        String bUser = gameData.bUsername();
+        String wUser = gameData.whiteUsername();
+        String bUser = gameData.blackUsername();
         return color.equals(ChessGame.TeamColor.WHITE) && wUser != null || color.equals(ChessGame.TeamColor.BLACK) && bUser != null;
     }
     public Map<Integer, GameData> getGames() {
