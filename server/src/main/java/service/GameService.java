@@ -25,7 +25,6 @@ public class GameService {
 
     public Collection<ListGamesResult> listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
         String token = listGamesRequest.authToken();
-
         if (token == null) {
             throw new BadRequestException();
         }
@@ -83,5 +82,9 @@ public class GameService {
     }
     public Map<Integer, GameData> getGames() {
         return gameMemory.getGames();
+    }
+
+    public Map<String, AuthData> getAuthentications() {
+        return authMemory.getAuthentications();
     }
 }

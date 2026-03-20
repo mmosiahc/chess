@@ -8,11 +8,11 @@ import java.util.Map;
 public class MemoryUserDAO implements UserDAO {
     Map<String, UserData> users = new HashMap<>();
     @Override
-    public UserData getUser(String username) throws BadRequestException {
+    public UserData getUser(String username) throws UnauthorizedException {
         if(users.containsKey(username)) {
             return users.get(username);
         } else {
-            throw new BadRequestException();
+            throw new UnauthorizedException();
         }
     }
 

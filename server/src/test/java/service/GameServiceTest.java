@@ -30,8 +30,8 @@ class GameServiceTest {
         service.getGames().put(2, game3);
         AuthData auth = new AuthData("authToken", "username");
         authDAO.createAuth(auth);
-        ListGamesRequest listGamesRequest = new ListGamesRequest("authToken");
-        Collection<ListGamesResult> results = service.listGames(listGamesRequest);
+        ListGamesRequest request = new ListGamesRequest("authToken");
+        Collection<ListGamesResult> results = service.listGames(request);
         assertNotNull(results);
         assertEquals(3, results.size());
 //        System.out.println(results);
@@ -46,7 +46,7 @@ class GameServiceTest {
         service.getGames().put(0, game1);
         service.getGames().put(1, game2);
         service.getGames().put(2, game3);
-        ListGamesRequest request = new ListGamesRequest("authToken");
+        ListGamesRequest request = new ListGamesRequest("badAuthToken");
         assertThrows(UnauthorizedException.class, () -> service.listGames(request));
     }
 
@@ -92,7 +92,7 @@ class GameServiceTest {
         JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, 100);
         service.joinGame(joinGameRequest);
         GameData gameData = gameDAO.getGame(100);
-        assertEquals("username", gameData.wUsername());
+        assertEquals("username", gameData.whiteUsername());
     }
 
     @Test

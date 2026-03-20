@@ -18,9 +18,9 @@ public class ListGamesHandler extends BaseHandler{
     }
 
     void listGames(Context ctx) throws DataAccessException, RuntimeException {
-        String token = getAuthHeaderObject(ctx, String.class);
+        String token = getAuthHeaderObject(ctx);
         ListGamesRequest request = new ListGamesRequest(token);
         Collection<ListGamesResult> results = service.listGames(request);
-        ctx.json(new Gson().toJson(Map.of("games:", results)));
+        ctx.json(new Gson().toJson(Map.of("games", results)));
     }
 }

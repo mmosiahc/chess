@@ -1,6 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import dataaccess.UnauthorizedException;
 import io.javalin.http.Context;
 
 public class BaseHandler {
@@ -15,13 +17,18 @@ public class BaseHandler {
         return bodyObject;
     }
 
-    static <T> T getAuthHeaderObject(Context context, Class<T> tClass) throws RuntimeException{
-        var headerObject = new Gson().fromJson(context.header("authorization"), tClass);
+    static String getAuthHeaderObject(Context context) throws RuntimeException, UnauthorizedException {
+        String authToken;
+        try {
+            authToken = new Gson().fromJson(context.header("authorization"), String.class);
+        } catch (JsonSyntaxException e) {
+            throw new UnauthorizedException();
+        }
 
-        if (headerObject == null) {
+        if (authToken == null) {
             throw new RuntimeException("missing required header");
         }
 
-        return headerObject;
+        return authToken;
     }
 }
