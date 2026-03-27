@@ -83,8 +83,4 @@ public class GameService {
     public Map<Integer, GameData> getGames() {
         return gameMemory.getGames();
     }
-
-    public Map<String, AuthData> getAuthentications() {
-        return authMemory.getAuthentications();
-    }
 }
