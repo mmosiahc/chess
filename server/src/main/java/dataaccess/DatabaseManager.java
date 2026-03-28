@@ -52,6 +52,14 @@ public class DatabaseManager {
         }
     }
 
+    public void createTable(String sqlStatement) throws Exception {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(sqlStatement)) {
+                preparedStatement.executeUpdate();
+            }
+        }
+    }
+
     private static void loadPropertiesFromResources() {
         try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) {
