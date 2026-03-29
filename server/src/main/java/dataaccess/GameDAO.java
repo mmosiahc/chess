@@ -8,7 +8,7 @@ import java.util.Map;
 public interface GameDAO {
 
     Collection<GameData> listGames() throws UnauthorizedException;
-    void createGame(GameData gameData);
+    void createGame(GameData gameData) throws DataAccessException;
     GameData getGame(int gameID) throws BadRequestException;
     void updateGame(GameData gameData);
     void clear();
