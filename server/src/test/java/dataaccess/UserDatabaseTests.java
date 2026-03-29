@@ -138,6 +138,17 @@ public class UserDatabaseTests {
         assertEquals(afterDelete, beforeDelete - 1);
     }
 
+    @Test
+    @DisplayName("Clear Auth Table - Successful")
+    void clearAllAuthData() throws DataAccessException {
+        AuthDatabase authentications = new AuthDatabase();
+        AuthData authData = new AuthData("testToken", "testUser");
+        authentications.createAuth(authData);
+        authentications.clear();
+        int numberOfUsers = countRowsInTable("authentications");
+        assertEquals(0, numberOfUsers);
+    }
+
     private int countRowsInTable(String database) throws DataAccessException {
         int numberOfRows = -1;
         String countAuthQuery = "SELECT COUNT(*) FROM " + database;

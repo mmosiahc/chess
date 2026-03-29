@@ -9,7 +9,7 @@ public interface AuthDAO {
     AuthData getAuth(String authToken) throws DataAccessException;
     void createAuth(AuthData authData) throws DataAccessException;
     void deleteAuth(String authToken) throws DataAccessException;
-    void clear();
+    void clear() throws DataAccessException;
     String toString();
     Map<String, AuthData> getAuthentications();
 }

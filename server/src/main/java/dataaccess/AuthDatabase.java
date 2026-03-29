@@ -62,8 +62,16 @@ public class AuthDatabase implements AuthDAO {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException{
+        String truncateTableStatement = "TRUNCATE TABLE authentications";
+        try(var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(truncateTableStatement)) {
 
+                preparedStatement.executeUpdate();
+            }
+        }catch (SQLException ex) {
+            throw new DataAccessException("Failed to connect to database", ex);
+        }
     }
 
     @Override
