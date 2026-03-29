@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Map;
 import java.util.UUID;
@@ -29,7 +30,8 @@ public class UserService {
         if(username == null || password == null || email == null) {
             throw new BadRequestException();
         }
-        UserData user = new UserData(username, password, email);
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        UserData user = new UserData(username, hashedPassword, email);
         userMemory.createUser(user);
 
         AuthData auth = new AuthData(generateToken(), username);
@@ -46,7 +48,8 @@ public class UserService {
         }
         UserData user;
         user = userMemory.getUser(username);
-        if(!user.password().equals(password)) {throw new UnauthorizedException();}
+        verifyUser(password, user.password());
+        if(!verifyUser(password, user.password())) {throw new UnauthorizedException();}
 
         AuthData auth = new AuthData(generateToken(), username);
         authMemory.createAuth(auth);
@@ -61,7 +64,9 @@ public class UserService {
         }
         authMemory.deleteAuth(authToken);
     }
-
+    private boolean verifyUser(String providedPassword, String hashedPassword) {
+        return BCrypt.checkpw(providedPassword, hashedPassword);
+    }
     public Map<String, UserData> getUsers() {return userMemory.getUsers();}
     public Map<String, AuthData> getAuthentications() {return authMemory.getAuthentications();}
 }
