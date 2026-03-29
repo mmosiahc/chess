@@ -72,4 +72,27 @@ public class UserDatabaseTests {
         UserData user = new UserData("newUser", "password", "newUser@chess.com");
         assertThrows(DataAccessException.class, () -> users.createUser(user));
     }
+
+    @Test
+    @DisplayName("Clear - Successful")
+    void clearAllUserData() throws DataAccessException {
+        UserDatabase users = new UserDatabase();
+        UserData user = new UserData("testUser", "testPassword", "testEmail");
+        users.createUser(user);
+        users.clear();
+        int numberOfUsers = -1;
+        String clearAllQuery = "SELECT COUNT(*) FROM users";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(clearAllQuery)) {
+
+                var rs = preparedStatement.executeQuery();
+                if(rs.next()) {
+                    numberOfUsers = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("failed to connect to database", e);
+        }
+        assertEquals(0, numberOfUsers);
+    }
 }
