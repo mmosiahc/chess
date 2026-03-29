@@ -35,6 +35,8 @@ public class UserDatabase implements UserDAO {
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         String username = userData.username();
+        UserData user = getUser(username);
+        if(user != null)  throw new AlreadyTakenException();
         String password = userData.password();
         String email = userData.email();
         String insertUserStatement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";

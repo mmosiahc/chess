@@ -54,4 +54,22 @@ public class UserDatabaseTests {
         }
         assertNull(user);
     }
+
+    @Test
+    @DisplayName("Create User - Successful")
+    void createNewUser() throws DataAccessException {
+        UserDatabase users = new UserDatabase();
+        UserData user = new UserData("newUser", "password", "newUser@chess.com");
+        users.createUser(user);
+        UserData retrievedUser = users.getUser("newUser");
+        assertEquals("newUser", retrievedUser.username());
+    }
+
+    @Test
+    @DisplayName("Create User - Username taken")
+    void createDuplicateUser() {
+        UserDatabase users = new UserDatabase();
+        UserData user = new UserData("newUser", "password", "newUser@chess.com");
+        assertThrows(DataAccessException.class, () -> users.createUser(user));
+    }
 }
