@@ -5,5 +5,5 @@ package dataaccess;
  */
 public class UnauthorizedException extends DataAccessException{
     public UnauthorizedException() {super(401, "unauthorized");}
-
+    public UnauthorizedException(String message) {super(message);}
 }

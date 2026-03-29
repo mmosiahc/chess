@@ -56,11 +56,9 @@ public class DatabaseManager {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(sqlStatement)) {
                 preparedStatement.executeUpdate();
-            } catch (SQLException ex) {
-                throw new DataAccessException("failed to create table", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("failed to get connection", ex);
+            throw new DataAccessException("failed to create table", ex);
         }
     }
 

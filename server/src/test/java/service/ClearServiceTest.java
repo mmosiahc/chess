@@ -35,7 +35,7 @@ class ClearServiceTest {
         GameData gameData = new GameData(1, "jack", "bill", "test", testGame);
         gameDAO.createGame(gameData);
         clearService.clear();
-        assertEquals(0, userService.getUsers().size());
+        assertEquals(0, userDAO.getUsers().size());
         assertEquals(0, authDAO.getAuthentications().size());
         assertEquals(0, gameDAO.getGames().size());
     }
