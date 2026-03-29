@@ -1,0 +1,69 @@
+package dataaccess;
+
+import model.AuthData;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Map;
+
+public class AuthDatabase implements AuthDAO {
+
+    public AuthDatabase() {}
+
+    @Override
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        AuthData authentication = null;
+        try(var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT authtoken, username FROM authentications WHERE authtoken = ?")) {
+                preparedStatement.setString(1, authToken);
+                try (var rs = preparedStatement.executeQuery()) {
+                    if(rs.next()) {
+                        var auth = rs.getString("authtoken");
+                        var username = rs.getString("username");
+                        authentication = new AuthData(auth, username);
+                    }
+                }
+            }
+        }catch (SQLException ex) {
+            throw new DataAccessException("Failed to connect to database", ex);
+        }
+        return authentication;
+    }
+
+    @Override
+    public void createAuth(AuthData authData) throws DataAccessException{
+        String authToken = authData.authToken();
+        String username = authData.username();
+        String insertAuthStatement = "INSERT INTO authentications (authtoken, username) VALUES (?, ?)";
+        try(var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(insertAuthStatement, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, authToken);
+                preparedStatement.setString(2, username);
+
+                preparedStatement.executeUpdate();
+            }
+        }catch (SQLException ex) {
+            throw new DataAccessException("Failed to connect to database", ex);
+        }
+    }
+
+    @Override
+    public void deleteAuth(String authToken) throws DataAccessException {
+
+    }
+
+    @Override
+    public void clear() {
+
+    }
+
+    @Override
+    public String toString() {
+        return null;
+    }
+
+    @Override
+    public Map<String, AuthData> getAuthentications() {
+        return null;
+    }
+}
