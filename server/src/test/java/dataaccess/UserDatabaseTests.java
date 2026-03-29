@@ -81,19 +81,7 @@ public class UserDatabaseTests {
         UserData user = new UserData("testUser", "testPassword", "testEmail");
         users.createUser(user);
         users.clear();
-        int numberOfUsers = -1;
-        String clearAllQuery = "SELECT COUNT(*) FROM users";
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(clearAllQuery)) {
-
-                var rs = preparedStatement.executeQuery();
-                if(rs.next()) {
-                    numberOfUsers = rs.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("failed to connect to database", e);
-        }
+        int numberOfUsers = countRowsInTable("users");
         assertEquals(0, numberOfUsers);
     }
 
@@ -136,5 +124,33 @@ public class UserDatabaseTests {
         AuthDatabase authentications = new AuthDatabase();
         AuthData authData = new AuthData(null, "testUser24");
         assertThrows(DataAccessException.class, () -> authentications.createAuth(authData));
+    }
+
+    @Test
+    @DisplayName("Delete Authentication - Successful")
+    void deleteAuth() throws DataAccessException {
+        AuthDatabase authentications = new AuthDatabase();
+        AuthData authData = new AuthData("testToken", "user");
+        authentications.createAuth(authData);
+        int beforeDelete = countRowsInTable("authentications");
+        authentications.deleteAuth("testToken");
+        int afterDelete = countRowsInTable("authentications");
+        assertEquals(afterDelete, beforeDelete - 1);
+    }
+
+    private int countRowsInTable(String database) throws DataAccessException {
+        int numberOfRows = -1;
+        String countAuthQuery = "SELECT COUNT(*) FROM " + database;
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(countAuthQuery)) {
+                var rs = preparedStatement.executeQuery();
+                if(rs.next()) {
+                    numberOfRows = rs.getInt(1);
+                }
+                return numberOfRows;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("failed to connect to database", e);
+        }
     }
 }
