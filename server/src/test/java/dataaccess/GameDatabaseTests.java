@@ -1,6 +1,6 @@
 package dataaccess;
 
-import chess.ChessGame;
+import chess.*;
 import model.GameData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,6 +74,26 @@ public class GameDatabaseTests extends BaseDatabaseTest{
         games.updateGame(gameData);
         gameData = games.getGame(gameID);
         assertEquals("newWhite", gameData.whiteUsername());
+    }
+
+    @Test
+    @DisplayName("Update Game - Make Move")
+    void updateExistingGameMovePawn() throws DataAccessException, InvalidMoveException {
+        GameDatabase games = new GameDatabase();
+        ChessGame newGame = new ChessGame();
+        GameData gameData = new GameData(0, "white", "black", "testName", newGame);
+        int gameID = games.createGame(gameData);
+        gameData = games.getGame(gameID);
+        newGame = gameData.game();
+        ChessMove move = new ChessMove(new ChessPosition(2,1), new ChessPosition(4,1), null);
+        newGame.makeMove(move);
+        ChessGame pawnMoved = newGame;
+        gameData = new GameData(gameID, "white", "black", "testName", pawnMoved);
+        games.updateGame(gameData);
+        gameData = games.getGame(gameID);
+        ChessPiece whitePawn = gameData.game().getBoard().getPiece(new ChessPosition(4, 1));
+        assertEquals(ChessPiece.PieceType.PAWN, whitePawn.getPieceType());
+        assertEquals(ChessGame.TeamColor.WHITE, whitePawn.getTeamColor());
     }
 
     @Test

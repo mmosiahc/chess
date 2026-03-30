@@ -48,7 +48,7 @@ public class UserService {
         }
         UserData user;
         user = users.getUser(username);
-        if(user == null) throw new BadRequestException();
+        if(user == null) throw new UnauthorizedException();
         verifyUser(password, user.password());
         if(!verifyUser(password, user.password())) throw new UnauthorizedException();
 
