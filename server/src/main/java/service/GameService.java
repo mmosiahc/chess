@@ -69,6 +69,7 @@ public class GameService {
 
         //Get requested GameData by id and determine status of teams
         GameData gameData = games.getGame(id);
+        if(gameData == null) throw new BadRequestException();
 
         //Check if requested team is taken and assign username to appropriate team if not
         if(isTeamTaken(color, gameData)) {throw new AlreadyTakenException();}

@@ -13,7 +13,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GameServiceTest {
+class GameServiceTest extends BaseDatabaseTest {
     private final AuthDatabase authentications = new AuthDatabase();
     private final UserDatabase users = new UserDatabase();
     private final GameDatabase games = new GameDatabase();
@@ -25,27 +25,26 @@ class GameServiceTest {
         GameData game1 = new GameData(service.generateID(), "white", "black", "normal", new ChessGame());
         GameData game2 = new GameData(service.generateID(), "will", "Blake", "speed", new ChessGame());
         GameData game3 = new GameData(service.generateID(), "wes", "bob", "test", new ChessGame());
-        service.getGames().put(0, game1);
-        service.getGames().put(1, game2);
-        service.getGames().put(2, game3);
+        games.createGame(game1);
+        games.createGame(game2);
+        games.createGame(game3);
         AuthData auth = new AuthData("authToken", "username");
         authentications.createAuth(auth);
         ListGamesRequest request = new ListGamesRequest("authToken");
         Collection<ListGamesResult> results = service.listGames(request);
         assertNotNull(results);
         assertEquals(3, results.size());
-//        System.out.println(results);
     }
 
     @Test
     @DisplayName("List Games - Unauthorized")
-    void listGamesBadAuth() {
+    void listGamesBadAuth() throws DataAccessException {
         GameData game1 = new GameData(service.generateID(), "white", "black", "normal", new ChessGame());
         GameData game2 = new GameData(service.generateID(), "will", "Blake", "speed", new ChessGame());
         GameData game3 = new GameData(service.generateID(), "wes", "bob", "test", new ChessGame());
-        service.getGames().put(0, game1);
-        service.getGames().put(1, game2);
-        service.getGames().put(2, game3);
+        games.createGame(game1);
+        games.createGame(game2);
+        games.createGame(game3);
         ListGamesRequest request = new ListGamesRequest("badAuthToken");
         assertThrows(UnauthorizedException.class, () -> service.listGames(request));
     }
@@ -58,8 +57,9 @@ class GameServiceTest {
         CreateGameRequest request = new CreateGameRequest("authToken", "testGame");
         CreateGameResult result = service.createGame(request);
         assertNotNull(result);
-        assertEquals(1, service.getGames().size());
-        assertEquals(100, result.gameID());
+        int numberOfGames = countRowsInTable("games");
+        assertEquals(1, numberOfGames);
+        assertEquals(1, result.gameID());
     }
 
     @Test
@@ -88,10 +88,10 @@ class GameServiceTest {
         AuthData auth = new AuthData("authToken", "username");
         authentications.createAuth(auth);
         CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "test");
-        service.createGame(createGameRequest);
-        JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, 100);
+        CreateGameResult result = service.createGame(createGameRequest);
+        JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, result.gameID());
         service.joinGame(joinGameRequest);
-        GameData gameData = games.getGame(100);
+        GameData gameData = games.getGame(result.gameID());
         assertEquals("username", gameData.whiteUsername());
     }
 
@@ -103,8 +103,8 @@ class GameServiceTest {
         AuthData auth = new AuthData("authToken", "username");
         authentications.createAuth(auth);
         CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "test");
-        service.createGame(createGameRequest);
-        JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", null, 100);
+        CreateGameResult result = service.createGame(createGameRequest);
+        JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", null, result.gameID());
         assertThrows(BadRequestException.class, () -> service.joinGame(joinGameRequest));
     }
 
@@ -129,8 +129,8 @@ class GameServiceTest {
         AuthData auth = new AuthData("authToken", "username");
         authentications.createAuth(auth);
         CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "test");
-        service.createGame(createGameRequest);
-        JoinGameRequest joinGameRequest = new JoinGameRequest("badAuthToken", ChessGame.TeamColor.WHITE, 100);
+        CreateGameResult result = service.createGame(createGameRequest);
+        JoinGameRequest joinGameRequest = new JoinGameRequest("badAuthToken", ChessGame.TeamColor.WHITE, result.gameID());
         assertThrows(UnauthorizedException.class, () -> service.joinGame(joinGameRequest));
     }
 
@@ -141,9 +141,9 @@ class GameServiceTest {
         users.createUser(user);
         AuthData auth = new AuthData("authToken", "username");
         authentications.createAuth(auth);
-        GameData gameData = new GameData(100, "name", null, "test", new ChessGame());
-        games.createGame(gameData);
-        JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, 100);
+        GameData gameData = new GameData(0, "name", null, "test", new ChessGame());
+        int gameID = games.createGame(gameData);
+        JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, gameID);
         assertThrows(AlreadyTakenException.class, () -> service.joinGame(joinGameRequest));
     }
 
