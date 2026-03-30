@@ -10,13 +10,13 @@ import java.util.Map;
 
 
 public class GameService {
-    private final MemoryGameDAO gameMemory;
-    private final MemoryAuthDAO authMemory;
+    private final GameDatabase games;
+    private final AuthDatabase authentications;
     int id = 100;
 
-    public GameService(MemoryGameDAO gameMemory, MemoryAuthDAO authMemory) {
-        this.gameMemory = gameMemory;
-        this.authMemory = authMemory;
+    public GameService(GameDatabase games, AuthDatabase authentications) {
+        this.games = games;
+        this.authentications = authentications;
     }
 
     public int generateID() {
@@ -28,9 +28,10 @@ public class GameService {
         if (token == null) {
             throw new BadRequestException();
         }
-        authMemory.getAuth(token);
-        var games = gameMemory.listGames();
-        return games.stream()
+        AuthData authData = authentications.getAuth(token);
+        if(authData == null) throw new UnauthorizedException();
+        var gamesList = games.listGames();
+        return gamesList.stream()
                 .map(g -> new ListGamesResult(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()))
                 .toList();
     }
@@ -42,10 +43,12 @@ public class GameService {
         if (name == null || token == null) {
             throw new BadRequestException();
         }
-        authMemory.getAuth(token);
+        AuthData authData = authentications.getAuth(token);
+        if(authData == null) throw new UnauthorizedException();
+
         GameData game = new GameData(generateID(), null, null, name, new ChessGame());
-        gameMemory.createGame(game);
-        return new CreateGameResult(game.gameID());
+        int gameID = games.createGame(game);
+        return new CreateGameResult(gameID);
     }
 
 
@@ -55,16 +58,17 @@ public class GameService {
         int id = joinGameRequest.gameID();
 
         //Check for missing information
-        if (token == null || color == null || id < 100) {
+        if (token == null || color == null || id <= 0) {
             throw new BadRequestException();
         }
 
         //Validate authToken and grab username from associated AuthData
-        AuthData auth = authMemory.getAuth(token);
-        String username = auth.username();
+        AuthData authData = authentications.getAuth(token);
+        if(authData == null) throw new UnauthorizedException();
+        String username = authData.username();
 
         //Get requested GameData by id and determine status of teams
-        GameData gameData = gameMemory.getGame(id);
+        GameData gameData = games.getGame(id);
 
         //Check if requested team is taken and assign username to appropriate team if not
         if(isTeamTaken(color, gameData)) {throw new AlreadyTakenException();}
@@ -72,7 +76,7 @@ public class GameService {
             case WHITE -> gameData = new GameData(id, username, gameData.blackUsername(), gameData.gameName(), gameData.game());
             case BLACK -> gameData = new GameData(id, gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
         }
-        gameMemory.updateGame(gameData);
+        games.updateGame(gameData);
     }
 
     public boolean isTeamTaken (ChessGame.TeamColor color, GameData gameData) {
@@ -81,6 +85,6 @@ public class GameService {
         return color.equals(ChessGame.TeamColor.WHITE) && wUser != null || color.equals(ChessGame.TeamColor.BLACK) && bUser != null;
     }
     public Map<Integer, GameData> getGames() {
-        return gameMemory.getGames();
+        return null;
     }
 }

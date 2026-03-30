@@ -1,27 +1,24 @@
 package service;
 
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 
 
 public class ClearService {
-    private static MemoryUserDAO userMemory;
-    private static MemoryAuthDAO authMemory;
-    private static MemoryGameDAO gameMemory;
+    private static UserDatabase users;
+    private static AuthDatabase authentications;
+    private static GameDatabase games;
 
-    public ClearService(MemoryUserDAO userMemory, MemoryAuthDAO authMemory, MemoryGameDAO gameMemory) {
-        ClearService.userMemory = userMemory;
-        ClearService.authMemory = authMemory;
-        ClearService.gameMemory = gameMemory;
+    public ClearService(UserDatabase users, AuthDatabase authentications, GameDatabase games) {
+        ClearService.users = users;
+        ClearService.authentications = authentications;
+        ClearService.games = games;
     }
 
     public void clear() throws DataAccessException {
         try {
-            userMemory.clear();
-            authMemory.clear();
-            gameMemory.clear();
+            users.clear();
+            authentications.clear();
+            games.clear();
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage(), e);
         }

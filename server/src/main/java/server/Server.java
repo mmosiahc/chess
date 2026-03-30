@@ -1,12 +1,10 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import model.GameData;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -18,13 +16,13 @@ public class Server {
     private final Javalin javalin;
 
     public Server(){
-        MemoryAuthDAO authDAO = new MemoryAuthDAO();
-        MemoryUserDAO userDAO = new MemoryUserDAO();
-        MemoryGameDAO gameDAO = new MemoryGameDAO();
+        AuthDatabase authentications = new AuthDatabase();
+        UserDatabase users = new UserDatabase();
+        GameDatabase games = new GameDatabase();
 
-        UserService userService = new UserService(userDAO, authDAO);
-        ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
-        GameService gameService = new GameService(gameDAO, authDAO);
+        UserService userService = new UserService(users, authentications);
+        ClearService clearService = new ClearService(users, authentications, games);
+        GameService gameService = new GameService(games, authentications);
 
         RegisterHandler registerHandler = new RegisterHandler(userService);
         ClearHandler clearHandler = new ClearHandler(clearService);

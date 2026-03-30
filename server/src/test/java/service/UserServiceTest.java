@@ -12,10 +12,10 @@ class UserServiceTest {
 
     @BeforeEach
     void setup() {
-        MemoryUserDAO userDAO = new MemoryUserDAO();
-        MemoryAuthDAO authDAO = new MemoryAuthDAO();
+        AuthDatabase authentications = new AuthDatabase();
+        UserDatabase users = new UserDatabase();
 
-        service = new UserService(userDAO, authDAO);
+        service = new UserService(users, authentications);
     }
 
     @Test

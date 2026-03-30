@@ -14,10 +14,10 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
-    private final MemoryUserDAO userDAO = new MemoryUserDAO();
-    private final MemoryGameDAO gameDAO = new MemoryGameDAO();
-    private final MemoryAuthDAO authDAO = new MemoryAuthDAO();
-    private final GameService service = new GameService(gameDAO, authDAO);
+    private final AuthDatabase authentications = new AuthDatabase();
+    private final UserDatabase users = new UserDatabase();
+    private final GameDatabase games = new GameDatabase();
+    private final GameService service = new GameService(games, authentications);
 
     @Test
     @DisplayName("List Games Successful")
@@ -29,7 +29,7 @@ class GameServiceTest {
         service.getGames().put(1, game2);
         service.getGames().put(2, game3);
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         ListGamesRequest request = new ListGamesRequest("authToken");
         Collection<ListGamesResult> results = service.listGames(request);
         assertNotNull(results);
@@ -54,7 +54,7 @@ class GameServiceTest {
     @DisplayName("Create Game Successful")
     void createNewGame() throws DataAccessException {
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         CreateGameRequest request = new CreateGameRequest("authToken", "testGame");
         CreateGameResult result = service.createGame(request);
         assertNotNull(result);
@@ -64,18 +64,18 @@ class GameServiceTest {
 
     @Test
     @DisplayName("Create Game - Bad Request")
-    void createGameMissingName() {
+    void createGameMissingName() throws DataAccessException {
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         CreateGameRequest request = new CreateGameRequest("authToken", null);
         assertThrows(BadRequestException.class, () -> service.createGame(request));
     }
 
     @Test
     @DisplayName("Create Game - Unauthorized")
-    void createGameBadToken() {
+    void createGameBadToken() throws DataAccessException {
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         CreateGameRequest request = new CreateGameRequest("badAuthToken", "test");
         assertThrows(UnauthorizedException.class, () -> service.createGame(request));
     }
@@ -84,14 +84,14 @@ class GameServiceTest {
     @DisplayName("Join Game Successful")
     void joinGameSuccess() throws DataAccessException {
         UserData user = new UserData("username", "password", "email");
-        userDAO.createUser(user);
+        users.createUser(user);
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "test");
         service.createGame(createGameRequest);
         JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, 100);
         service.joinGame(joinGameRequest);
-        GameData gameData = gameDAO.getGame(100);
+        GameData gameData = games.getGame(100);
         assertEquals("username", gameData.whiteUsername());
     }
 
@@ -99,9 +99,9 @@ class GameServiceTest {
     @DisplayName("Join Game - Missing Info")
     void joinGameMissingTeam() throws DataAccessException {
         UserData user = new UserData("username", "password", "email");
-        userDAO.createUser(user);
+        users.createUser(user);
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "test");
         service.createGame(createGameRequest);
         JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", null, 100);
@@ -112,9 +112,9 @@ class GameServiceTest {
     @DisplayName("Join Game - Wrong ID")
     void joinGameWrongID() throws DataAccessException {
         UserData user = new UserData("username", "password", "email");
-        userDAO.createUser(user);
+        users.createUser(user);
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "test");
         service.createGame(createGameRequest);
         JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, 101);
@@ -125,9 +125,9 @@ class GameServiceTest {
     @DisplayName("Join Game - Bad Authorization")
     void joinGameBadToken() throws DataAccessException {
         UserData user = new UserData("username", "password", "email");
-        userDAO.createUser(user);
+        users.createUser(user);
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "test");
         service.createGame(createGameRequest);
         JoinGameRequest joinGameRequest = new JoinGameRequest("badAuthToken", ChessGame.TeamColor.WHITE, 100);
@@ -138,19 +138,19 @@ class GameServiceTest {
     @DisplayName("Join Game - Team taken")
     void joinGameTeamTaken() throws DataAccessException {
         UserData user = new UserData("username", "password", "email");
-        userDAO.createUser(user);
+        users.createUser(user);
         AuthData auth = new AuthData("authToken", "username");
-        authDAO.createAuth(auth);
+        authentications.createAuth(auth);
         GameData gameData = new GameData(100, "name", null, "test", new ChessGame());
-        gameDAO.createGame(gameData);
+        games.createGame(gameData);
         JoinGameRequest joinGameRequest = new JoinGameRequest("authToken", ChessGame.TeamColor.WHITE, 100);
         assertThrows(AlreadyTakenException.class, () -> service.joinGame(joinGameRequest));
     }
 
     @AfterEach
-    void tearDown() {
-        gameDAO.clear();
-        authDAO.clear();
-        userDAO.clear();
+    void tearDown() throws DataAccessException {
+        games.clear();
+        authentications.clear();
+        users.clear();
     }
 }

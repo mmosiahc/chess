@@ -1,10 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,18 +9,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ClearServiceTest {
+class ClearServiceTest extends BaseDatabaseTest {
     private ClearService clearService;
     private UserService userService;
-    private final MemoryAuthDAO authDAO = new MemoryAuthDAO();
-    private final MemoryGameDAO gameDAO = new MemoryGameDAO();
-    private final MemoryUserDAO userDAO = new MemoryUserDAO();
+    private final AuthDatabase authentications = new AuthDatabase();
+    private final UserDatabase users = new UserDatabase();
+    private final GameDatabase games = new GameDatabase();
 
     @BeforeEach
     void setup() {
-        userService = new UserService(userDAO, authDAO);
-        clearService = new ClearService(userDAO, authDAO, gameDAO);
-
+        userService = new UserService(users, authentications);
+        clearService = new ClearService(users, authentications, games);
     }
 
     @Test
@@ -33,10 +29,13 @@ class ClearServiceTest {
         userService.register(request);
         ChessGame testGame = new ChessGame();
         GameData gameData = new GameData(1, "jack", "bill", "test", testGame);
-        gameDAO.createGame(gameData);
+        games.createGame(gameData);
         clearService.clear();
-        assertEquals(0, userDAO.getUsers().size());
-        assertEquals(0, authDAO.getAuthentications().size());
-        assertEquals(0, gameDAO.getGames().size());
+        int numberOfUsers = countRowsInTable("users");
+        int numberOfAuthentications = countRowsInTable("authentications");
+        int numberOfGames = countRowsInTable("games");
+        assertEquals(0, numberOfGames);
+        assertEquals(0, numberOfUsers);
+        assertEquals(0, numberOfAuthentications);
     }
 }
