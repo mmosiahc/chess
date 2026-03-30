@@ -6,6 +6,7 @@ import model.GameData;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -87,8 +88,27 @@ public class GameDatabase implements GameDAO {
     }
 
     @Override
-    public Collection<GameData> listGames() {
-        return null;
+    public Collection<GameData> listGames() throws DataAccessException {
+        Collection<GameData> gamesList = new ArrayList<>();
+        try(var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * FROM games")) {
+                try (var rs = preparedStatement.executeQuery()) {
+                    while(rs.next()) {
+                        var id = rs.getInt("id");
+                        var whiteName = rs.getString("white_username");
+                        var blackName = rs.getString("black_username");
+                        var gameName = rs.getString("game_name");
+                        var chess = rs.getString("game");
+                        ChessGame chessGame = new Gson().fromJson(chess, ChessGame.class);
+                        GameData game = new GameData(id, whiteName, blackName, gameName, chessGame);
+                        gamesList.add(game);
+                    }
+                }
+            }
+        }catch (SQLException ex) {
+            throw new DataAccessException("Failed to connect to database", ex);
+        }
+        return gamesList;
     }
 
     @Override

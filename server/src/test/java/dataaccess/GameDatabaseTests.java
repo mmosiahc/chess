@@ -1,16 +1,15 @@
 package dataaccess;
 
 import chess.ChessGame;
-import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.sql.SQLException;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GameDatabaseTests {
+public class GameDatabaseTests extends BaseDatabaseTest{
 
     @Test
     @DisplayName("Get Game - Successful")
@@ -89,59 +88,25 @@ public class GameDatabaseTests {
     }
 
     @Test
-    @DisplayName("Create Authentication - Successful")
-    void createNewAuth() throws DataAccessException {
-        AuthDatabase authentications = new AuthDatabase();
-        AuthData authData1 = new AuthData("testToken", "testUser24");
-        authentications.createAuth(authData1);
-        authData1 = authentications.getAuth("testToken");
-        assertEquals("testUser24", authData1.username());
-    }
-
-    @Test
-    @DisplayName("Create Authentication - Null token")
-    void createAuthNullToken() throws DataAccessException {
-        AuthDatabase authentications = new AuthDatabase();
-        AuthData authData = new AuthData(null, "testUser24");
-        assertThrows(DataAccessException.class, () -> authentications.createAuth(authData));
-    }
-
-    @Test
-    @DisplayName("Delete Authentication - Successful")
-    void deleteAuth() throws DataAccessException {
-        AuthDatabase authentications = new AuthDatabase();
-        AuthData authData = new AuthData("testToken", "user");
-        authentications.createAuth(authData);
-        int beforeDelete = countRowsInTable("authentications");
-        authentications.deleteAuth("testToken");
-        int afterDelete = countRowsInTable("authentications");
-        assertEquals(afterDelete, beforeDelete - 1);
-    }
-
-    @Test
-    @DisplayName("Clear Auth Table - Successful")
-    void clearAllAuthData() throws DataAccessException {
-        AuthDatabase authentications = new AuthDatabase();
-        AuthData authData = new AuthData("testToken", "testUser");
-        authentications.createAuth(authData);
-        authentications.clear();
-        int numberOfUsers = countRowsInTable("authentications");
-        assertEquals(0, numberOfUsers);
-    }
-
-    private int countRowsInTable(String database) throws DataAccessException {
-        int numberOfRows = -1;
-        String countAuthQuery = "SELECT COUNT(*) FROM " + database;
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(countAuthQuery)) {
-                var rs = preparedStatement.executeQuery();
-                if(rs.next()) {
-                    numberOfRows = rs.getInt(1);
-                }
-                return numberOfRows;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("failed to connect to database", e);
+    @DisplayName("List Games - Successful")
+    void listAllGames() throws DataAccessException {
+        GameDatabase games = new GameDatabase();
+        Collection<GameData> gamesList;
+        games.clear();
+        for(int i = 0; i < 3; i++) {
+            games.createGame(new GameData(i, "w", "b", "gameName", new ChessGame()));
         }
+        gamesList = games.listGames();
+        assertEquals(3, gamesList.size());
+    }
+
+    @Test
+    @DisplayName("List Games - Empty Table")
+    void listGamesNoData() throws DataAccessException {
+        GameDatabase games = new GameDatabase();
+        Collection<GameData> gamesList;
+        games.clear();
+        gamesList = games.listGames();
+        assertEquals(0, gamesList.size());
     }
 }
