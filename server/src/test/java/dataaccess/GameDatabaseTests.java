@@ -67,26 +67,26 @@ public class GameDatabaseTests {
     }
 
     @Test
-    @DisplayName("Get Authentication - Successful")
-    void getExistingAuth() throws DataAccessException {
-        AuthDatabase authentications = new AuthDatabase();
-        AuthData authData1 = new AuthData("authtoken1", "testUser1");
-        AuthData authData2 = new AuthData("authtoken2", "testUser2");
-        authentications.createAuth(authData1);
-        authentications.createAuth(authData2);
-        authData2 = authentications.getAuth("authtoken1");
-        authData1 = authentications.getAuth("authtoken2");
-        assertEquals("testUser1", authData2.username());
-        assertEquals("testUser2", authData1.username());
+    @DisplayName("Update Game - Successful")
+    void updateExistingGame() throws DataAccessException {
+        GameDatabase games = new GameDatabase();
+        GameData gameData = new GameData(0, "white", "black", "testName", new ChessGame());
+        int gameID = games.createGame(gameData);
+        gameData = new GameData(gameID, "newWhite", "newBlack", "testName", new ChessGame());
+        games.updateGame(gameData);
+        gameData = games.getGame(gameID);
+        assertEquals("newWhite", gameData.whiteUsername());
     }
 
     @Test
-    @DisplayName("Get Authentication - Bad Authtoken")
-    void getAuthWrongToken() throws DataAccessException {
-        AuthData authData;
-        AuthDatabase authentications = new AuthDatabase();
-        authData = authentications.getAuth("authtoken");
-        assertNull(authData);
+    @DisplayName("Update Game - Null Game")
+    void updateGameNullGame() throws DataAccessException {
+        GameDatabase games = new GameDatabase();
+        GameData gameData = new GameData(0, "white", "black", "testName", new ChessGame());
+        int gameID = games.createGame(gameData);
+        gameData = new GameData(gameID, "newWhite", "newBlack", null, null);
+        GameData finalGameData = gameData;
+        assertThrows(DataAccessException.class, () -> games.updateGame(finalGameData));
     }
 
     @Test
