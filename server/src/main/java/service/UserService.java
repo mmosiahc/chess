@@ -10,12 +10,12 @@ import java.util.UUID;
 
 
 public class UserService {
-    private final MemoryUserDAO userMemory;
-    private final MemoryAuthDAO authMemory;
+    private final UserDatabase users;
+    private final AuthDatabase authentications;
 
-    public UserService(MemoryUserDAO userMemory, MemoryAuthDAO authMemory) {
-        this.userMemory = userMemory;
-        this.authMemory = authMemory;
+    public UserService(UserDatabase users, AuthDatabase authentications) {
+        this.users = users;
+        this.authentications = authentications;
     }
 
     public static String generateToken() {
@@ -32,10 +32,10 @@ public class UserService {
         }
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         UserData user = new UserData(username, hashedPassword, email);
-        userMemory.createUser(user);
+        users.createUser(user);
 
         AuthData auth = new AuthData(generateToken(), username);
-        authMemory.createAuth(auth);
+        authentications.createAuth(auth);
         return new RegisterResult(username, auth.authToken());
     }
 
@@ -47,12 +47,13 @@ public class UserService {
             throw new BadRequestException();
         }
         UserData user;
-        user = userMemory.getUser(username);
+        user = users.getUser(username);
+        if(user == null) throw new BadRequestException();
         verifyUser(password, user.password());
-        if(!verifyUser(password, user.password())) {throw new UnauthorizedException();}
+        if(!verifyUser(password, user.password())) throw new UnauthorizedException();
 
         AuthData auth = new AuthData(generateToken(), username);
-        authMemory.createAuth(auth);
+        authentications.createAuth(auth);
         return new LoginResult(username, auth.authToken());
     }
 
@@ -62,11 +63,13 @@ public class UserService {
         if (authToken == null) {
             throw new BadRequestException();
         }
-        authMemory.deleteAuth(authToken);
+        authentications.deleteAuth(authToken);
     }
+
     private boolean verifyUser(String providedPassword, String hashedPassword) {
         return BCrypt.checkpw(providedPassword, hashedPassword);
     }
-    public Map<String, UserData> getUsers() {return userMemory.getUsers();}
-    public Map<String, AuthData> getAuthentications() {return authMemory.getAuthentications();}
+
+    public Map<String, UserData> getUsers() {return null;}
+    public Map<String, AuthData> getAuthentications() {return null;}
 }
