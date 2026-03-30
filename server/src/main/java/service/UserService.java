@@ -63,6 +63,9 @@ public class UserService {
         if (authToken == null) {
             throw new BadRequestException();
         }
+        AuthData authData = authentications.getAuth(authToken);
+        if(authData == null) throw new UnauthorizedException();
+
         authentications.deleteAuth(authToken);
     }
 

@@ -1,28 +1,37 @@
 package service;
 
 import dataaccess.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserServiceTest {
-    private UserService service;
+class UserServiceTest extends BaseDatabaseTest {
+    private UserService userService;
+    private ClearService clearService;
 
     @BeforeEach
     void setup() {
         AuthDatabase authentications = new AuthDatabase();
         UserDatabase users = new UserDatabase();
+        GameDatabase games = new GameDatabase();
 
-        service = new UserService(users, authentications);
+        userService = new UserService(users, authentications);
+        clearService = new ClearService(users, authentications, games);
+    }
+
+    @AfterEach
+    void tearDown() throws DataAccessException {
+        clearService.clear();
     }
 
     @Test
     @DisplayName("Registration Successful")
     void registerNewUser() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
-        RegisterResult result = service.register(request);
+        RegisterResult result = userService.register(request);
         assertNotNull(result.authToken());
         assertEquals("User", result.username());
     }
@@ -31,24 +40,24 @@ class UserServiceTest {
     @DisplayName("Registration - User Already Exists")
     void registerUserAlreadyExists() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("User", "password", "User@chess.com");
-        service.register(request);
-        assertThrows(AlreadyTakenException.class, () -> service.register(request));
+        userService.register(request);
+        assertThrows(AlreadyTakenException.class, () -> userService.register(request));
     }
 
     @Test
     @DisplayName("Registration - Bad Request")
     void registerBadRequest() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("User", "password", null);
-        assertThrows(BadRequestException.class, () -> service.register(request));
+        assertThrows(BadRequestException.class, () -> userService.register(request));
     }
 
     @Test
     @DisplayName("Login Successful")
     void loginUser() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-        service.register(registerRequest);
+        userService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("User", "password");
-        LoginResult loginResult = service.login(loginRequest);
+        LoginResult loginResult = userService.login(loginRequest);
         assertNotNull(loginResult.authToken());
         assertEquals("User", loginResult.username());
     }
@@ -57,40 +66,43 @@ class UserServiceTest {
     @DisplayName("Login - Missing Information")
     void loginMissingPassword() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-        service.register(registerRequest);
+        userService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("User", null);
-        assertThrows(BadRequestException.class, () -> service.login(loginRequest));
+        assertThrows(BadRequestException.class, () -> userService.login(loginRequest));
     }
 
     @Test
     @DisplayName("Login - Bad Password")
     void loginBadPassword() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-        service.register(registerRequest);
+        userService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("User", "badPassword");
-        assertThrows(UnauthorizedException.class, () -> service.login(loginRequest));
+        assertThrows(UnauthorizedException.class, () -> userService.login(loginRequest));
     }
 
     @Test
     @DisplayName("Logout Successful")
     void logoutUser() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-        service.register(registerRequest);
+        userService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("User", "password");
-        LoginResult loginResult = service.login(loginRequest);
+        LoginResult loginResult = userService.login(loginRequest);
         LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
-        assertEquals(2, service.getAuthentications().size());
-        service.logout(logoutRequest);
-        assertEquals(1, service.getAuthentications().size());
+        int beforeLogout = countRowsInTable("authentications");
+        assertEquals(2, beforeLogout);
+        userService.logout(logoutRequest);
+        int afterLogout = countRowsInTable("authentications");
+        assertEquals(1, afterLogout);
     }
 
     @Test
     @DisplayName("Logout - Bad Authtoken")
     void logoutBadAuthtoken() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("User", "password", "User@chess.com");
-        service.register(registerRequest);
+        userService.register(registerRequest);
         LogoutRequest logoutRequest = new LogoutRequest("badAuthtoken");
-        assertEquals(1, service.getAuthentications().size());
-        assertThrows(UnauthorizedException.class, () -> service.logout(logoutRequest));
+        int numberOfAuths = countRowsInTable("authentications");
+        assertEquals(1, numberOfAuths);
+        assertThrows(UnauthorizedException.class, () -> userService.logout(logoutRequest));
     }
 }
