@@ -92,8 +92,16 @@ public class GameDatabase implements GameDAO {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
+        String truncateTableStatement = "TRUNCATE TABLE games";
+        try(var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(truncateTableStatement)) {
 
+                preparedStatement.executeUpdate();
+            }
+        }catch (SQLException ex) {
+            throw new DataAccessException("Failed to connect to database", ex);
+        }
     }
 
     @Override

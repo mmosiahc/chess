@@ -3,7 +3,6 @@ package dataaccess;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
-import model.UserData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -57,13 +56,13 @@ public class GameDatabaseTests {
 
     @Test
     @DisplayName("Clear - Successful")
-    void clearAllUserData() throws DataAccessException {
-        UserDatabase users = new UserDatabase();
-        UserData user = new UserData("testUser", "testPassword", "testEmail");
-        users.createUser(user);
-        users.clear();
-        int numberOfUsers = countRowsInTable("users");
-        assertEquals(0, numberOfUsers);
+    void clearAllGameData() throws DataAccessException {
+        GameDatabase games = new GameDatabase();
+        GameData gameData = new GameData(0, "testWhite", "testBlack", "testName", new ChessGame());
+        games.createGame(gameData);
+        games.clear();
+        int numberOfGames = countRowsInTable("games");
+        assertEquals(0, numberOfGames);
     }
 
     @Test
