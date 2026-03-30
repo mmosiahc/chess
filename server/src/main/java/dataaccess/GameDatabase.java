@@ -11,12 +11,31 @@ import java.util.Map;
 
 public class GameDatabase implements GameDAO {
     @Override
-    public GameData getGame(int gameID) throws BadRequestException {
-        return null;
+    public GameData getGame(int gameID) throws DataAccessException {
+        GameData game = null;
+        try(var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT id, white_username, black_username, game_name, game FROM games WHERE id = ?")) {
+                preparedStatement.setInt(1, gameID);
+                try (var rs = preparedStatement.executeQuery()) {
+                    if(rs.next()) {
+                        var id = rs.getInt("id");
+                        var whiteName = rs.getString("white_username");
+                        var blackName = rs.getString("black_username");
+                        var gameName = rs.getString("game_name");
+                        var chess = rs.getString("game");
+                        ChessGame chessGame = new Gson().fromJson(chess, ChessGame.class);
+                        game = new GameData(id, whiteName, blackName, gameName, chessGame);
+                    }
+                }
+            }
+        }catch (SQLException ex) {
+            throw new DataAccessException("Failed to connect to database", ex);
+        }
+        return game;
     }
 
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
+    public int createGame(GameData gameData) throws DataAccessException {
         String gameName = gameData.gameName();
         String whiteUsername = gameData.whiteUsername();
         String blackUsername = gameData.blackUsername();
@@ -31,6 +50,12 @@ public class GameDatabase implements GameDAO {
                 preparedStatement.setString(4, json);
 
                 preparedStatement.executeUpdate();
+                var rs = preparedStatement.getGeneratedKeys();
+                var id = 0;
+                if(rs.next()) {
+                    id = rs.getInt(1);
+                }
+                return id;
             }
         }catch (SQLException ex) {
             throw new DataAccessException("Failed to connect to database", ex);

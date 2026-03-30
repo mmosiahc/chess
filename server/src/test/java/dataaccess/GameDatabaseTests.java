@@ -8,54 +8,32 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GameDatabaseTests {
 
     @Test
-    @DisplayName("Get User - Successful")
-    void getExistingUser() throws DataAccessException {
-        UserData user;
-        String insertUserStatement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(insertUserStatement, Statement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setString(1, "Mike");
-                preparedStatement.setString(2, "password");
-                preparedStatement.setString(3, "mike@chess.com");
-
-                preparedStatement.executeUpdate();
-
-                UserDatabase users = new UserDatabase();
-                user = users.getUser( "Mike");
-            }
-        }catch (SQLException e) {
-            throw new DataAccessException("failed to connect");
-        }
-        assertEquals("Mike", user.username());
+    @DisplayName("Get Game - Successful")
+    void getExistingGame() throws DataAccessException {
+        GameDatabase games = new GameDatabase();
+        GameData gameData1 = new GameData(4, null, null, "wvb", new ChessGame());
+        GameData gameData2 = new GameData(1, "white", "black", "speed", new ChessGame());
+        int game1Id = games.createGame(gameData1);
+        int game2Id = games.createGame(gameData2);
+        gameData2 = games.getGame(game1Id);
+        gameData1 = games.getGame(game2Id);
+        assertEquals("wvb", gameData2.gameName());
+        assertEquals("speed", gameData1.gameName());
     }
 
     @Test
-    @DisplayName("Get User - username doesn't exist")
-    void getNonExistentUser() throws DataAccessException {
-        UserData user;
-        String insertUserStatement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(insertUserStatement, Statement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setString(1, "Mike");
-                preparedStatement.setString(2, "password");
-                preparedStatement.setString(3, "mike@chess.com");
-
-                preparedStatement.executeUpdate();
-
-                UserDatabase users = new UserDatabase();
-                user = users.getUser("username");
-            }
-        }catch (SQLException e) {
-            throw new DataAccessException("failed to connect");
-        }
-        assertNull(user);
+    @DisplayName("Get Game - ID Doesn't Exist")
+    void getNonExistentGame() throws DataAccessException {
+        GameDatabase games = new GameDatabase();
+        GameData gameData;
+        gameData = games.getGame(424);
+        assertNull(gameData);
     }
 
     @Test
