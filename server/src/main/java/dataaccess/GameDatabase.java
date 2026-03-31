@@ -116,7 +116,6 @@ public class GameDatabase implements GameDAO {
         String truncateTableStatement = "TRUNCATE TABLE games";
         try(var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(truncateTableStatement)) {
-
                 preparedStatement.executeUpdate();
             }
         }catch (SQLException ex) {

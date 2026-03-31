@@ -3,7 +3,6 @@ package dataaccess;
 import model.UserData;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 
 public class UserDatabase implements UserDAO {
@@ -41,7 +40,7 @@ public class UserDatabase implements UserDAO {
         String email = userData.email();
         String insertUserStatement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         try(var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(insertUserStatement, Statement.RETURN_GENERATED_KEYS)) {
+            try (var preparedStatement = conn.prepareStatement(insertUserStatement)) {
                 preparedStatement.setString(1, username);
                 preparedStatement.setString(2, password);
                 preparedStatement.setString(3, email);
