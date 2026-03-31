@@ -18,7 +18,7 @@ public class BaseHandler {
 
     static String getAuthHeaderObject(Context context) throws UnauthorizedException {
         String authToken = context.header("authorization");
-
+        //Check authtoken
         if (authToken == null || authToken.isEmpty()) {
             throw new UnauthorizedException();
         }
