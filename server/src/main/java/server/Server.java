@@ -1,10 +1,12 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.*;
+import dataaccess.AuthDatabase;
+import dataaccess.DataAccessException;
+import dataaccess.GameDatabase;
+import dataaccess.UserDatabase;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import model.GameData;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -52,12 +54,12 @@ public class Server {
         }else{
             context.status(e.getStatusCode());
         }
-        context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
+        context.json(new Gson().toJson(Map.of("message", "Errord: " + e.getMessage())));
     }
 
     private void exceptionHandler(Exception e, Context context) {
 //        e.printStackTrace();
-        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
+        var body = new Gson().toJson(Map.of("message", String.format("Errore: %s", e.getMessage())));
         context.status(500);
         context.json(body);
     }
