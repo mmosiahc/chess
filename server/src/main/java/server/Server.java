@@ -49,17 +49,13 @@ public class Server {
 
     private void dataAccessExceptionHandler(DataAccessException e, Context context) {
 //        e.printStackTrace();
-        if(e.getStatusCode() == 0) {
-            context.status(500);
-        }else{
-            context.status(e.getStatusCode());
-        }
-        context.json(new Gson().toJson(Map.of("message", "Errord: " + e.getMessage())));
+        int status = (e.getStatusCode() != 0) ? e.getStatusCode() : 500;
+        context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
     }
 
     private void exceptionHandler(Exception e, Context context) {
 //        e.printStackTrace();
-        var body = new Gson().toJson(Map.of("message", String.format("Errore: %s", e.getMessage())));
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         context.status(500);
         context.json(body);
     }
