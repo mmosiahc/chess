@@ -10,20 +10,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class GameDatabase extends BaseDatabase implements GameDAO {
-    public GameDatabase() throws DataAccessException {
-        // Create games table
-        String createGameTableStatement = """
-                CREATE TABLE IF NOT EXISTS games (
-                id INT NOT NULL AUTO_INCREMENT,
-                white_username VARCHAR(255) DEFAULT NULL,
-                black_username VARCHAR(255) DEFAULT NULL,
-                game_name VARCHAR(255) NOT NULL,
-                game longtext NOT NULL,
-                PRIMARY KEY (id)
-                )
-                """;
-        createTable(createGameTableStatement);
-    }
+//    public GameDatabase() throws DataAccessException {
+//        // Create games table
+//        String createGameTableStatement = """
+//                CREATE TABLE IF NOT EXISTS games (
+//                id INT NOT NULL AUTO_INCREMENT,
+//                white_username VARCHAR(255) DEFAULT NULL,
+//                black_username VARCHAR(255) DEFAULT NULL,
+//                game_name VARCHAR(255) NOT NULL,
+//                game longtext NOT NULL,
+//                PRIMARY KEY (id)
+//                )
+//                """;
+//        createTable(createGameTableStatement);
+//    }
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         GameData game = null;

@@ -7,18 +7,18 @@ import java.sql.Statement;
 
 public class AuthDatabase extends BaseDatabase implements AuthDAO {
 
-    public AuthDatabase() throws DataAccessException {
-        // Create authentications table
-        String createAuthTableStatement = """
-                CREATE TABLE IF NOT EXISTS authentications (
-                id INT NOT NULL AUTO_INCREMENT,
-                authtoken VARCHAR(255) NOT NULL,
-                username VARCHAR(255) NOT NULL,
-                PRIMARY KEY (id)
-                )
-                """;
-        createTable(createAuthTableStatement);
-    }
+//    public AuthDatabase() throws DataAccessException {
+//        // Create authentications table
+//        String createAuthTableStatement = """
+//                CREATE TABLE IF NOT EXISTS authentications (
+//                id INT NOT NULL AUTO_INCREMENT,
+//                authtoken VARCHAR(255) NOT NULL,
+//                username VARCHAR(255) NOT NULL,
+//                PRIMARY KEY (id)
+//                )
+//                """;
+//        createTable(createAuthTableStatement);
+//    }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {

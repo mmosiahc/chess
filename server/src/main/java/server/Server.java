@@ -1,10 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.AuthDatabase;
-import dataaccess.DataAccessException;
-import dataaccess.GameDatabase;
-import dataaccess.UserDatabase;
+import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import service.ClearService;
@@ -17,7 +14,7 @@ public class Server {
 
     private final Javalin javalin;
 
-    public Server() throws DataAccessException {
+    public Server() {
 
         AuthDatabase authentications = new AuthDatabase();
         UserDatabase users = new UserDatabase();
@@ -70,7 +67,8 @@ public class Server {
         exceptionHandler(new Exception(msg), context);
     }
 
-    public int run(int desiredPort) {
+    public int run(int desiredPort) throws DataAccessException {
+        DatabaseManager.configureDatabase();
         javalin.start(desiredPort);
         return javalin.port();
     }

@@ -1,6 +1,8 @@
 package dataaccess;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -49,6 +51,52 @@ public class DatabaseManager {
             return conn;
         } catch (SQLException ex) {
             throw new DataAccessException("failed to get connection", ex);
+        }
+    }
+
+    public static void createTable(String sqlStatement) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(sqlStatement)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to create table", ex);
+        }
+    }
+
+    static public void configureDatabase() throws DataAccessException {
+        createDatabase();
+        final String[] creatTableStatements = {
+                """
+                CREATE TABLE IF NOT EXISTS users (
+                id INT NOT NULL AUTO_INCREMENT,
+                username VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS authentications (
+                id INT NOT NULL AUTO_INCREMENT,
+                authtoken VARCHAR(255) NOT NULL,
+                username VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS games (
+                id INT NOT NULL AUTO_INCREMENT,
+                white_username VARCHAR(255) DEFAULT NULL,
+                black_username VARCHAR(255) DEFAULT NULL,
+                game_name VARCHAR(255) NOT NULL,
+                game longtext NOT NULL,
+                PRIMARY KEY (id)
+                )
+                """
+        };
+        for(String statement: creatTableStatements) {
+            createTable(statement);
         }
     }
 
