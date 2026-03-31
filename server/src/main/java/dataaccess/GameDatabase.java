@@ -8,9 +8,22 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
-public class GameDatabase implements GameDAO {
+public class GameDatabase extends BaseDatabase implements GameDAO {
+    public GameDatabase() throws DataAccessException {
+        // Create games table
+        String createGameTableStatement = """
+                CREATE TABLE IF NOT EXISTS games (
+                id INT NOT NULL AUTO_INCREMENT,
+                white_username VARCHAR(255) DEFAULT NULL,
+                black_username VARCHAR(255) DEFAULT NULL,
+                game_name VARCHAR(255) NOT NULL,
+                game longtext NOT NULL,
+                PRIMARY KEY (id)
+                )
+                """;
+        createTable(createGameTableStatement);
+    }
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         GameData game = null;
@@ -122,15 +135,5 @@ public class GameDatabase implements GameDAO {
         }catch (SQLException ex) {
             throw new DataAccessException("Failed to connect to database", ex);
         }
-    }
-
-    @Override
-    public Map<Integer, GameData> getGames() {
-        return null;
-    }
-
-    @Override
-    public String toString() {
-        return null;
     }
 }

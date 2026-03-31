@@ -16,6 +16,9 @@ class ClearServiceTest extends BaseDatabaseTest {
     private final UserDatabase users = new UserDatabase();
     private final GameDatabase games = new GameDatabase();
 
+    ClearServiceTest() throws DataAccessException {
+    }
+
     @BeforeEach
     void setup() {
         userService = new UserService(users, authentications);

@@ -4,11 +4,21 @@ import model.AuthData;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Map;
 
-public class AuthDatabase implements AuthDAO {
+public class AuthDatabase extends BaseDatabase implements AuthDAO {
 
-    public AuthDatabase() {}
+    public AuthDatabase() throws DataAccessException {
+        // Create authentications table
+        String createAuthTableStatement = """
+                CREATE TABLE IF NOT EXISTS authentications (
+                id INT NOT NULL AUTO_INCREMENT,
+                authtoken VARCHAR(255) NOT NULL,
+                username VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)
+                )
+                """;
+        createTable(createAuthTableStatement);
+    }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
@@ -72,15 +82,5 @@ public class AuthDatabase implements AuthDAO {
         }catch (SQLException ex) {
             throw new DataAccessException("Failed to connect to database", ex);
         }
-    }
-
-    @Override
-    public String toString() {
-        return null;
-    }
-
-    @Override
-    public Map<String, AuthData> getAuthentications() {
-        return null;
     }
 }

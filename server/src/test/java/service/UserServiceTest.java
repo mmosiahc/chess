@@ -13,7 +13,7 @@ class UserServiceTest extends BaseDatabaseTest {
     private ClearService clearService;
 
     @BeforeEach
-    void setup() {
+    void setup() throws DataAccessException {
         AuthDatabase authentications = new AuthDatabase();
         UserDatabase users = new UserDatabase();
         GameDatabase games = new GameDatabase();

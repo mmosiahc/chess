@@ -19,6 +19,9 @@ class GameServiceTest extends BaseDatabaseTest {
     private final GameDatabase games = new GameDatabase();
     private final GameService service = new GameService(games, authentications);
 
+    GameServiceTest() throws DataAccessException {
+    }
+
     @Test
     @DisplayName("List Games Successful")
     void listGames() throws DataAccessException {

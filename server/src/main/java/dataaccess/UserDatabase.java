@@ -3,16 +3,29 @@ package dataaccess;
 import model.UserData;
 
 import java.sql.SQLException;
-import java.util.Map;
 
-public class UserDatabase implements UserDAO {
+public class UserDatabase extends BaseDatabase implements UserDAO {
 
-    public UserDatabase() {}
+    public UserDatabase() throws DataAccessException {
+        // Create users table
+        String createUserTableStatement = """
+                CREATE TABLE IF NOT EXISTS users (
+                id INT NOT NULL AUTO_INCREMENT,
+                username VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)
+                )
+                """;
+
+        createTable(createUserTableStatement);
+    }
+
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
         UserData user = null;
-        try(var conn = DatabaseManager.getConnection()) {
+        try(var conn = dataaccess.DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM users WHERE username = ?")) {
                 preparedStatement.setString(1, username);
                 try (var rs = preparedStatement.executeQuery()) {
@@ -63,15 +76,5 @@ public class UserDatabase implements UserDAO {
         }catch (SQLException ex) {
             throw new DataAccessException("Failed to connect to database", ex);
         }
-    }
-
-    @Override
-    public Map<String, UserData> getUsers() {
-        return null;
-    }
-
-    @Override
-    public String toString() {
-        return null;
     }
 }

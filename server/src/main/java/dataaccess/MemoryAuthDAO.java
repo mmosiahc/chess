@@ -34,14 +34,4 @@ public class MemoryAuthDAO implements AuthDAO {
     public void clear() {
         authentications.clear();
     }
-
-    @Override
-    public String toString() {
-        return authentications.toString();
-    }
-
-    @Override
-    public Map<String, AuthData> getAuthentications() {
-        return authentications;
-    }
 }

@@ -17,7 +17,7 @@ public class Server {
 
     private final Javalin javalin;
 
-    public Server(){
+    public Server() throws DataAccessException {
 
         AuthDatabase authentications = new AuthDatabase();
         UserDatabase users = new UserDatabase();

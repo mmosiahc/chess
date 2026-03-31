@@ -10,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserDatabaseTests extends BaseDatabaseTest {
     private final UserDatabase users = new UserDatabase();
 
+    public UserDatabaseTests() throws DataAccessException {
+    }
+
     @AfterEach
     void tearDown() throws DataAccessException {
         users.clear();
