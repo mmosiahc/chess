@@ -46,7 +46,7 @@ public class GameService {
         AuthData authData = authentications.getAuth(token);
         if(authData == null) throw new UnauthorizedException();
 
-        GameData game = new GameData(generateID(), null, null, name, new ChessGame());
+        GameData game = new GameData(0, null, null, name, new ChessGame());
         int gameID = games.createGame(game);
         return new CreateGameResult(gameID);
     }

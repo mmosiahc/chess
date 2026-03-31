@@ -51,12 +51,13 @@ public class GameDatabase implements GameDAO {
                 preparedStatement.setString(4, json);
 
                 preparedStatement.executeUpdate();
-                var rs = preparedStatement.getGeneratedKeys();
-                var id = 0;
-                if(rs.next()) {
-                    id = rs.getInt(1);
+                try(var rs = preparedStatement.getGeneratedKeys()) {
+                    var id = 0;
+                    if(rs.next()) {
+                        id = rs.getInt(1);
+                    }
+                    return id;
                 }
-                return id;
             }
         }catch (SQLException ex) {
             throw new DataAccessException("Failed to connect to database", ex);
