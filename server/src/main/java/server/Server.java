@@ -18,6 +18,7 @@ public class Server {
     private final Javalin javalin;
 
     public Server(){
+
         AuthDatabase authentications = new AuthDatabase();
         UserDatabase users = new UserDatabase();
         GameDatabase games = new GameDatabase();
@@ -49,7 +50,11 @@ public class Server {
 
     private void dataAccessExceptionHandler(DataAccessException e, Context context) {
 //        e.printStackTrace();
-        int status = (e.getStatusCode() != 0) ? e.getStatusCode() : 500;
+        if(e.getStatusCode() == 0) {
+            context.status(500);
+        } else {
+            context.status(e.getStatusCode());
+        }
         context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
     }
 
