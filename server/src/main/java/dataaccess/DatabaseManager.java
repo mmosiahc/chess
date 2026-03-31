@@ -66,7 +66,7 @@ public class DatabaseManager {
 
     static public void configureDatabase() throws DataAccessException {
         createDatabase();
-        final String[] creatTableStatements = {
+        final String[] createTableStatements = {
                 """
                 CREATE TABLE IF NOT EXISTS users (
                 id INT NOT NULL AUTO_INCREMENT,
@@ -95,7 +95,7 @@ public class DatabaseManager {
                 )
                 """
         };
-        for(String statement: creatTableStatements) {
+        for(String statement: createTableStatements) {
             createTable(statement);
         }
     }

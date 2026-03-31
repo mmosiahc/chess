@@ -12,9 +12,13 @@ import java.util.Map;
 
 public class Server {
 
+
     private final Javalin javalin;
 
-    public Server() {
+    public Server() throws DataAccessException {
+
+        // Create chess database
+        DatabaseManager.configureDatabase();
 
         AuthDatabase authentications = new AuthDatabase();
         UserDatabase users = new UserDatabase();
@@ -67,8 +71,7 @@ public class Server {
         exceptionHandler(new Exception(msg), context);
     }
 
-    public int run(int desiredPort) throws DataAccessException {
-        DatabaseManager.configureDatabase();
+    public int run(int desiredPort) {
         javalin.start(desiredPort);
         return javalin.port();
     }
