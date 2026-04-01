@@ -18,7 +18,13 @@ public class Server {
     public Server() throws DataAccessException {
 
         // Create chess database
-        DatabaseManager.configureDatabase();
+        try {
+            // 1. Configure the DB
+            DatabaseManager.configureDatabase();
+        } catch (DataAccessException e) {
+            // If this fails, the server shouldn't start
+            throw new RuntimeException("Database setup failed: " + e.getMessage());
+        }
 
         AuthDatabase authentications = new AuthDatabase();
         UserDatabase users = new UserDatabase();
