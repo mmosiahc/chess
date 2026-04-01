@@ -15,7 +15,7 @@ public class Server {
 
     private final Javalin javalin;
 
-    public Server() throws DataAccessException {
+    public Server() {
 
         // Create chess database
         try {
