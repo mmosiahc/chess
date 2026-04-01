@@ -29,7 +29,7 @@ public class GameService {
             throw new BadRequestException();
         }
         AuthData authData = authentications.getAuth(token);
-        if(authData == null) throw new UnauthorizedException();
+        if(authData == null) {throw new UnauthorizedException();}
         var gamesList = games.listGames();
         return gamesList.stream()
                 .map(g -> new ListGamesResult(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()))
@@ -44,7 +44,7 @@ public class GameService {
             throw new BadRequestException();
         }
         AuthData authData = authentications.getAuth(token);
-        if(authData == null) throw new UnauthorizedException();
+        if(authData == null) {throw new UnauthorizedException();}
 
         GameData game = new GameData(0, null, null, name, new ChessGame());
         int gameID = games.createGame(game);
@@ -64,12 +64,12 @@ public class GameService {
 
         //Validate authToken and grab username from associated AuthData
         AuthData authData = authentications.getAuth(token);
-        if(authData == null) throw new UnauthorizedException();
+        if(authData == null) {throw new UnauthorizedException();}
         String username = authData.username();
 
         //Get requested GameData by id and determine status of teams
         GameData gameData = games.getGame(id);
-        if(gameData == null) throw new BadRequestException();
+        if(gameData == null) {throw new BadRequestException();}
 
         //Check if requested team is taken and assign username to appropriate team if not
         if(isTeamTaken(color, gameData)) {throw new AlreadyTakenException();}

@@ -4,23 +4,7 @@ import model.UserData;
 
 import java.sql.SQLException;
 
-public class UserDatabase extends BaseDatabase implements UserDAO {
-
-//    public UserDatabase() throws DataAccessException {
-//        // Create users table
-//        String createUserTableStatement = """
-//                CREATE TABLE IF NOT EXISTS users (
-//                id INT NOT NULL AUTO_INCREMENT,
-//                username VARCHAR(255) NOT NULL,
-//                password VARCHAR(255) NOT NULL,
-//                email VARCHAR(255) NOT NULL,
-//                PRIMARY KEY (id)
-//                )
-//                """;
-//
-//        createTable(createUserTableStatement);
-//    }
-
+public class UserDatabase implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
@@ -48,7 +32,7 @@ public class UserDatabase extends BaseDatabase implements UserDAO {
     public void createUser(UserData userData) throws DataAccessException {
         String username = userData.username();
         UserData user = getUser(username);
-        if(user != null)  throw new AlreadyTakenException();
+        if(user != null)  {throw new AlreadyTakenException();}
         String password = userData.password();
         String email = userData.email();
         String insertUserStatement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";

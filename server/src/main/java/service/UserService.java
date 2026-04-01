@@ -48,9 +48,9 @@ public class UserService {
         }
         UserData user;
         user = users.getUser(username);
-        if(user == null) throw new UnauthorizedException();
+        if(user == null) {throw new UnauthorizedException();}
         verifyUser(password, user.password());
-        if(!verifyUser(password, user.password())) throw new UnauthorizedException();
+        if(!verifyUser(password, user.password())) {throw new UnauthorizedException();}
 
         AuthData auth = new AuthData(generateToken(), username);
         authentications.createAuth(auth);
@@ -64,7 +64,7 @@ public class UserService {
             throw new BadRequestException();
         }
         AuthData authData = authentications.getAuth(authToken);
-        if(authData == null) throw new UnauthorizedException();
+        if(authData == null) {throw new UnauthorizedException();}
 
         authentications.deleteAuth(authToken);
     }

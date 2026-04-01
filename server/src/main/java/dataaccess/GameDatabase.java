@@ -9,26 +9,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class GameDatabase extends BaseDatabase implements GameDAO {
-//    public GameDatabase() throws DataAccessException {
-//        // Create games table
-//        String createGameTableStatement = """
-//                CREATE TABLE IF NOT EXISTS games (
-//                id INT NOT NULL AUTO_INCREMENT,
-//                white_username VARCHAR(255) DEFAULT NULL,
-//                black_username VARCHAR(255) DEFAULT NULL,
-//                game_name VARCHAR(255) NOT NULL,
-//                game longtext NOT NULL,
-//                PRIMARY KEY (id)
-//                )
-//                """;
-//        createTable(createGameTableStatement);
-//    }
+public class GameDatabase implements GameDAO {
+
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
+        String query = "SELECT id, white_username, black_username, game_name, game FROM games WHERE id = ?";
         GameData game = null;
         try(var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("SELECT id, white_username, black_username, game_name, game FROM games WHERE id = ?")) {
+            try (var preparedStatement = conn.prepareStatement(query)) {
                 preparedStatement.setInt(1, gameID);
                 try (var rs = preparedStatement.executeQuery()) {
                     if(rs.next()) {

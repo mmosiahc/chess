@@ -1,14 +1,16 @@
 package passoff.server;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
 import server.Server;
 
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -47,7 +49,7 @@ public class DatabaseTests {
     @Test
     @DisplayName("Persistence Test")
     @Order(1)
-    public void persistenceTest() throws DataAccessException {
+    public void persistenceTest() {
         int initialRowCount = getDatabaseRows();
 
         TestAuthResult regResult = serverFacade.register(TEST_USER);
