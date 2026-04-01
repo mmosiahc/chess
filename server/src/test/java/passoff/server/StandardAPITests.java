@@ -30,7 +30,12 @@ public class StandardAPITests {
 
     @BeforeAll
     public static void init() throws DataAccessException {
-        server = new Server();
+        try{
+            server = new Server();
+        }catch (Exception e) {
+            throw new DataAccessException("Couldn't construct server", e);
+        }
+
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
 
