@@ -6,6 +6,8 @@ import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import org.junit.jupiter.api.*;
 import server.Server;
+import service.LoginRequest;
+import service.LoginResult;
 import service.RegisterRequest;
 import service.RegisterResult;
 
@@ -59,5 +61,17 @@ public class ServerFacadeTests {
         RegisterRequest request = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(request);
         Assertions.assertThrows(AlreadyTakenException.class, () -> serverFacade.register(request));
+    }
+
+    @Test
+    @DisplayName("Login - Success")
+    public void LoginUser() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        serverFacade.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("testName", "testPassword");
+        LoginResult loginResult = serverFacade.login(loginRequest);
+        Assertions.assertNotNull(loginResult);
+        Assertions.assertEquals("testName", loginResult.username());
+        Assertions.assertNotNull(loginResult.authToken());
     }
 }
