@@ -1,17 +1,19 @@
 package client;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
 import service.*;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
 
 public class ServerFacade {
@@ -46,10 +48,16 @@ public class ServerFacade {
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public HashMap listGames(String token) throws Exception {
+    public Map<String, Collection<ListGamesResult>> listGames(String token) throws Exception {
         var request = buildRequest("GET", "/game", null, token);
         var response = sendRequest(request);
-        return handleResponse(response, HashMap.class);
+        return handleResponse(response, Map.class);
+    }
+
+    public void joinGame(JoinGameRequest joinGameRequest) throws Exception {
+        var request = buildRequest("PUT", "/game", joinGameRequest, joinGameRequest.authToken());
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String token) {
@@ -101,6 +109,11 @@ public class ServerFacade {
         }
 
         if (responseClass != null) {
+            if (Map.class.isAssignableFrom(responseClass)) {
+                Type type = new TypeToken<Map<String, Collection<ListGamesResult>>>() {
+                }.getType();
+                return new Gson().fromJson(response.body(), type);
+            }
             return new Gson().fromJson(response.body(), responseClass);
         }
 

@@ -1,11 +1,13 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import service.*;
 
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Map;
 
 
 public class ServerFacadeTests {
@@ -143,9 +145,14 @@ public class ServerFacadeTests {
         RegisterResult registerResult = serverFacade.register(registerRequest);
         CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
         serverFacade.createGame(createGameRequest);
-        HashMap games = serverFacade.listGames(registerResult.authToken());
-        System.out.println(games.toString());
+        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames(registerResult.authToken());
         Assertions.assertNotNull(games);
+        Collection<ListGamesResult> gamesList = games.get("games");
+        ListGamesResult game = gamesList.stream()
+                .filter(g -> g.gameName().equals("testGame"))
+                        .findFirst()
+                                .orElse(null);
+        Assertions.assertEquals("testGame", game.gameName());
     }
 
     @Test
@@ -156,5 +163,55 @@ public class ServerFacadeTests {
         CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
         serverFacade.createGame(createGameRequest);
         Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.listGames("badToken"));
+    }
+
+    @Test
+    @DisplayName("Join Game - Success")
+    public void joinGameAsWhite() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
+        serverFacade.createGame(createGameRequest);
+        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames(registerResult.authToken());
+        JoinGameRequest joinGameRequest = new JoinGameRequest(registerResult.authToken(), ChessGame.TeamColor.WHITE, 1);
+        serverFacade.joinGame(joinGameRequest);
+        games = serverFacade.listGames(registerResult.authToken());
+        Collection<ListGamesResult> gamesList = games.get("games");
+        ListGamesResult game = gamesList.stream()
+                .filter(g -> g.gameName().equals("testGame"))
+                .findFirst()
+                .orElse(null);
+        Assertions.assertEquals("testName", game.whiteUsername());
+    }
+
+    @Test
+    @DisplayName("Join Game - Occupied")
+    public void joinGameWhiteTaken() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
+        serverFacade.createGame(createGameRequest);
+        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames(registerResult.authToken());
+        JoinGameRequest joinGameRequest = new JoinGameRequest(registerResult.authToken(), ChessGame.TeamColor.WHITE, 1);
+        serverFacade.joinGame(joinGameRequest);
+        games = serverFacade.listGames(registerResult.authToken());
+        Collection<ListGamesResult> gamesList = games.get("games");
+        ListGamesResult game = gamesList.stream()
+                .filter(g -> g.gameName().equals("testGame"))
+                .findFirst()
+                .orElse(null);
+        Assertions.assertThrows(AlreadyTakenException.class, () -> serverFacade.joinGame(joinGameRequest));
+    }
+
+    @Test
+    @DisplayName("Join Game - No Team")
+    public void joinGameMissingInfo() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
+        serverFacade.createGame(createGameRequest);
+        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames(registerResult.authToken());
+        JoinGameRequest joinGameRequest = new JoinGameRequest(registerResult.authToken(), null, 1);
+        Assertions.assertThrows(BadRequestException.class, () -> serverFacade.joinGame(joinGameRequest));
     }
 }
