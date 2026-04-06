@@ -1,9 +1,6 @@
 package client;
 
-import dataaccess.AlreadyTakenException;
-import dataaccess.BadRequestException;
-import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
+import dataaccess.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import service.LoginRequest;
@@ -73,5 +70,32 @@ public class ServerFacadeTests {
         Assertions.assertNotNull(loginResult);
         Assertions.assertEquals("testName", loginResult.username());
         Assertions.assertNotNull(loginResult.authToken());
+    }
+
+    @Test
+    @DisplayName("Login - No Password")
+    public void LoginUserMissingPassword() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        serverFacade.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("testName", null);
+        Assertions.assertThrows(BadRequestException.class, () -> serverFacade.login(loginRequest));
+    }
+
+    @Test
+    @DisplayName("Login - Bad Password")
+    public void LoginUserBadPassword() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        serverFacade.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("testName", "badPassword");
+        Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.login(loginRequest));
+    }
+
+    @Test
+    @DisplayName("Login - Bad Username")
+    public void LoginUserBadUsername() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        serverFacade.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("badName", "testPassword");
+        Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.login(loginRequest));
     }
 }

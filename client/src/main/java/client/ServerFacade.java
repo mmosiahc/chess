@@ -36,6 +36,8 @@ public class ServerFacade {
         return handleResponse(response, LoginResult.class);
     }
 
+
+
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(url + path))
