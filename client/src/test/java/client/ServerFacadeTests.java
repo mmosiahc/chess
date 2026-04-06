@@ -25,7 +25,7 @@ public class ServerFacadeTests {
     }
 
     @BeforeEach
-    public void clear() throws DataAccessException {
+    public void wipeDatabase() throws DataAccessException {
         DatabaseManager.clearDatabase();
     }
 
@@ -213,5 +213,18 @@ public class ServerFacadeTests {
         Map<String, Collection<ListGamesResult>> games = serverFacade.listGames(registerResult.authToken());
         JoinGameRequest joinGameRequest = new JoinGameRequest(registerResult.authToken(), null, 1);
         Assertions.assertThrows(BadRequestException.class, () -> serverFacade.joinGame(joinGameRequest));
+    }
+
+    @Test
+    @DisplayName("Clear - Success")
+    public void clear() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
+        serverFacade.createGame(createGameRequest);
+        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames(registerResult.authToken());
+        Assertions.assertEquals(1, games.get("games").size());
+        serverFacade.clear();
+        Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.listGames(registerResult.authToken()));
     }
 }
