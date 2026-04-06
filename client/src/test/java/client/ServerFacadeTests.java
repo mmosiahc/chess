@@ -107,6 +107,14 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @DisplayName("Logout - Bad token")
+    public void LogoutUserUnauthorized() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult result = serverFacade.register(registerRequest);
+        Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.logout("badAuth"));
+    }
+
+    @Test
     @DisplayName("Create Game - Success")
     public void createNewGame() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
@@ -115,5 +123,14 @@ public class ServerFacadeTests {
         CreateGameResult createGameResult = serverFacade.createGame(createGameRequest);
         Assertions.assertNotNull(createGameResult);
         Assertions.assertEquals(1, createGameResult.gameID());
+    }
+
+    @Test
+    @DisplayName("Create Game - Missing Game Name")
+    public void createGameNoName() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), null);
+        Assertions.assertThrows(BadRequestException.class, () -> serverFacade.createGame(createGameRequest));
     }
 }
