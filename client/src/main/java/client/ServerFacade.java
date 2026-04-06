@@ -1,6 +1,10 @@
 package client;
 
 import com.google.gson.Gson;
+import dataaccess.AlreadyTakenException;
+import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
+import dataaccess.UnauthorizedException;
 import service.RegisterRequest;
 import service.RegisterResult;
 
@@ -8,6 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -49,15 +54,22 @@ public class ServerFacade {
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws DataAccessException {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw new Exception(String.format("Response body: %s", new Gson().fromJson(body, String.class)));
+                var bodyFromJson = new Gson().fromJson(body, Map.class);
+                String exceptionMessage = bodyFromJson.get("message").toString();
+                switch (exceptionMessage) {
+                    case "Error: bad request" -> throw new BadRequestException();
+                    case "Error: already taken" -> throw new AlreadyTakenException();
+                    case "Error: unauthorized" -> throw new UnauthorizedException();
+                    default -> throw new DataAccessException(exceptionMessage);
+                }
             }
 
-            throw new Exception("other failure: " + response.statusCode());
+            throw new DataAccessException("other failure: " + response.statusCode());
         }
 
         if (responseClass != null) {

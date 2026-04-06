@@ -1,7 +1,13 @@
 package client;
 
+import dataaccess.AlreadyTakenException;
+import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import org.junit.jupiter.api.*;
 import server.Server;
+import service.RegisterRequest;
+import service.RegisterResult;
 
 
 public class ServerFacadeTests {
@@ -18,6 +24,11 @@ public class ServerFacadeTests {
         serverFacade = new ServerFacade(url);
     }
 
+    @BeforeEach
+    public void clear() throws DataAccessException {
+        DatabaseManager.clearDatabase();
+    }
+
     @AfterAll
     static void stopServer() {
         server.stop();
@@ -25,8 +36,28 @@ public class ServerFacadeTests {
 
 
     @Test
-    public void sampleTest() {
-        Assertions.assertTrue(true);
+    @DisplayName("Register - Success")
+    public void registerNewUser() throws Exception {
+        RegisterRequest request = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult result = serverFacade.register(request);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("testName", result.username());
+        Assertions.assertNotNull(result.authToken());
     }
 
+    @Test
+    @DisplayName("Register - Missing Email")
+    public void registerNoEmail() {
+        RegisterRequest request = new RegisterRequest("testName", "testPassword", null);
+        Assertions.assertThrows(BadRequestException.class, () -> serverFacade.register(request));
+    }
+
+
+    @Test
+    @DisplayName("Register - Register Existing User")
+    public void registerUserAlreadyExists() throws Exception {
+        RegisterRequest request = new RegisterRequest("testName", "testPassword", "testEmail");
+        serverFacade.register(request);
+        Assertions.assertThrows(AlreadyTakenException.class, () -> serverFacade.register(request));
+    }
 }

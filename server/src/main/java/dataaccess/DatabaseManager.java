@@ -54,7 +54,7 @@ public class DatabaseManager {
         }
     }
 
-    public static void createTable(String sqlStatement) throws DataAccessException {
+    public static void executeStatement(String sqlStatement) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(sqlStatement)) {
                 preparedStatement.executeUpdate();
@@ -96,7 +96,24 @@ public class DatabaseManager {
                 """
         };
         for(String statement: createTableStatements) {
-            createTable(statement);
+            executeStatement(statement);
+        }
+    }
+
+    public static void clearDatabase() throws DataAccessException {
+        final String[] clearTableStatements = {
+                """
+                TRUNCATE TABLE authentications
+                """,
+                """
+                TRUNCATE TABLE users
+                """,
+                """
+                TRUNCATE TABLE games
+                """
+        };
+        for(String statement: clearTableStatements) {
+            executeStatement(statement);
         }
     }
 
