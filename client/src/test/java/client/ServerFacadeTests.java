@@ -3,10 +3,7 @@ package client;
 import dataaccess.*;
 import org.junit.jupiter.api.*;
 import server.Server;
-import service.LoginRequest;
-import service.LoginResult;
-import service.RegisterRequest;
-import service.RegisterResult;
+import service.*;
 
 
 public class ServerFacadeTests {
@@ -97,5 +94,26 @@ public class ServerFacadeTests {
         serverFacade.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("badName", "testPassword");
         Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.login(loginRequest));
+    }
+
+    @Test
+    @DisplayName("Logout - Success")
+    public void LogoutUser() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult result = serverFacade.register(registerRequest);
+        serverFacade.logout(result.authToken());
+        CreateGameRequest createGameRequest = new CreateGameRequest(result.authToken(), "testGame");
+        Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.createGame(createGameRequest));
+    }
+
+    @Test
+    @DisplayName("Create Game - Success")
+    public void createNewGame() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
+        CreateGameResult createGameResult = serverFacade.createGame(createGameRequest);
+        Assertions.assertNotNull(createGameResult);
+        Assertions.assertEquals(1, createGameResult.gameID());
     }
 }

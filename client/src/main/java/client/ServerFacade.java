@@ -5,10 +5,7 @@ import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
-import service.LoginRequest;
-import service.LoginResult;
-import service.RegisterRequest;
-import service.RegisterResult;
+import service.*;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -25,25 +22,38 @@ public class ServerFacade {
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws Exception {
-        var request = buildRequest("POST", "/user", registerRequest);
+        var request = buildRequest("POST", "/user", registerRequest, null);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
 
     public LoginResult login(LoginRequest loginRequest) throws Exception {
-        var request = buildRequest("POST", "/session", loginRequest);
+        var request = buildRequest("POST", "/session", loginRequest, null);
         var response = sendRequest(request);
         return handleResponse(response, LoginResult.class);
     }
 
+    public void logout(String token) throws Exception {
+        var request = buildRequest("DELETE", "/session", null, token);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
 
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws Exception {
+        var request = buildRequest("POST", "/game", createGameRequest, createGameRequest.authToken());
+        var response = sendRequest(request);
+        return handleResponse(response, CreateGameResult.class);
+    }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    private HttpRequest buildRequest(String method, String path, Object body, String token) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(url + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-type", "application/json");
+        }
+        if (token != null) {
+            request.setHeader("authorization", token);
         }
         return request.build();
     }
@@ -55,6 +65,7 @@ public class ServerFacade {
             return HttpRequest.BodyPublishers.noBody();
         }
     }
+
 
     private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
         try {
