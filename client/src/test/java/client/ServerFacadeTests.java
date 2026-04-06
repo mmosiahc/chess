@@ -5,6 +5,8 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import service.*;
 
+import java.util.HashMap;
+
 
 public class ServerFacadeTests {
 
@@ -132,5 +134,27 @@ public class ServerFacadeTests {
         RegisterResult registerResult = serverFacade.register(registerRequest);
         CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), null);
         Assertions.assertThrows(BadRequestException.class, () -> serverFacade.createGame(createGameRequest));
+    }
+
+    @Test
+    @DisplayName("List Games - Success")
+    public void listAllGames() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
+        serverFacade.createGame(createGameRequest);
+        HashMap games = serverFacade.listGames(registerResult.authToken());
+        System.out.println(games.toString());
+        Assertions.assertNotNull(games);
+    }
+
+    @Test
+    @DisplayName("List Games - Unauthorized")
+    public void listAllGamesBadToken() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
+        RegisterResult registerResult = serverFacade.register(registerRequest);
+        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "testGame");
+        serverFacade.createGame(createGameRequest);
+        Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.listGames("badToken"));
     }
 }

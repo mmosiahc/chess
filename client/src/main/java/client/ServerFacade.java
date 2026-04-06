@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ServerFacade {
@@ -43,6 +44,12 @@ public class ServerFacade {
         var request = buildRequest("POST", "/game", createGameRequest, createGameRequest.authToken());
         var response = sendRequest(request);
         return handleResponse(response, CreateGameResult.class);
+    }
+
+    public HashMap listGames(String token) throws Exception {
+        var request = buildRequest("GET", "/game", null, token);
+        var response = sendRequest(request);
+        return handleResponse(response, HashMap.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String token) {
