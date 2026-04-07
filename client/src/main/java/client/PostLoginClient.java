@@ -10,12 +10,13 @@ import java.util.Map;
 
 public class PostLoginClient implements ChessClient{
     private final ServerFacade facade;
-    private State state = State.LOGGED_IN;
+    private final Repl repl;
     private HashMap<Integer, Integer> gamesList = new HashMap<>();
     private int gamesListIndex = 1;
 
-    public PostLoginClient(ServerFacade facade) throws Exception {
+    public PostLoginClient(ServerFacade facade, Repl repl) {
         this.facade = facade;
+        this.repl = repl;
         initializeGamesList();
     }
 
@@ -34,27 +35,37 @@ public class PostLoginClient implements ChessClient{
     }
 
     public String eval(String input) {
-
         try {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "create" -> create(params);
-                case "list" -> list();
-                case "join" -> join(params);
-                case "observe" -> observe(params);
-                case "logout" -> logout(params);
-                case "quit" -> "quit";
-                default -> help(cmd);
-            };
+            if(cmd.startsWith("-")) {
+                return switch (cmd) {
+                    case "-c" -> create(params);
+                    case "-l" -> list();
+                    case "-j" -> join(params);
+                    case "-o" -> observe(params);
+                    case "-lo" -> logout();
+                    case "-q" -> "quit";
+                    default -> help(cmd);
+                };
+            }else {
+                return switch (cmd) {
+                    case "create" -> create(params);
+                    case "list" -> list();
+                    case "join" -> join(params);
+                    case "observe" -> observe(params);
+                    case "logout" -> logout();
+                    case "quit" -> "quit";
+                    default -> help(cmd);
+                };
+            }
         } catch (Exception ex) {
             return ex.getMessage();
         }
     }
 
-    public String create(String... params) throws Exception {
-        assertLoggedIn();
+    public String create(String... params) {
         if(params.length != 1) {
             return "Expected <game_name>\n";
         }
@@ -67,13 +78,10 @@ public class PostLoginClient implements ChessClient{
         }
     }
 
-    public String list() throws Exception {
-        assertLoggedIn();
+    public String list() {
         StringBuilder sb = new StringBuilder();
-        String header = String.format("%-3s | %-15s | %-10s | %-10s |%n", "ID", "Name", "White", "Black");
-        sb.append(header);
-        String divider = "----+-----------------+------------+------------+\n";
-        sb.append(divider);
+        sb.append(String.format("%-3s | %-15s |%-11s | %s%n", "ID", "Name", "White", "Black"));
+        sb.append("-".repeat(48)).append("\n");
         try {
             Map<String, Collection<ListGamesResult>> games = facade.listGames();
             Collection<ListGamesResult> results = games.get("games");
@@ -85,10 +93,9 @@ public class PostLoginClient implements ChessClient{
                 String black = result.blackUsername();
                 if(black == null) {black = "empty";}
                 String name = result.gameName();
-                String line = String.format("%-2s | %-15s | %-10s | %-10s |%n",
+                String line = String.format("%-2s | %-15s | %-10s | %-10s%n",
                         listIndex, name, white, black);
                 sb.append(line);
-                sb.append(divider);
             }
             return sb.toString();
         } catch (Exception e) {
@@ -96,10 +103,9 @@ public class PostLoginClient implements ChessClient{
         }
     }
 
-    public String join(String... params) throws Exception {
-        assertLoggedIn();
+    public String join(String... params) {
         if(params.length != 2) {
-            return "Expected <ID> <WHITE|BLACK>\n";
+            return "Expected <game_id> <white|black>\n";
         }
         int id;
         ChessGame.TeamColor teamColor;
@@ -113,14 +119,19 @@ public class PostLoginClient implements ChessClient{
         } catch (IllegalArgumentException | NullPointerException e) {
             return String.format("Invalid team color selected \"" + params[1] + ".\"\n");
         }
-        Map<String, Collection<ListGamesResult>> games = facade.listGames();
-        Collection<ListGamesResult> results = games.get("games");
         String gameName = "";
-        for(ListGamesResult result : results) {
-            if(result.gameID() == id) {
-                gameName = result.gameName();
+        try{
+            Map<String, Collection<ListGamesResult>> games = facade.listGames();
+            Collection<ListGamesResult> results = games.get("games");
+            for(ListGamesResult result : results) {
+                if(result.gameID() == id) {
+                    gameName = result.gameName();
+                }
             }
+        } catch (Exception e) {
+            return e.getMessage();
         }
+
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
             facade.joinGame(request);
@@ -131,26 +142,39 @@ public class PostLoginClient implements ChessClient{
     }
 
     public String observe(String... params) {
-        if(params.length != 2) {
-            return "Expected <username> <password>\n";
+        if(params.length != 1) {
+            return "Expected <game_id>\n";
+        }
+        int id;
+        try {
+            id = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            return String.format("%s wasn't a valid number.\n", params[0]);
+        }
+        String gameName = "";
+        try{
+            Map<String, Collection<ListGamesResult>> games = facade.listGames();
+            Collection<ListGamesResult> results = games.get("games");
+            for(ListGamesResult result : results) {
+                if(result.gameID() == id) {
+                    gameName = result.gameName();
+                }
+            }
+        } catch (Exception e) {
+            return e.getMessage();
         }
         try {
-            LoginRequest request = new LoginRequest(params[0], params[1]);
-            LoginResult result = facade.login(request);
-            return String.format("You signed in as %s\nYour authtoken is: %s\n", result.username(), result.authToken());
+            return String.format("You joined \"" + gameName + "\" as an %s\n", "observer.");
         } catch (Exception e) {
             return e.getMessage();
         }
     }
 
-    public String logout(String... params) {
-        if(params.length != 2) {
-            return "Expected <username> <password>\n";
-        }
+    public String logout() {
         try {
-            LoginRequest request = new LoginRequest(params[0], params[1]);
-            LoginResult result = facade.login(request);
-            return String.format("You signed in as %s\nYour authtoken is: %s\n", result.username(), result.authToken());
+            facade.logout();
+            repl.setState(new PreLoginClient(facade, repl));
+            return "Signed out.\n";
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -158,35 +182,25 @@ public class PostLoginClient implements ChessClient{
 
 
     public String help(String failedCommand) {
-        if(failedCommand.equals("help")) {
-            return """
-                
-                create <GAME_NAME> - to create a game
-                list - to list all games
-                join <GAME_ID> <WHITE|BLACK> - to join game as color
-                observe <GAME_ID> - to watch game
-                logout - when finished
-                quit - to exit chess application
-                help - to show options
-                """;
-        }
-        return """
-                
-                create <GAME_NAME> - to create a game
-                list - to list all games
-                join <GAME_ID> <WHITE|BLACK> - to join game as color
-                observe <GAME_ID> - to watch game
-                logout - when finished
-                quit - to exit chess application
-                help - to show options
-                
-                """ + "Expected <command> got \"" + failedCommand + "\"\n";
-    }
+        StringBuilder sb = new StringBuilder();
 
-    private void assertLoggedIn() throws Exception {
-        if(state == State.LOGGED_OUT) {
-            throw new Exception("You must sign in");
+        sb.append(String.format("%-35s | %s%n", "Command", "Description"));
+        sb.append("-".repeat(55)).append("\n");
+
+        sb.append(String.format("%-35s | %s%n", "create <GAME_NAME> (-c)", "Create a new game"));
+        sb.append(String.format("%-35s | %s%n", "list (-l)", "List all current games"));
+        sb.append(String.format("%-35s | %s%n", "join <GAME_ID> [WHITE|BLACK] (-j)", "Join a game as a player"));
+        sb.append(String.format("%-35s | %s%n", "observe <GAME_ID> (-o)", "Watch a game as a spectator"));
+        sb.append(String.format("%-35s | %s%n", "logout (-lo)", "Log out of your account"));
+        sb.append(String.format("%-35s | %s%n", "quit (-q)", "Exit the application"));
+        sb.append(String.format("%-35s | %s%n", "help (-h)", "Show these options again"));
+
+        if(failedCommand.equalsIgnoreCase("help") || failedCommand.equalsIgnoreCase("-h")) {
+            return sb.toString();
         }
+        sb.append("\nExpected <Command> got \"" + failedCommand + "\"\n");
+
+        return sb.toString();
     }
 
     private int generateIndex() {
