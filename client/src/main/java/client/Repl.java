@@ -49,6 +49,10 @@ public class Repl {
     }
 
     void setUsername(String result) {
-        this.username = result.substring("You signed in as ".length());
+        String prefix = "You signed in as ";
+        String suffix = "\n";
+        int start = result.indexOf(prefix) + prefix.length();
+        int end = result.indexOf(suffix);
+        this.username = result.substring(start, end);
     }
 }

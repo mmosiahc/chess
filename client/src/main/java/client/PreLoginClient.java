@@ -24,7 +24,7 @@ public class PreLoginClient implements ChessClient{
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "quit" -> "quit";
-                default -> help();
+                default -> help(cmd);
             };
         } catch (Exception ex) {
             return ex.getMessage();
@@ -57,14 +57,24 @@ public class PreLoginClient implements ChessClient{
         }
     }
 
-    public String help() {
-        return """
+    public String help(String failedCommand) {
+        if(failedCommand.equals("help")) {
+            return """
                 
                 register <USERNAME> <PASSWORD> <EMAIL> - to create account
                 login <USERNAME> <PASSWORD> - to play chess
                 quit - to exit this chess application
                 help - to show options
                 """;
+        }
+        return """
+                
+                register <USERNAME> <PASSWORD> <EMAIL> - to create account
+                login <USERNAME> <PASSWORD> - to play chess
+                quit - to exit this chess application
+                help - to show options
+                
+                """ + "Expected <command> got \"" + failedCommand + "\"\n";
     }
 
 }
