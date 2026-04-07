@@ -1,11 +1,13 @@
 package client;
 
+import java.util.Scanner;
+
 public class Repl {
 
     private String username = null;
     private final ServerFacade facade;
-    private State state = State.SIGNEDOUT;
-    private final ChessClient client;
+    private State state = State.LOGGED_OUT;
+    private ChessClient client;
 
     public Repl(String serverUrl) {
         this.facade = new ServerFacade(serverUrl);
@@ -13,7 +15,44 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("♕ 240 Chess Client");
-        System.out.print(client.help());
+        System.out.println("♕ 240 Chess Client. Type \"help\" to get started\n");
+        System.out.print(printPrompt(state));
+
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while(!result.equals("quit")) {
+            String line = scanner.nextLine();
+
+            try {
+                result = client.eval(line);
+                if(result.startsWith("You signed in")) {
+                    state = State.LOGGED_IN;
+                    setUsername(result);
+//                  client = new PostLoginClient(facade);
+                }
+                System.out.print(result);
+                System.out.println();
+                System.out.print(printPrompt(state));
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(msg);
+            }
+        }
+        System.out.println();
+    }
+
+    String printPrompt(State state) {
+        if(state == State.LOGGED_IN || state == State.IN_GAME) {
+            return "[" + username + "] >>> ";
+        }
+        return "[" + state.toString() + "] >>> ";
+    }
+
+    void setUsername(String result) {
+        String prefix = "You signed in as ";
+        String suffix = "\nYour authtoken is: ";
+        int start = result.indexOf(prefix) + prefix.length();
+        int end = result.indexOf(suffix);
+        this.username = result.substring(start, end);
     }
 }

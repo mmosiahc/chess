@@ -24,10 +24,6 @@ public class ServerFacade {
         this.url = url;
     }
 
-    public ServerFacade() {
-
-    }
-
     public RegisterResult register(RegisterRequest registerRequest) throws Exception {
         var request = buildRequest("POST", "/user", registerRequest, null);
         var response = sendRequest(request);
