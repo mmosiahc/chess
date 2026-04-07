@@ -1,14 +1,16 @@
 package client;
 
+import service.LoginRequest;
+import service.LoginResult;
 import service.RegisterRequest;
 import service.RegisterResult;
 
 import java.util.Arrays;
 
-public class PreloginClient implements ChessClient{
+public class PreLoginClient implements ChessClient{
     private final ServerFacade facade;
 
-    public PreloginClient(ServerFacade facade) {
+    public PreLoginClient(ServerFacade facade) {
         this.facade = facade;
     }
 
@@ -20,7 +22,7 @@ public class PreloginClient implements ChessClient{
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "register" -> register(params);
-//                case "login" -> login(params);
+                case "login" -> login(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -36,7 +38,20 @@ public class PreloginClient implements ChessClient{
         try {
             RegisterRequest request = new RegisterRequest(params[0], params[1], params[2]);
             RegisterResult result = facade.register(request);
-            return String.format("You signed in as %s\nYour authtoken is: %s\n", result.username(), result.authToken());
+            return String.format("You signed in as %s\n", result.username());
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    public String login(String... params) {
+        if(params.length != 2) {
+            return "Expected <username> <password>\n";
+        }
+        try {
+            LoginRequest request = new LoginRequest(params[0], params[1]);
+            LoginResult result = facade.login(request);
+            return String.format("You signed in as %s\n", result.username());
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -51,4 +66,5 @@ public class PreloginClient implements ChessClient{
                 help - to show options
                 """;
     }
+
 }

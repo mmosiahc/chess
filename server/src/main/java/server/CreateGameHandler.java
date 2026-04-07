@@ -15,7 +15,7 @@ public class CreateGameHandler extends BaseHandler{
         this.service = service;
     }
 
-    void createGame(Context ctx) throws DataAccessException, RuntimeException {
+    void createGame(Context ctx) throws DataAccessException {
         String token = getAuthHeaderObject(ctx);
         CreateGameBody body = getBodyObject(ctx, CreateGameBody.class);
         CreateGameRequest request = new CreateGameRequest(token, body.gameName());

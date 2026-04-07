@@ -19,6 +19,7 @@ import java.util.Map;
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String url;
+    private String token;
 
     public ServerFacade(String url) {
         this.url = url;
@@ -27,35 +28,43 @@ public class ServerFacade {
     public RegisterResult register(RegisterRequest registerRequest) throws Exception {
         var request = buildRequest("POST", "/user", registerRequest, null);
         var response = sendRequest(request);
-        return handleResponse(response, RegisterResult.class);
+        RegisterResult result = handleResponse(response, RegisterResult.class);
+        assert result != null;
+        token = result.authToken();
+        return result;
     }
 
     public LoginResult login(LoginRequest loginRequest) throws Exception {
         var request = buildRequest("POST", "/session", loginRequest, null);
         var response = sendRequest(request);
-        return handleResponse(response, LoginResult.class);
+        LoginResult result = handleResponse(response, LoginResult.class);
+        assert result != null;
+        token = result.authToken();
+        return result;
     }
 
-    public void logout(String token) throws Exception {
+    public void logout() throws Exception {
         var request = buildRequest("DELETE", "/session", null, token);
         var response = sendRequest(request);
         handleResponse(response, null);
+        token = null;
     }
 
-    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws Exception {
-        var request = buildRequest("POST", "/game", createGameRequest, createGameRequest.authToken());
+    public CreateGameResult createGame(String gameName) throws Exception {
+        CreateGameBody body = new CreateGameBody(gameName);
+        var request = buildRequest("POST", "/game", body, token);
         var response = sendRequest(request);
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public Map<String, Collection<ListGamesResult>> listGames(String token) throws Exception {
+    public Map<String, Collection<ListGamesResult>> listGames() throws Exception {
         var request = buildRequest("GET", "/game", null, token);
         var response = sendRequest(request);
         return handleResponse(response, Map.class);
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest) throws Exception {
-        var request = buildRequest("PUT", "/game", joinGameRequest, joinGameRequest.authToken());
+    public void joinGame(JoinGameBody body) throws Exception {
+        var request = buildRequest("PUT", "/game", body, token);
         var response = sendRequest(request);
         handleResponse(response, null);
     }
@@ -128,6 +137,10 @@ public class ServerFacade {
 
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
+    }
+
+    public void setToken(String testToken) {
+        token = testToken;
     }
 
 }

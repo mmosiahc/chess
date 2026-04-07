@@ -1,16 +1,17 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.BadRequestException;
 import dataaccess.UnauthorizedException;
 import io.javalin.http.Context;
 
 public class BaseHandler {
 
-    static <T> T getBodyObject(Context context, Class<T> tClass) throws RuntimeException{
+    static <T> T getBodyObject(Context context, Class<T> tClass) throws BadRequestException {
         var bodyObject = new Gson().fromJson(context.body(), tClass);
 
         if (bodyObject == null) {
-            throw new RuntimeException("missing required body");
+            throw new BadRequestException();
         }
 
         return bodyObject;

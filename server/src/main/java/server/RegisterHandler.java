@@ -14,7 +14,7 @@ public class RegisterHandler extends BaseHandler{
         this.service = service;
     }
 
-    void register(Context ctx) throws DataAccessException, RuntimeException {
+    void register(Context ctx) throws DataAccessException {
         RegisterRequest request = getBodyObject(ctx, RegisterRequest.class);
         RegisterResult result = service.register(request);
         String json = new Gson().toJson(result);

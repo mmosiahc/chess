@@ -15,7 +15,7 @@ public class LogoutHandler extends BaseHandler{
         this.service = service;
     }
 
-    void logout(Context ctx) throws DataAccessException, RuntimeException {
+    void logout(Context ctx) throws DataAccessException {
         String token = getAuthHeaderObject(ctx);
         LogoutRequest request = new LogoutRequest(token);
         service.logout(request);

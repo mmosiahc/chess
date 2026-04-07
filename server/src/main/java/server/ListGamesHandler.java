@@ -17,7 +17,7 @@ public class ListGamesHandler extends BaseHandler{
         this.service = service;
     }
 
-    void listGames(Context ctx) throws DataAccessException, RuntimeException {
+    void listGames(Context ctx) throws DataAccessException {
         String token = getAuthHeaderObject(ctx);
         ListGamesRequest request = new ListGamesRequest(token);
         Collection<ListGamesResult> results = service.listGames(request);

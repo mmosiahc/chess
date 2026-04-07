@@ -14,7 +14,7 @@ public class LoginHandler extends BaseHandler{
         this.service = service;
     }
 
-    void login(Context ctx) throws DataAccessException, RuntimeException {
+    void login(Context ctx) throws DataAccessException {
         LoginRequest request = getBodyObject(ctx, LoginRequest.class);
         LoginResult result = service.login(request);
         String json = new Gson().toJson(result);

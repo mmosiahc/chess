@@ -11,7 +11,7 @@ public class Repl {
 
     public Repl(String serverUrl) {
         this.facade = new ServerFacade(serverUrl);
-        this.client = new PreloginClient(facade);
+        this.client = new PreLoginClient(facade);
     }
 
     public void run() {
@@ -28,7 +28,7 @@ public class Repl {
                 if(result.startsWith("You signed in")) {
                     state = State.LOGGED_IN;
                     setUsername(result);
-//                  client = new PostLoginClient(facade);
+                    client = new PostLoginClient(facade);
                 }
                 System.out.print(result);
                 System.out.println();
@@ -49,10 +49,6 @@ public class Repl {
     }
 
     void setUsername(String result) {
-        String prefix = "You signed in as ";
-        String suffix = "\nYour authtoken is: ";
-        int start = result.indexOf(prefix) + prefix.length();
-        int end = result.indexOf(suffix);
-        this.username = result.substring(start, end);
+        this.username = result.substring("You signed in as ".length());
     }
 }
