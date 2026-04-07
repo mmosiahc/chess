@@ -1,9 +1,7 @@
 package client;
 
-import service.CreateGameResult;
-import service.ListGamesResult;
-import service.LoginRequest;
-import service.LoginResult;
+import chess.ChessGame;
+import service.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,13 +19,18 @@ public class PostLoginClient implements ChessClient{
         initializeGamesList();
     }
 
-    private void initializeGamesList() throws Exception {
-        Map<String, Collection<ListGamesResult>> games = facade.listGames();
-        Collection<ListGamesResult> results = games.get("games");
-        for(ListGamesResult result : results) {
-            int id = result.gameID();
-            gamesList.put(id, generateIndex());
+    private void initializeGamesList() {
+        try {
+            Map<String, Collection<ListGamesResult>> games = facade.listGames();
+            Collection<ListGamesResult> results = games.get("games");
+            for(ListGamesResult result : results) {
+                int id = result.gameID();
+                gamesList.put(id, generateIndex());
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
+
     }
 
     public String eval(String input) {
@@ -93,14 +96,35 @@ public class PostLoginClient implements ChessClient{
         }
     }
 
-    public String join(String... params) {
+    public String join(String... params) throws Exception {
+        assertLoggedIn();
         if(params.length != 2) {
-            return "Expected <username> <password>\n";
+            return "Expected <ID> <WHITE|BLACK>\n";
+        }
+        int id;
+        ChessGame.TeamColor teamColor;
+        try {
+            id = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            return String.format("%s wasn't a valid number.\n", params[0]);
         }
         try {
-            LoginRequest request = new LoginRequest(params[0], params[1]);
-            LoginResult result = facade.login(request);
-            return String.format("You signed in as %s\nYour authtoken is: %s\n", result.username(), result.authToken());
+            teamColor = ChessGame.TeamColor.valueOf(params[1].trim().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return String.format("Invalid team color selected \"" + params[1] + ".\"\n");
+        }
+        Map<String, Collection<ListGamesResult>> games = facade.listGames();
+        Collection<ListGamesResult> results = games.get("games");
+        String gameName = "";
+        for(ListGamesResult result : results) {
+            if(result.gameID() == id) {
+                gameName = result.gameName();
+            }
+        }
+        try {
+            JoinGameBody request = new JoinGameBody(teamColor, id);
+            facade.joinGame(request);
+            return String.format("You joined \"" + gameName + "\" as %s\n", teamColor);
         } catch (Exception e) {
             return e.getMessage();
         }
