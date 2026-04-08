@@ -33,57 +33,43 @@ public class DrawChessBoard {
     }
 
     private static void printBoardBlack(PrintStream out) {
+        boolean isWhitePerspective = false;
         for(int i = 0; i < ROWS; i++) {
             if(i == 0 || i == ROWS - 1) {
                 printHeaderAndFooterBlack(out);
             } else {
                 if(i == 1) {
-                    printRankORFile(out, String.valueOf(i));
-                    printBoardLineWhiteFirstWithPieces(out, whitePieces);
-                    printRankORFile(out, String.valueOf(i));
-                    printLine(out);
+                    printRowOnBoardWithPieces(out, i, "white", whitePieces);
                 } else if (i == 2) {
-                    printRankORFile(out, String.valueOf(i));
-                    printBoardLineBlackFirstWithPieces(out, whitePawns);
-                    printRankORFile(out, String.valueOf(i));
-                    printLine(out);
+                    printRowOnBoardWithPieces(out, i, "black", whitePawns);
                 } else if (i == 7) {
-                    printRankORFile(out, String.valueOf(i));
-                    printBoardLineWhiteFirstWithPieces(out, blackPawns);
-                    printRankORFile(out, String.valueOf(i));
-                    printLine(out);
+                    printRowOnBoardWithPieces(out, i, "white", blackPawns);
                 } else if (i == 8) {
-                    printRankORFile(out, String.valueOf(i));
-                    printBoardLineBlackFirstWithPieces(out, blackPieces);
-                    printRankORFile(out, String.valueOf(i));
-                    printLine(out);
+                    printRowOnBoardWithPieces(out, i, "black", blackPieces);
                 } else {
-                    printRankORFile(out, String.valueOf(i));
-                    if(isEven(i)) {
-                        printBoardLineBlackFirst(out);
-                    } else {
-                        printBoardLineWhiteFirst(out);
-                    }
-                    printRankORFile(out, String.valueOf(i));
-                    printLine(out);
+                    printRowOnBoardNoPiecesBlack(out, i);
                 }
             }
         }
     }
 
     private static void printBoardWhite(PrintStream out) {
+        boolean isWhitePerspective = true;
         for(int i = ROWS - 1; i >= 0; i--) {
             if(i == ROWS - 1 || i == 0) {
                 printHeaderAndFooterWhite(out);
             } else {
-                printRankORFile(out, String.valueOf(i));
-                if(isEven(i)) {
-                    printBoardLineBlackFirst(out);
+                if(i == 8) {
+                    printRowOnBoardWithPieces(out, i, "white", blackPieces);
+                } else if (i == 7) {
+                    printRowOnBoardWithPieces(out, i, "black", blackPawns);
+                } else if (i == 2) {
+                    printRowOnBoardWithPieces(out, i, "white", whitePawns);
+                } else if (i == 1) {
+                    printRowOnBoardWithPieces(out, i, "black", whitePieces);
                 } else {
-                    printBoardLineWhiteFirst(out);
+                    printRowOnBoardNoPiecesWhite(out, i);
                 }
-                printRankORFile(out, String.valueOf(i));
-                printLine(out);
             }
         }
     }
@@ -188,6 +174,38 @@ public class DrawChessBoard {
         }
         out.print(SET_TEXT_BOLD);
         out.print(piece);
+    }
+
+    private static void printRowOnBoardWithPieces(PrintStream out, int rowNumber, String firstSpaceColor, ArrayList<String> pieces) {
+        printRankORFile(out, String.valueOf(rowNumber));
+        if(firstSpaceColor.equals("white")) {
+            printBoardLineWhiteFirstWithPieces(out, pieces);
+        } else {
+            printBoardLineBlackFirstWithPieces(out, pieces);
+        }
+        printRankORFile(out, String.valueOf(rowNumber));
+        printLine(out);
+    }
+    private static void printRowOnBoardNoPiecesWhite(PrintStream out, int rowNumber) {
+        printRankORFile(out, String.valueOf(rowNumber));
+        if(isEven(rowNumber)) {
+            printBoardLineWhiteFirst(out);
+        } else {
+            printBoardLineBlackFirst(out);
+        }
+        printRankORFile(out, String.valueOf(rowNumber));
+        printLine(out);
+    }
+
+    private static void printRowOnBoardNoPiecesBlack(PrintStream out, int rowNumber) {
+        printRankORFile(out, String.valueOf(rowNumber));
+        if(isEven(rowNumber)) {
+            printBoardLineBlackFirst(out);
+        } else {
+            printBoardLineWhiteFirst(out);
+        }
+        printRankORFile(out, String.valueOf(rowNumber));
+        printLine(out);
     }
 
     private static boolean isEven (int iteration) {
