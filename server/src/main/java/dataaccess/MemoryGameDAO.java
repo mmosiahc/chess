@@ -1,5 +1,6 @@
 package dataaccess;
 
+import Exceptions.BadRequestException;
 import model.GameData;
 
 import java.util.Collection;

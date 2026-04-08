@@ -1,7 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
+import Exceptions.DataAccessException;
 import io.javalin.http.Context;
 import model.CreateGameBody;
 import model.CreateGameRequest;

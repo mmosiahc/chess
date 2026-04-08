@@ -1,8 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.BadRequestException;
-import dataaccess.UnauthorizedException;
+import Exceptions.BadRequestException;
+import Exceptions.UnauthorizedException;
 import io.javalin.http.Context;
 
 public class BaseHandler {

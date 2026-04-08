@@ -1,5 +1,6 @@
 package server;
 
+import Exceptions.DataAccessException;
 import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.Javalin;
