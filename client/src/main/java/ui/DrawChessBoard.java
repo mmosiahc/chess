@@ -22,18 +22,19 @@ public class DrawChessBoard {
     private static final ArrayList<String> blackPawns = new ArrayList<>(List.of(
             BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN));
 
-    static void main() {
+    public static void main(boolean isWhite) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-
         out.print(ERASE_SCREEN);
-
-        printBoardBlack(out);
-        printLine(out);
-        printBoardWhite(out);
+        if(isWhite) {
+            printBoardWhite(out);
+            printLine(out);
+        } else {
+            printBoardBlack(out);
+            printLine(out);
+        }
     }
 
     private static void printBoardBlack(PrintStream out) {
-        boolean isWhitePerspective = false;
         for(int i = 0; i < ROWS; i++) {
             if(i == 0 || i == ROWS - 1) {
                 printHeaderAndFooterBlack(out);
@@ -54,7 +55,6 @@ public class DrawChessBoard {
     }
 
     private static void printBoardWhite(PrintStream out) {
-        boolean isWhitePerspective = true;
         for(int i = ROWS - 1; i >= 0; i--) {
             if(i == ROWS - 1 || i == 0) {
                 printHeaderAndFooterWhite(out);

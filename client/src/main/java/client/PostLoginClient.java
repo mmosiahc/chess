@@ -1,7 +1,9 @@
 package client;
 
 import chess.ChessGame;
-import service.*;
+import service.CreateGameResult;
+import service.JoinGameBody;
+import service.ListGamesResult;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -104,6 +106,7 @@ public class PostLoginClient implements ChessClient{
     }
 
     public String join(String... params) {
+        StringBuilder sb = new StringBuilder();
         if(params.length != 2) {
             return "Expected <game_id> <white|black>\n";
         }
@@ -135,7 +138,7 @@ public class PostLoginClient implements ChessClient{
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
             facade.joinGame(request);
-            return String.format("You joined \"" + gameName + "\" as %s\n", teamColor);
+            return (String.format("You joined \"" + gameName + "\" as %s\n", teamColor));
         } catch (Exception e) {
             return e.getMessage();
         }

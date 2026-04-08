@@ -1,5 +1,7 @@
 package client;
 
+import ui.DrawChessBoard;
+
 import java.util.Scanner;
 
 public class Repl {
@@ -27,6 +29,10 @@ public class Repl {
                 setUsername(result);
                 System.out.print(result);
                 System.out.println();
+                if(result.startsWith("You joined")) {
+                    boolean isWhite = result.endsWith("WHITE\n");
+                    DrawChessBoard.main(isWhite);
+                }
                 if(!result.equals("quit")) {
                     System.out.print(printPrompt(client));
                 }
