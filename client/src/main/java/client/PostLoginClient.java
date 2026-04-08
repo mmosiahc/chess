@@ -31,7 +31,7 @@ public class PostLoginClient implements ChessClient{
                 gamesList.put(id, generateIndex());
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.getMessage()  + "\n");
         }
 
     }
@@ -63,7 +63,7 @@ public class PostLoginClient implements ChessClient{
                 };
             }
         } catch (Exception ex) {
-            return ex.getMessage();
+            return ex.getMessage() + "\n";
         }
     }
 
@@ -76,13 +76,13 @@ public class PostLoginClient implements ChessClient{
             gamesList.put(result.gameID(), generateIndex());
             return "Success! " + params[0] + " created.\n";
         } catch (Exception e) {
-            return e.getMessage();
+            return e.getMessage() + "\n";
         }
     }
 
     public String list() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-3s | %-15s |%-11s | %s%n", "ID", "Name", "White", "Black"));
+        sb.append(String.format("%-3s | %-15s | %-11s | %s%n", "ID", "Name", "White", "Black"));
         sb.append("-".repeat(48)).append("\n");
         try {
             Map<String, Collection<ListGamesResult>> games = facade.listGames();
@@ -101,7 +101,7 @@ public class PostLoginClient implements ChessClient{
             }
             return sb.toString();
         } catch (Exception e) {
-            return e.getMessage();
+            return e.getMessage() + "\n";
         }
     }
 
@@ -115,7 +115,7 @@ public class PostLoginClient implements ChessClient{
         try {
             id = Integer.parseInt(params[0]);
         } catch (NumberFormatException e) {
-            return String.format("%s wasn't a valid number.\n", params[0]);
+            return String.format("\"%s\" wasn't a valid number.\n", params[0]);
         }
         try {
             teamColor = ChessGame.TeamColor.valueOf(params[1].trim().toUpperCase());
@@ -128,7 +128,7 @@ public class PostLoginClient implements ChessClient{
             facade.joinGame(request);
             return (String.format("You joined \"" + gameName + "\" as %s\n", teamColor));
         } catch (Exception e) {
-            return e.getMessage();
+            return e.getMessage() + "\n";
         }
     }
 
@@ -140,13 +140,16 @@ public class PostLoginClient implements ChessClient{
         try {
             id = Integer.parseInt(params[0]);
         } catch (NumberFormatException e) {
-            return String.format("%s wasn't a valid number.\n", params[0]);
+            return String.format("\"%s\" wasn't a valid number.\n", params[0]);
         }
-        String gameName = getGameName(id);
         try {
+            String gameName = getGameName(id);
+            if(gameName == null) {
+                return String.format("Invalid game id \"%s\"\n", id);
+            }
             return String.format("You joined \"" + gameName + "\" as an %s\n", "observer");
         } catch (Exception e) {
-            return e.getMessage();
+            return e.getMessage() + "\n";
         }
     }
 
@@ -156,7 +159,7 @@ public class PostLoginClient implements ChessClient{
             repl.setState(new PreLoginClient(facade, repl));
             return "Signed out.\n";
         } catch (Exception e) {
-            return e.getMessage();
+            return e.getMessage() + "\n";
         }
     }
 
@@ -199,7 +202,7 @@ public class PostLoginClient implements ChessClient{
             }
             return gameName;
         } catch (Exception e) {
-            return e.getMessage();
+            return e.getMessage() + "\n";
         }
     }
 }

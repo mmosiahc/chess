@@ -36,6 +36,8 @@ public class Repl {
                         DrawChessBoard.main(true);
                     } else if (isObserver) {
                         DrawChessBoard.main(true);
+                    } else {
+                        DrawChessBoard.main(false);
                     }
                 }
                 if(!result.equals("quit")) {
