@@ -44,6 +44,7 @@ public class Repl {
         System.out.println();
     }
 
+
     String printPrompt(ChessClient client) {
         if(client instanceof PostLoginClient) {
             return "[" + username + "] >>> ";
