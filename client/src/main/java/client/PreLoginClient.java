@@ -85,7 +85,7 @@ public class PreLoginClient implements ChessClient{
         if(failedCommand.equalsIgnoreCase("help") || failedCommand.equalsIgnoreCase("-h")) {
             return sb.toString();
         }
-        sb.append("\nExpected <Command> got \"" + failedCommand + "\"\n");
+        sb.append("\nExpected <Command> got \"").append(failedCommand).append("\"\n");
 
         return sb.toString();
     }
