@@ -144,7 +144,7 @@ public class PostLoginClient implements ChessClient{
         }
         String gameName = getGameName(id);
         try {
-            return String.format("You joined \"" + gameName + "\" as an %s\n", "observer.");
+            return String.format("You joined \"" + gameName + "\" as an %s\n", "observer");
         } catch (Exception e) {
             return e.getMessage();
         }

@@ -32,6 +32,8 @@ public class DrawChessBoard {
             printBoardBlack(out);
             printLine(out);
         }
+        out.print(RESET_BG_COLOR);
+        out.print(RESET_TEXT_COLOR);
     }
 
     private static void printBoardBlack(PrintStream out) {

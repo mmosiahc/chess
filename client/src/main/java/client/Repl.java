@@ -31,7 +31,12 @@ public class Repl {
                 System.out.println();
                 if(result.startsWith("You joined")) {
                     boolean isWhite = result.endsWith("WHITE\n");
-                    DrawChessBoard.main(isWhite);
+                    boolean isObserver = result.endsWith("observer\n");
+                    if(isWhite) {
+                        DrawChessBoard.main(true);
+                    } else if (isObserver) {
+                        DrawChessBoard.main(true);
+                    }
                 }
                 if(!result.equals("quit")) {
                     System.out.print(printPrompt(client));
