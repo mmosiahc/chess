@@ -2,9 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
-import model.AuthData;
-import model.GameData;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

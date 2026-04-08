@@ -1,9 +1,9 @@
 package client;
 
 import chess.ChessGame;
-import service.CreateGameResult;
-import service.JoinGameBody;
-import service.ListGamesResult;
+import model.CreateGameResult;
+import model.JoinGameBody;
+import model.ListGamesResult;
 
 import java.util.Arrays;
 import java.util.Collection;

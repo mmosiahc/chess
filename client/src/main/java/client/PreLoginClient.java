@@ -1,9 +1,9 @@
 package client;
 
-import service.LoginRequest;
-import service.LoginResult;
-import service.RegisterRequest;
-import service.RegisterResult;
+import model.LoginRequest;
+import model.LoginResult;
+import model.RegisterRequest;
+import model.RegisterResult;
 
 import java.util.Arrays;
 

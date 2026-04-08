@@ -3,7 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
-import service.LogoutRequest;
+import model.LogoutRequest;
 import service.UserService;
 
 import java.util.Map;

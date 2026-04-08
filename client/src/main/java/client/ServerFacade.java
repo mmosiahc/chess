@@ -1,12 +1,12 @@
 package client;
 
 import com.google.gson.Gson;
+import model.*;
 import com.google.gson.reflect.TypeToken;
 import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
-import service.*;
 
 import java.lang.reflect.Type;
 import java.net.URI;
