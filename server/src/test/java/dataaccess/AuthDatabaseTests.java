@@ -1,6 +1,6 @@
 package dataaccess;
 
-import Exceptions.DataAccessException;
+import exceptions.DataAccessException;
 import model.AuthData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

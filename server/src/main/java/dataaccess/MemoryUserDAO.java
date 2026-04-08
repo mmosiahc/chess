@@ -1,7 +1,7 @@
 package dataaccess;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.UnauthorizedException;
+import exceptions.AlreadyTakenException;
+import exceptions.UnauthorizedException;
 import model.UserData;
 
 import java.util.HashMap;

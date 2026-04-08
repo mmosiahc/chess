@@ -122,19 +122,7 @@ public class PostLoginClient implements ChessClient{
         } catch (IllegalArgumentException | NullPointerException e) {
             return String.format("Invalid team color selected \"" + params[1] + ".\"\n");
         }
-        String gameName = "";
-        try{
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
-                if(result.gameID() == id) {
-                    gameName = result.gameName();
-                }
-            }
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-
+        String gameName = getGameName(id);
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
             facade.joinGame(request);
@@ -154,18 +142,7 @@ public class PostLoginClient implements ChessClient{
         } catch (NumberFormatException e) {
             return String.format("%s wasn't a valid number.\n", params[0]);
         }
-        String gameName = "";
-        try{
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
-                if(result.gameID() == id) {
-                    gameName = result.gameName();
-                }
-            }
-        } catch (Exception e) {
-            return e.getMessage();
-        }
+        String gameName = getGameName(id);
         try {
             return String.format("You joined \"" + gameName + "\" as an %s\n", "observer.");
         } catch (Exception e) {
@@ -208,5 +185,21 @@ public class PostLoginClient implements ChessClient{
 
     private int generateIndex() {
         return gamesListIndex++;
+    }
+
+    private String getGameName(int id) {
+        String gameName = null;
+        try{
+            Map<String, Collection<ListGamesResult>> games = facade.listGames();
+            Collection<ListGamesResult> results = games.get("games");
+            for(ListGamesResult result : results) {
+                if(result.gameID() == id) {
+                    gameName = result.gameName();
+                }
+            }
+            return gameName;
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }

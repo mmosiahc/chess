@@ -1,7 +1,7 @@
 package dataaccess;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.DataAccessException;
+import exceptions.AlreadyTakenException;
+import exceptions.DataAccessException;
 import model.UserData;
 
 import java.sql.SQLException;

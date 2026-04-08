@@ -1,6 +1,6 @@
 package dataaccess;
 
-import Exceptions.DataAccessException;
+import exceptions.DataAccessException;
 import chess.*;
 import model.GameData;
 import org.junit.jupiter.api.DisplayName;

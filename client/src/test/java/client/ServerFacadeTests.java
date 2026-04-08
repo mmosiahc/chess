@@ -1,9 +1,9 @@
 package client;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.BadRequestException;
-import Exceptions.DataAccessException;
-import Exceptions.UnauthorizedException;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.DataAccessException;
+import exceptions.UnauthorizedException;
 import chess.ChessGame;
 import dataaccess.*;
 import model.*;
@@ -67,7 +67,7 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Login - Success")
-    public void LoginUser() throws Exception {
+    public void loginUser() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("testName", "testPassword");
@@ -79,7 +79,7 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Login - No Password")
-    public void LoginUserMissingPassword() throws Exception {
+    public void loginUserMissingPassword() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("testName", null);
@@ -88,7 +88,7 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Login - Bad Password")
-    public void LoginUserBadPassword() throws Exception {
+    public void loginUserBadPassword() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("testName", "badPassword");
@@ -97,14 +97,14 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Login - Unregistered")
-    public void LoginUserNoCredentials() {
+    public void loginUserNoCredentials() {
         LoginRequest loginRequest = new LoginRequest("badName", "testPassword");
         Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.login(loginRequest));
     }
 
     @Test
     @DisplayName("Logout - Success")
-    public void LogoutUser() throws Exception {
+    public void logoutUser() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(registerRequest);
         serverFacade.logout();
@@ -113,7 +113,7 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Logout - No token")
-    public void LogoutUserUnauthorized() {
+    public void logoutUserUnauthorized() {
         Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.logout());
     }
 

@@ -3,10 +3,10 @@ package client;
 import com.google.gson.Gson;
 import model.*;
 import com.google.gson.reflect.TypeToken;
-import Exceptions.AlreadyTakenException;
-import Exceptions.BadRequestException;
-import Exceptions.DataAccessException;
-import Exceptions.UnauthorizedException;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.DataAccessException;
+import exceptions.UnauthorizedException;
 
 import java.lang.reflect.Type;
 import java.net.URI;

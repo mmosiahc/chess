@@ -1,6 +1,6 @@
 package server;
 
-import Exceptions.DataAccessException;
+import exceptions.DataAccessException;
 
 public class ServerMain {
     public static void main(String[] args) throws DataAccessException {

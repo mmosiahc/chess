@@ -13,13 +13,13 @@ public class DrawChessBoard {
     private static final int BOARD_LENGTH = 8;
     private static final int BLACK_OFFSET = 95;
     private static final int WHITE_OFFSET = 96;
-    private static final ArrayList<String> blackPieces = new ArrayList<>(List.of(
+    private static final ArrayList<String> BLACK_PIECES = new ArrayList<>(List.of(
             BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK));
-    private static final ArrayList<String> whitePieces = new ArrayList<>(List.of(
+    private static final ArrayList<String> WHITE_PIECES = new ArrayList<>(List.of(
             WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK));
-    private static final ArrayList<String> whitePawns = new ArrayList<>(List.of(
+    private static final ArrayList<String> WHITE_PAWNS = new ArrayList<>(List.of(
             WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN));
-    private static final ArrayList<String> blackPawns = new ArrayList<>(List.of(
+    private static final ArrayList<String> BLACK_PAWNS = new ArrayList<>(List.of(
             BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN));
 
     public static void main(boolean isWhite) {
@@ -40,13 +40,13 @@ public class DrawChessBoard {
                 printHeaderAndFooterBlack(out);
             } else {
                 if(i == 1) {
-                    printRowOnBoardWithPieces(out, i, "white", whitePieces);
+                    printRowOnBoardWithPieces(out, i, "white", WHITE_PIECES);
                 } else if (i == 2) {
-                    printRowOnBoardWithPieces(out, i, "black", whitePawns);
+                    printRowOnBoardWithPieces(out, i, "black", WHITE_PAWNS);
                 } else if (i == 7) {
-                    printRowOnBoardWithPieces(out, i, "white", blackPawns);
+                    printRowOnBoardWithPieces(out, i, "white", BLACK_PAWNS);
                 } else if (i == 8) {
-                    printRowOnBoardWithPieces(out, i, "black", blackPieces);
+                    printRowOnBoardWithPieces(out, i, "black", BLACK_PIECES);
                 } else {
                     printRowOnBoardNoPiecesBlack(out, i);
                 }
@@ -60,13 +60,13 @@ public class DrawChessBoard {
                 printHeaderAndFooterWhite(out);
             } else {
                 if(i == 8) {
-                    printRowOnBoardWithPieces(out, i, "white", blackPieces);
+                    printRowOnBoardWithPieces(out, i, "white", BLACK_PIECES);
                 } else if (i == 7) {
-                    printRowOnBoardWithPieces(out, i, "black", blackPawns);
+                    printRowOnBoardWithPieces(out, i, "black", BLACK_PAWNS);
                 } else if (i == 2) {
-                    printRowOnBoardWithPieces(out, i, "white", whitePawns);
+                    printRowOnBoardWithPieces(out, i, "white", WHITE_PAWNS);
                 } else if (i == 1) {
-                    printRowOnBoardWithPieces(out, i, "black", whitePieces);
+                    printRowOnBoardWithPieces(out, i, "black", WHITE_PIECES);
                 } else {
                     printRowOnBoardNoPiecesWhite(out, i);
                 }
