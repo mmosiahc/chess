@@ -4,6 +4,7 @@ import chess.ChessGame;
 import model.CreateGameResult;
 import model.JoinGameBody;
 import model.ListGamesResult;
+import ui.EscapeSequences;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,6 +82,9 @@ public class PostLoginClient implements ChessClient{
     }
 
     public String list() {
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        System.out.flush();
+
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-3s | %-15s | %-11s | %s%n", "ID", "Name", "White", "Black"));
         sb.append("-".repeat(48)).append("\n");
@@ -99,6 +103,7 @@ public class PostLoginClient implements ChessClient{
                         listIndex, name, white, black);
                 sb.append(line);
             }
+            if(gamesList.isEmpty()) return gamesList + " There are no current games being played.\n";
             return sb.toString();
         } catch (Exception e) {
             return e.getMessage() + "\n";
