@@ -132,7 +132,10 @@ public class PostLoginClient implements ChessClient{
         GameData game = getGame(id);
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
+            //Call join endpoint
             facade.joinGame(request);
+            //Open Websocket Connection
+
             repl.setState(new GameplayClient(facade, repl, game));
             DrawChessBoard.main(isWhite);
             return (String.format("You joined \"" + game.gameName() + "\" as %s\n", teamColor));

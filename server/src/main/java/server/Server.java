@@ -8,6 +8,7 @@ import io.javalin.http.Context;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
+import websocket.WebsocketHandler;
 
 import java.util.Map;
 
@@ -42,6 +43,7 @@ public class Server {
         ListGamesHandler listGamesHandler = new ListGamesHandler(gameService);
         CreateGameHandler createGameHandler = new CreateGameHandler(gameService);
         JoinGameHandler joinGameHandler = new JoinGameHandler(gameService);
+        WebsocketHandler websocketHandler = new WebsocketHandler();
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", registerHandler::register)
@@ -53,7 +55,12 @@ public class Server {
                 .exception(Exception.class, this::exceptionHandler)
                 .error(404, this::notFound)
                 .delete("/db", clearHandler::clear)
-                .delete("/session", logoutHandler::logout);
+                .delete("/session", logoutHandler::logout)
+                .ws("/ws", ws -> {
+                    ws.onConnect(websocketHandler);
+                    ws.onMessage(websocketHandler);
+                    ws.onClose(websocketHandler);
+                });
     }
 
     private void dataAccessExceptionHandler(DataAccessException e, Context context) {
