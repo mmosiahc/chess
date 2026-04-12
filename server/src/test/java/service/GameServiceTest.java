@@ -37,7 +37,7 @@ class GameServiceTest extends BaseDatabaseTest {
         AuthData auth = new AuthData("authToken", "username");
         authentications.createAuth(auth);
         ListGamesRequest request = new ListGamesRequest("authToken");
-        Collection<ListGamesResult> results = service.listGames(request);
+        Collection<GameData> results = service.listGames(request);
         assertNotNull(results);
         assertEquals(3, results.size());
     }

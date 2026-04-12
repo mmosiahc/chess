@@ -3,7 +3,8 @@ package client;
 import chess.ChessGame;
 import data_transfer.CreateGameResult;
 import data_transfer.JoinGameBody;
-import data_transfer.ListGamesResult;
+import model.GameData;
+import ui.DrawChessBoard;
 import ui.EscapeSequences;
 
 import java.util.Arrays;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class PostLoginClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
-    private HashMap<Integer, Integer> gamesList = new HashMap<>();
+    private final HashMap<Integer, Integer> gamesList = new HashMap<>();
     private int gamesListIndex = 1;
 
     public PostLoginClient(ServerFacade facade, Repl repl) {
@@ -25,9 +26,9 @@ public class PostLoginClient implements ChessClient{
 
     private void initializeGamesList() {
         try {
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
+            Map<String, Collection<GameData>> games = facade.listGames();
+            Collection<GameData> results = games.get("games");
+            for(GameData result : results) {
                 int id = result.gameID();
                 gamesList.put(id, generateIndex());
             }
@@ -89,9 +90,9 @@ public class PostLoginClient implements ChessClient{
         sb.append(String.format("%-3s | %-15s | %-11s | %s%n", "ID", "Name", "White", "Black"));
         sb.append("-".repeat(48)).append("\n");
         try {
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
+            Map<String, Collection<GameData>> games = facade.listGames();
+            Collection<GameData> results = games.get("games");
+            for(GameData result : results) {
                 int id = result.gameID();
                 String listIndex = gamesList.get(id) + ". ";
                 String white = result.whiteUsername();
@@ -110,13 +111,13 @@ public class PostLoginClient implements ChessClient{
         }
     }
 
-    public String join(String... params) {
-        StringBuilder sb = new StringBuilder();
+    public String join(String... params) throws Exception {
         if(params.length != 2) {
             return "Expected <game_id> <white|black>\n";
         }
         int id;
         ChessGame.TeamColor teamColor;
+        boolean isWhite = false;
         try {
             id = Integer.parseInt(params[0]);
         } catch (NumberFormatException e) {
@@ -127,11 +128,14 @@ public class PostLoginClient implements ChessClient{
         } catch (IllegalArgumentException | NullPointerException e) {
             return String.format("Invalid team color selected \"" + params[1] + ".\"\n");
         }
-        String gameName = getGameName(id);
+        if(teamColor == ChessGame.TeamColor.WHITE) isWhite = true;
+        GameData game = getGame(id);
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
             facade.joinGame(request);
-            return (String.format("You joined \"" + gameName + "\" as %s\n", teamColor));
+            repl.setState(new GameplayClient(facade, repl, game.game()));
+            DrawChessBoard.main(isWhite);
+            return (String.format("You joined \"" + game.gameName() + "\" as %s\n", teamColor));
         } catch (Exception e) {
             return e.getMessage() + "\n";
         }
@@ -148,11 +152,13 @@ public class PostLoginClient implements ChessClient{
             return String.format("\"%s\" wasn't a valid number.\n", params[0]);
         }
         try {
-            String gameName = getGameName(id);
-            if(gameName == null) {
+            GameData game = getGame(id);
+            if(game == null) {
                 return String.format("Invalid game id \"%s\"\n", id);
             }
-            return String.format("You joined \"" + gameName + "\" as an %s\n", "observer");
+            repl.setState(new GameplayClient(facade, repl, game.game()));
+            DrawChessBoard.main(true);
+            return String.format("You joined \"" + game.gameName() + "\" as an %s\n", "observer");
         } catch (Exception e) {
             return e.getMessage() + "\n";
         }
@@ -195,19 +201,19 @@ public class PostLoginClient implements ChessClient{
         return gamesListIndex++;
     }
 
-    private String getGameName(int id) {
-        String gameName = null;
+    private GameData getGame(int id) throws Exception {
+        GameData game = null;
         try{
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
+            Map<String, Collection<GameData>> games = facade.listGames();
+            Collection<GameData> results = games.get("games");
+            for(GameData result : results) {
                 if(result.gameID() == id) {
-                    gameName = result.gameName();
+                    game = result;
                 }
             }
-            return gameName;
+            return game;
         } catch (Exception e) {
-            return e.getMessage() + "\n";
+            throw new Exception(e.getMessage());
         }
     }
 }

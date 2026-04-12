@@ -27,17 +27,14 @@ public class GameService {
         return id++;
     }
 
-    public Collection<ListGamesResult> listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
+    public Collection<GameData> listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
         String token = listGamesRequest.authToken();
         if (token == null) {
             throw new BadRequestException();
         }
         AuthData authData = authentications.getAuth(token);
         if(authData == null) {throw new UnauthorizedException();}
-        var gamesList = games.listGames();
-        return gamesList.stream()
-                .map(g -> new ListGamesResult(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()))
-                .toList();
+        return games.listGames();
     }
 
     public CreateGameResult createGame(CreateGameRequest createGameRequest) throws DataAccessException {

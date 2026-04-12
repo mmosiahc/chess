@@ -1,9 +1,8 @@
 package client;
 
 import chess.ChessGame;
-import data_transfer.CreateGameResult;
 import data_transfer.JoinGameBody;
-import data_transfer.ListGamesResult;
+import model.GameData;
 import ui.EscapeSequences;
 
 import java.util.Arrays;
@@ -14,20 +13,22 @@ import java.util.Map;
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
+    private final ChessGame game;
     private final HashMap<Integer, Integer> gamesList = new HashMap<>();
     private int gamesListIndex = 1;
 
-    public GameplayClient(ServerFacade facade, Repl repl) {
+    public GameplayClient(ServerFacade facade, Repl repl, ChessGame game) {
         this.facade = facade;
         this.repl = repl;
+        this.game = game;
         initializeGamesList();
     }
 
     private void initializeGamesList() {
         try {
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
+            Map<String, Collection<GameData>> games = facade.listGames();
+            Collection<GameData> results = games.get("games");
+            for(GameData result : results) {
                 int id = result.gameID();
                 gamesList.put(id, generateIndex());
             }
@@ -44,22 +45,20 @@ public class GameplayClient implements ChessClient{
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             if(cmd.startsWith("-")) {
                 return switch (cmd) {
-                    case "-c" -> create(params);
-                    case "-l" -> list();
-                    case "-j" -> join(params);
-                    case "-o" -> observe(params);
-                    case "-lo" -> logout();
-                    case "-q" -> "quit";
+                    case "-r" -> redraw();
+                    case "-hi" -> highlight();
+                    case "-m" -> join(params);
+                    case "-l" -> observe(params);
+                    case "-rs" -> logout();
                     default -> help(cmd);
                 };
             }else {
                 return switch (cmd) {
-                    case "create" -> create(params);
-                    case "list" -> list();
-                    case "join" -> join(params);
-                    case "observe" -> observe(params);
-                    case "logout" -> logout();
-                    case "quit" -> "quit";
+                    case "redraw" -> redraw();
+                    case "highlight" -> highlight();
+                    case "move" -> join(params);
+                    case "leave" -> observe(params);
+                    case "resign" -> logout();
                     default -> help(cmd);
                 };
             }
@@ -69,20 +68,15 @@ public class GameplayClient implements ChessClient{
     }
 
 
-    public String create(String... params) {
-        if(params.length != 1) {
-            return "Expected <game_name>\n";
-        }
+    public String redraw(String... params) {
         try {
-            CreateGameResult result = facade.createGame(params[0]);
-            gamesList.put(result.gameID(), generateIndex());
-            return "Success! " + params[0] + " created.\n";
+            return "Redrew board.\n";
         } catch (Exception e) {
             return e.getMessage() + "\n";
         }
     }
 
-    public String list() {
+    public String highlight() {
         System.out.print(EscapeSequences.ERASE_SCREEN);
         System.out.flush();
 
@@ -90,9 +84,9 @@ public class GameplayClient implements ChessClient{
         sb.append(String.format("%-3s | %-15s | %-11s | %s%n", "ID", "Name", "White", "Black"));
         sb.append("-".repeat(48)).append("\n");
         try {
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
+            Map<String, Collection<GameData>> games = facade.listGames();
+            Collection<GameData> results = games.get("games");
+            for(GameData result : results) {
                 int id = result.gameID();
                 String listIndex = gamesList.get(id) + ". ";
                 String white = result.whiteUsername();
@@ -175,12 +169,11 @@ public class GameplayClient implements ChessClient{
         sb.append(String.format("%-35s | %s%n", "Command", "Description"));
         sb.append("-".repeat(55)).append("\n");
 
-        sb.append(String.format("%-35s | %s%n", "create <GAME_NAME> (-c)", "Create a new game"));
-        sb.append(String.format("%-35s | %s%n", "list (-l)", "List all current games"));
-        sb.append(String.format("%-35s | %s%n", "join <GAME_ID> [WHITE|BLACK] (-j)", "Join a game as a player"));
-        sb.append(String.format("%-35s | %s%n", "observe <GAME_ID> (-o)", "Watch a game as a spectator"));
-        sb.append(String.format("%-35s | %s%n", "logout (-lo)", "Log out of your account"));
-        sb.append(String.format("%-35s | %s%n", "quit (-q)", "Exit the application"));
+        sb.append(String.format("%-35s | %s%n", "redraw (-r)", "Redraws the chess board"));
+        sb.append(String.format("%-35s | %s%n", "highlight (-hi)", "Show legal moves for a piece"));
+        sb.append(String.format("%-35s | %s%n", "move (-m)", "Make a move"));
+        sb.append(String.format("%-35s | %s%n", "leave (-l)", "Exit the game"));
+        sb.append(String.format("%-35s | %s%n", "resign (-rs)", "Forfeit the game"));
         sb.append(String.format("%-35s | %s%n", "help (-h)", "Show these options again"));
 
         if(failedCommand.equalsIgnoreCase("help") || failedCommand.equalsIgnoreCase("-h")) {
@@ -198,9 +191,9 @@ public class GameplayClient implements ChessClient{
     private String getGameName(int id) {
         String gameName = null;
         try{
-            Map<String, Collection<ListGamesResult>> games = facade.listGames();
-            Collection<ListGamesResult> results = games.get("games");
-            for(ListGamesResult result : results) {
+            Map<String, Collection<GameData>> games = facade.listGames();
+            Collection<GameData> results = games.get("games");
+            for(GameData result : results) {
                 if(result.gameID() == id) {
                     gameName = result.gameName();
                 }

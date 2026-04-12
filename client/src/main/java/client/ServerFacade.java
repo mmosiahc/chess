@@ -7,6 +7,7 @@ import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.DataAccessException;
 import exceptions.UnauthorizedException;
+import model.GameData;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -59,7 +60,7 @@ public class ServerFacade {
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public Map<String, Collection<ListGamesResult>> listGames() throws Exception {
+    public Map<String, Collection<GameData>> listGames() throws Exception {
         var request = buildRequest("GET", "/game", null, token);
         var response = sendRequest(request);
         return handleResponse(response, Map.class);
@@ -127,7 +128,7 @@ public class ServerFacade {
 
         if (responseClass != null) {
             if (Map.class.isAssignableFrom(responseClass)) {
-                Type type = new TypeToken<Map<String, Collection<ListGamesResult>>>() {
+                Type type = new TypeToken<Map<String, Collection<GameData>>>() {
                 }.getType();
                 return new Gson().fromJson(response.body(), type);
             }

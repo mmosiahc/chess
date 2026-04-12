@@ -1,12 +1,13 @@
 package client;
 
+import chess.ChessGame;
 import data_transfer.*;
+import dataaccess.DatabaseManager;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.DataAccessException;
 import exceptions.UnauthorizedException;
-import chess.ChessGame;
-import dataaccess.*;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
 
@@ -18,6 +19,7 @@ public class ServerFacadeTests {
 
     private static Server server;
     private static ServerFacade serverFacade;
+    private static ServerMessageObserver observer;
 
     @BeforeAll
     public static void init() {
@@ -25,7 +27,7 @@ public class ServerFacadeTests {
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
         var url = "http://localhost:" + port;
-        serverFacade = new ServerFacade(url);
+        serverFacade = new ServerFacade(url, observer);
     }
 
     @BeforeEach
@@ -141,10 +143,10 @@ public class ServerFacadeTests {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(registerRequest);
         serverFacade.createGame("testGame");
-        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames();
+        Map<String, Collection<GameData>> games = serverFacade.listGames();
         Assertions.assertNotNull(games);
-        Collection<ListGamesResult> gamesList = games.get("games");
-        ListGamesResult game = gamesList.stream()
+        Collection<GameData> gamesList = games.get("games");
+        GameData game = gamesList.stream()
                 .filter(g -> g.gameName().equals("testGame"))
                         .findFirst()
                                 .orElse(null);
@@ -166,9 +168,9 @@ public class ServerFacadeTests {
         serverFacade.createGame("testGame");
         JoinGameBody joinGameBody = new JoinGameBody(ChessGame.TeamColor.WHITE, 1);
         serverFacade.joinGame(joinGameBody);
-        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames();
-        Collection<ListGamesResult> gamesList = games.get("games");
-        ListGamesResult game = gamesList.stream()
+        Map<String, Collection<GameData>> games = serverFacade.listGames();
+        Collection<GameData> gamesList = games.get("games");
+        GameData game = gamesList.stream()
                 .filter(g -> g.gameName().equals("testGame"))
                 .findFirst()
                 .orElse(null);
@@ -192,7 +194,7 @@ public class ServerFacadeTests {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(registerRequest);
         serverFacade.createGame("testGame");
-        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames();
+        Map<String, Collection<GameData>> games = serverFacade.listGames();
         JoinGameBody joinGameBody = new JoinGameBody(null, 1);
         Assertions.assertThrows(BadRequestException.class, () -> serverFacade.joinGame(joinGameBody));
     }
@@ -203,7 +205,7 @@ public class ServerFacadeTests {
         RegisterRequest registerRequest = new RegisterRequest("testName", "testPassword", "testEmail");
         serverFacade.register(registerRequest);
         serverFacade.createGame("testGame");
-        Map<String, Collection<ListGamesResult>> games = serverFacade.listGames();
+        Map<String, Collection<GameData>> games = serverFacade.listGames();
         Assertions.assertEquals(1, games.get("games").size());
         serverFacade.clear();
         Assertions.assertThrows(UnauthorizedException.class, () -> serverFacade.listGames());
