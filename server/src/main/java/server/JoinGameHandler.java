@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import exceptions.DataAccessException;
 import io.javalin.http.Context;
 import service.GameService;
-import model.JoinGameBody;
-import model.JoinGameRequest;
+import data_transfer.JoinGameBody;
+import data_transfer.JoinGameRequest;
 
 import java.util.Map;
 

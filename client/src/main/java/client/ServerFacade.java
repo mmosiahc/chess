@@ -1,7 +1,7 @@
 package client;
 
 import com.google.gson.Gson;
-import model.*;
+import data_transfer.*;
 import com.google.gson.reflect.TypeToken;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
@@ -20,9 +20,11 @@ public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String url;
     private String token;
+    private final WebsocketCommunicator ws;
 
-    public ServerFacade(String url) {
+    public ServerFacade(String url, ServerMessageObserver observer) {
         this.url = url;
+        this.ws = new WebsocketCommunicator(observer);
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws Exception {

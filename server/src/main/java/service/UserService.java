@@ -1,5 +1,6 @@
 package service;
 
+import data_transfer.*;
 import exceptions.BadRequestException;
 import exceptions.DataAccessException;
 import exceptions.UnauthorizedException;

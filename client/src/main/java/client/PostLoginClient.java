@@ -1,9 +1,9 @@
 package client;
 
 import chess.ChessGame;
-import model.CreateGameResult;
-import model.JoinGameBody;
-import model.ListGamesResult;
+import data_transfer.CreateGameResult;
+import data_transfer.JoinGameBody;
+import data_transfer.ListGamesResult;
 import ui.EscapeSequences;
 
 import java.util.Arrays;

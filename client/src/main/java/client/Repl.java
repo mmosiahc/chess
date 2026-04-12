@@ -1,17 +1,18 @@
 package client;
 
 import ui.DrawChessBoard;
+import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 
-public class Repl {
+public class Repl implements ServerMessageObserver {
 
     private String username = null;
     private final ServerFacade facade;
     private ChessClient client;
 
     public Repl(String serverUrl) {
-        this.facade = new ServerFacade(serverUrl);
+        this.facade = new ServerFacade(serverUrl, this);
         this.client = new PreLoginClient(facade, this);
     }
 
@@ -51,6 +52,8 @@ public class Repl {
         System.out.println();
     }
 
+    public void notifyClient(ServerMessage message) {
+    }
 
     String printPrompt(ChessClient client) {
         if(client instanceof PostLoginClient) {

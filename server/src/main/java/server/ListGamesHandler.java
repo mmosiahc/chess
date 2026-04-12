@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import exceptions.DataAccessException;
 import io.javalin.http.Context;
 import service.GameService;
-import model.ListGamesRequest;
-import model.ListGamesResult;
+import data_transfer.ListGamesRequest;
+import data_transfer.ListGamesResult;
 
 import java.util.Collection;
 import java.util.Map;

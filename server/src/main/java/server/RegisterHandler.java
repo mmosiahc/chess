@@ -3,8 +3,8 @@ package server;
 import com.google.gson.Gson;
 import exceptions.DataAccessException;
 import io.javalin.http.Context;
-import model.RegisterRequest;
-import model.RegisterResult;
+import data_transfer.RegisterRequest;
+import data_transfer.RegisterResult;
 import service.UserService;
 
 public class RegisterHandler extends BaseHandler{
