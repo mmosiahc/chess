@@ -133,7 +133,7 @@ public class PostLoginClient implements ChessClient{
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
             facade.joinGame(request);
-            repl.setState(new GameplayClient(facade, repl, game.game()));
+            repl.setState(new GameplayClient(facade, repl, game));
             DrawChessBoard.main(isWhite);
             return (String.format("You joined \"" + game.gameName() + "\" as %s\n", teamColor));
         } catch (Exception e) {
@@ -156,7 +156,7 @@ public class PostLoginClient implements ChessClient{
             if(game == null) {
                 return String.format("Invalid game id \"%s\"\n", id);
             }
-            repl.setState(new GameplayClient(facade, repl, game.game()));
+            repl.setState(new GameplayClient(facade, repl, game));
             DrawChessBoard.main(true);
             return String.format("You joined \"" + game.gameName() + "\" as an %s\n", "observer");
         } catch (Exception e) {

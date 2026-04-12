@@ -25,7 +25,7 @@ public class ServerFacade {
 
     public ServerFacade(String url, ServerMessageObserver observer) {
         this.url = url;
-        this.ws = new WebsocketCommunicator(observer);
+        this.ws = new WebsocketCommunicator(url, observer);
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws Exception {

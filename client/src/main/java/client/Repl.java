@@ -1,12 +1,15 @@
 package client;
 
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 
 public class Repl implements ServerMessageObserver {
 
-    private String username = null;
+    static String username = null;
     private final ServerFacade facade;
     private ChessClient client;
 
@@ -52,10 +55,27 @@ public class Repl implements ServerMessageObserver {
     }
 
     public void notifyClient(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case ERROR -> printServerErrorMessage((ErrorMessage) message);
+            case NOTIFICATION -> printNotification((NotificationMessage) message);
+            case LOAD_GAME -> loadGame((LoadGameMessage) message);
+        }
+    }
+
+    public void printServerErrorMessage(ErrorMessage message) {
+        System.out.print(message.getErrorMessage() + "\n");
+    }
+
+    public void printNotification(NotificationMessage message) {
+        System.out.print(message.getMessage() + "\n");
+    }
+
+    public void loadGame(LoadGameMessage message) {
+
     }
 
     String printPrompt(ChessClient client) {
-        if(client instanceof PostLoginClient) {
+        if(client instanceof PostLoginClient || client instanceof GameplayClient) {
             return "[" + username + "] >>> ";
         }
         return "[LOGGED_OUT] >>> ";
@@ -67,7 +87,7 @@ public class Repl implements ServerMessageObserver {
             String suffix = "\n";
             int start = result.indexOf(prefix) + prefix.length();
             int end = result.indexOf(suffix);
-            this.username = result.substring(start, end);
+            username = result.substring(start, end);
         }
     }
 

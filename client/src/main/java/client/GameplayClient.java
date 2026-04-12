@@ -13,11 +13,11 @@ import java.util.Map;
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
-    private final ChessGame game;
+    private GameData game;
     private final HashMap<Integer, Integer> gamesList = new HashMap<>();
     private int gamesListIndex = 1;
 
-    public GameplayClient(ServerFacade facade, Repl repl, ChessGame game) {
+    public GameplayClient(ServerFacade facade, Repl repl, GameData game) {
         this.facade = facade;
         this.repl = repl;
         this.game = game;
@@ -48,7 +48,7 @@ public class GameplayClient implements ChessClient{
                     case "-r" -> redraw();
                     case "-hi" -> highlight();
                     case "-m" -> join(params);
-                    case "-l" -> observe(params);
+                    case "-l" -> leave();
                     case "-rs" -> logout();
                     default -> help(cmd);
                 };
@@ -57,7 +57,7 @@ public class GameplayClient implements ChessClient{
                     case "redraw" -> redraw();
                     case "highlight" -> highlight();
                     case "move" -> join(params);
-                    case "leave" -> observe(params);
+                    case "leave" -> leave();
                     case "resign" -> logout();
                     default -> help(cmd);
                 };
@@ -131,22 +131,12 @@ public class GameplayClient implements ChessClient{
         }
     }
 
-    public String observe(String... params) {
-        if(params.length != 1) {
-            return "Expected <game_id>\n";
-        }
-        int id;
+    public String leave() {
         try {
-            id = Integer.parseInt(params[0]);
-        } catch (NumberFormatException e) {
-            return String.format("\"%s\" wasn't a valid number.\n", params[0]);
-        }
-        try {
-            String gameName = getGameName(id);
-            if(gameName == null) {
-                return String.format("Invalid game id \"%s\"\n", id);
+            if(game.whiteUsername().equals(Repl.username)) {
+                game = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
             }
-            return String.format("You joined \"" + gameName + "\" as an %s\n", "observer");
+            return String.format("You joined \"" + game.gameName() + "\" as an %s\n", "observer");
         } catch (Exception e) {
             return e.getMessage() + "\n";
         }
