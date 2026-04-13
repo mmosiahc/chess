@@ -1,6 +1,6 @@
 package websocket.messages;
 
-import chess.ChessGame;
+import model.GameData;
 
 /**
  * Represents a Message the server can send through a WebSocket
@@ -9,20 +9,14 @@ import chess.ChessGame;
  * methods.
  */
 public class LoadGameMessage extends ServerMessage {
-    final String message;
-    ChessGame game;
+    GameData game;
 
-    public LoadGameMessage(ServerMessageType type, String message, ChessGame game) {
+    public LoadGameMessage(ServerMessageType type, GameData game) {
         super(type);
-        this.message = message;
         this.game = game;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public ChessGame getGame() {
+    public GameData getGame() {
         return game;
     }
 

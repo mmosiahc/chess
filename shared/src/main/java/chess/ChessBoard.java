@@ -81,7 +81,6 @@ public class ChessBoard {
             }
         }
 
-//        System.out.println(this);
     }
 
     public ChessPosition locateKing(ChessGame.TeamColor team) {

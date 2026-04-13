@@ -8,6 +8,8 @@ import exceptions.BadRequestException;
 import exceptions.DataAccessException;
 import exceptions.UnauthorizedException;
 import model.GameData;
+import websocket.commands.ConnectCommand;
+import websocket.commands.UserGameCommand;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -66,10 +68,12 @@ public class ServerFacade {
         return handleResponse(response, Map.class);
     }
 
-    public void joinGame(JoinGameBody body) throws Exception {
+    public void joinGame(JoinGameBody body, String username) throws Exception {
         var request = buildRequest("PUT", "/game", body, token);
         var response = sendRequest(request);
         handleResponse(response, null);
+        ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, body.gameID(), username, body.playerColor());
+        ws.playerJoins(connect);
     }
 
     public void clear() throws Exception {
@@ -77,6 +81,8 @@ public class ServerFacade {
         var response = sendRequest(request);
         handleResponse(response, null);
     }
+
+//    public void sendLeaveMessage()
 
     private HttpRequest buildRequest(String method, String path, Object body, String token) {
         var request = HttpRequest.newBuilder()

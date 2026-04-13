@@ -1,5 +1,7 @@
 package ui;
 
+import chess.ChessGame;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import static ui.EscapeSequences.*;
 
 public class DrawChessBoard {
 
+    private final ChessGame game;
     private static final int ROWS = 10;
     private static final int BOARD_LENGTH = 8;
     private static final int BLACK_OFFSET = 95;
@@ -26,7 +29,33 @@ public class DrawChessBoard {
     private static final ArrayList<String> BLACK_PAWNS = new ArrayList<>(List.of(
             BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN));
 
-    public static void main(boolean isWhite) {
+    public DrawChessBoard(ChessGame game) {
+        this.game = game;
+    }
+
+    public String toString() {
+        return game.toString();
+    }
+
+    public static void main() {
+
+    }
+
+    public static void drawBoardFromGame(ChessGame game, boolean isWhite) {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        out.print(ERASE_SCREEN);
+        if(isWhite) {
+            printBoardWhiteFromGame(out, game);
+            printLine(out);
+        } else {
+            printBoardBlackFromGame(out, game);
+            printLine(out);
+        }
+        out.print(RESET_BG_COLOR);
+        out.print(RESET_TEXT_COLOR);
+    }
+
+    public static void drawNewBoard(boolean isWhite) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         if(isWhite) {
@@ -60,7 +89,47 @@ public class DrawChessBoard {
         }
     }
 
+    private static void printBoardBlackFromGame(PrintStream out, ChessGame game) {
+        for(int i = 0; i < ROWS; i++) {
+            if(i == 0 || i == ROWS - 1) {
+                printHeaderAndFooterBlack(out);
+            } else {
+                if(i == 1) {
+                    printRowOnBoardWithPieces(out, i, "white", WHITE_PIECES_PRINT_BLACK);
+                } else if (i == 2) {
+                    printRowOnBoardWithPieces(out, i, "black", WHITE_PAWNS);
+                } else if (i == 7) {
+                    printRowOnBoardWithPieces(out, i, "white", BLACK_PAWNS);
+                } else if (i == 8) {
+                    printRowOnBoardWithPieces(out, i, "black", BLACK_PIECES_PRINT_BLACK);
+                } else {
+                    printRowOnBoardNoPiecesBlack(out, i);
+                }
+            }
+        }
+    }
+
     private static void printBoardWhite(PrintStream out) {
+        for(int i = ROWS - 1; i >= 0; i--) {
+            if(i == ROWS - 1 || i == 0) {
+                printHeaderAndFooterWhite(out);
+            } else {
+                if(i == 8) {
+                    printRowOnBoardWithPieces(out, i, "white", BLACK_PIECES_PRINT_WHITE);
+                } else if (i == 7) {
+                    printRowOnBoardWithPieces(out, i, "black", BLACK_PAWNS);
+                } else if (i == 2) {
+                    printRowOnBoardWithPieces(out, i, "white", WHITE_PAWNS);
+                } else if (i == 1) {
+                    printRowOnBoardWithPieces(out, i, "black", WHITE_PIECES_PRINT_WHITE);
+                } else {
+                    printRowOnBoardNoPiecesWhite(out, i);
+                }
+            }
+        }
+    }
+
+    private static void printBoardWhiteFromGame(PrintStream out, ChessGame game) {
         for(int i = ROWS - 1; i >= 0; i--) {
             if(i == ROWS - 1 || i == 0) {
                 printHeaderAndFooterWhite(out);

@@ -167,7 +167,7 @@ public class ServerFacadeTests {
         serverFacade.register(registerRequest);
         serverFacade.createGame("testGame");
         JoinGameBody joinGameBody = new JoinGameBody(ChessGame.TeamColor.WHITE, 1);
-        serverFacade.joinGame(joinGameBody);
+        serverFacade.joinGame(joinGameBody, null);
         Map<String, Collection<GameData>> games = serverFacade.listGames();
         Collection<GameData> gamesList = games.get("games");
         GameData game = gamesList.stream()
@@ -184,8 +184,8 @@ public class ServerFacadeTests {
         serverFacade.register(registerRequest);
         serverFacade.createGame("testGame");
         JoinGameBody joinGameBody = new JoinGameBody(ChessGame.TeamColor.WHITE, 1);
-        serverFacade.joinGame(joinGameBody);
-        Assertions.assertThrows(AlreadyTakenException.class, () -> serverFacade.joinGame(joinGameBody));
+        serverFacade.joinGame(joinGameBody, null);
+        Assertions.assertThrows(AlreadyTakenException.class, () -> serverFacade.joinGame(joinGameBody, null));
     }
 
     @Test
@@ -196,7 +196,7 @@ public class ServerFacadeTests {
         serverFacade.createGame("testGame");
         Map<String, Collection<GameData>> games = serverFacade.listGames();
         JoinGameBody joinGameBody = new JoinGameBody(null, 1);
-        Assertions.assertThrows(BadRequestException.class, () -> serverFacade.joinGame(joinGameBody));
+        Assertions.assertThrows(BadRequestException.class, () -> serverFacade.joinGame(joinGameBody, null));
     }
 
     @Test

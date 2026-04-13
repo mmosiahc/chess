@@ -1,5 +1,6 @@
 package client;
 
+import model.GameData;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -71,7 +72,11 @@ public class Repl implements ServerMessageObserver {
     }
 
     public void loadGame(LoadGameMessage message) {
-
+        GameData data = message.getGame();
+        GameplayClient.gameData = message.getGame();
+        boolean isWhite = username.equals(data.whiteUsername());
+//        DrawChessBoard.drawBoardFromGame(data.game(), isWhite);
+        System.out.print(data.game().toString());
     }
 
     String printPrompt(ChessClient client) {

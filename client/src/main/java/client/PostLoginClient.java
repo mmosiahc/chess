@@ -128,16 +128,14 @@ public class PostLoginClient implements ChessClient{
         } catch (IllegalArgumentException | NullPointerException e) {
             return String.format("Invalid team color selected \"" + params[1] + ".\"\n");
         }
-        if(teamColor == ChessGame.TeamColor.WHITE) isWhite = true;
+        if(teamColor == ChessGame.TeamColor.WHITE) {isWhite = true;}
         GameData game = getGame(id);
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
-            //Call join endpoint
-            facade.joinGame(request);
-            //Open Websocket Connection
-
+            //Call join endpoint & open websocket connection
+            facade.joinGame(request, Repl.username);
             repl.setState(new GameplayClient(facade, repl, game));
-            DrawChessBoard.main(isWhite);
+            DrawChessBoard.drawNewBoard(isWhite);
             return (String.format("You joined \"" + game.gameName() + "\" as %s\n", teamColor));
         } catch (Exception e) {
             return e.getMessage() + "\n";
@@ -160,7 +158,7 @@ public class PostLoginClient implements ChessClient{
                 return String.format("Invalid game id \"%s\"\n", id);
             }
             repl.setState(new GameplayClient(facade, repl, game));
-            DrawChessBoard.main(true);
+            DrawChessBoard.drawNewBoard(true);
             return String.format("You joined \"" + game.gameName() + "\" as an %s\n", "observer");
         } catch (Exception e) {
             return e.getMessage() + "\n";

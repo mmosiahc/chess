@@ -1,11 +1,10 @@
 package client;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import jakarta.websocket.*;
 import websocket.commands.ConnectCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.LeaveCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.ServerMessage;
 
@@ -42,14 +41,17 @@ public class WebsocketCommunicator extends Endpoint {
         }
     }
 
-    public void playerJoins(String username, ChessGame.TeamColor color, String token, Integer gameID) {
+    public void playerJoins(ConnectCommand connect) {
         try {
-            ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, gameID, username, color);
             this.session.getBasicRemote().sendText(new Gson().toJson(connect, ConnectCommand.class));
         } catch (IOException e) {
             System.out.print(e.getMessage() + "\n");
             throw new RuntimeException(e);
         }
+    }
+
+    public void playerLeaves(LeaveCommand leave) {
+
     }
 
 

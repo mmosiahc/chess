@@ -3,7 +3,6 @@ package client;
 import chess.ChessGame;
 import data_transfer.JoinGameBody;
 import model.GameData;
-import ui.EscapeSequences;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,14 +12,16 @@ import java.util.Map;
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
-    private GameData game;
+    static GameData gameData;
+//    static DrawChessBoard boardPrinter;
     private final HashMap<Integer, Integer> gamesList = new HashMap<>();
     private int gamesListIndex = 1;
 
     public GameplayClient(ServerFacade facade, Repl repl, GameData game) {
         this.facade = facade;
         this.repl = repl;
-        this.game = game;
+        GameplayClient.gameData = game;
+//        boardPrinter = new DrawChessBoard(game.game());
         initializeGamesList();
     }
 
@@ -47,7 +48,7 @@ public class GameplayClient implements ChessClient{
                 return switch (cmd) {
                     case "-r" -> redraw();
                     case "-hi" -> highlight();
-                    case "-m" -> join(params);
+                    case "-m" -> move(params);
                     case "-l" -> leave();
                     case "-rs" -> logout();
                     default -> help(cmd);
@@ -56,7 +57,7 @@ public class GameplayClient implements ChessClient{
                 return switch (cmd) {
                     case "redraw" -> redraw();
                     case "highlight" -> highlight();
-                    case "move" -> join(params);
+                    case "move" -> move(params);
                     case "leave" -> leave();
                     case "resign" -> logout();
                     default -> help(cmd);
@@ -69,43 +70,14 @@ public class GameplayClient implements ChessClient{
 
 
     public String redraw(String... params) {
-        try {
-            return "Redrew board.\n";
-        } catch (Exception e) {
-            return e.getMessage() + "\n";
-        }
+        return GameplayClient.gameData.game().toString();
     }
 
     public String highlight() {
-        System.out.print(EscapeSequences.ERASE_SCREEN);
-        System.out.flush();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-3s | %-15s | %-11s | %s%n", "ID", "Name", "White", "Black"));
-        sb.append("-".repeat(48)).append("\n");
-        try {
-            Map<String, Collection<GameData>> games = facade.listGames();
-            Collection<GameData> results = games.get("games");
-            for(GameData result : results) {
-                int id = result.gameID();
-                String listIndex = gamesList.get(id) + ". ";
-                String white = result.whiteUsername();
-                if(white == null) {white = "empty";}
-                String black = result.blackUsername();
-                if(black == null) {black = "empty";}
-                String name = result.gameName();
-                String line = String.format("%-2s | %-15s | %-10s | %-10s%n",
-                        listIndex, name, white, black);
-                sb.append(line);
-            }
-            if(gamesList.isEmpty()) return gamesList + " There are no current games being played.\n";
-            return sb.toString();
-        } catch (Exception e) {
-            return e.getMessage() + "\n";
-        }
+        return "Valid moves";
     }
 
-    public String join(String... params) {
+    public String move(String... params) {
         if(params.length != 2) {
             return "Expected <game_id> <white|black>\n";
         }
@@ -124,7 +96,7 @@ public class GameplayClient implements ChessClient{
         String gameName = getGameName(id);
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
-            facade.joinGame(request);
+            facade.joinGame(request, Repl.username);
             return (String.format("You joined \"" + gameName + "\" as %s\n", teamColor));
         } catch (Exception e) {
             return e.getMessage() + "\n";
@@ -133,10 +105,13 @@ public class GameplayClient implements ChessClient{
 
     public String leave() {
         try {
-            if(game.whiteUsername().equals(Repl.username)) {
-                game = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
+            if(gameData.whiteUsername().equals(Repl.username)) {
+                gameData = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            } else {
+                gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
             }
-            return String.format("You joined \"" + game.gameName() + "\" as an %s\n", "observer");
+            repl.setState(new PostLoginClient(facade, repl));
+            return String.format("You left \"" + gameData.gameName() + "\"\n");
         } catch (Exception e) {
             return e.getMessage() + "\n";
         }
