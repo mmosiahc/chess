@@ -57,7 +57,7 @@ public class Repl implements ServerMessageObserver {
 
     public void notifyClient(ServerMessage message) {
         switch (message.getServerMessageType()) {
-            case ERROR -> printServerErrorMessage((ErrorMessage) message);
+            case ERROR -> {printServerErrorMessage((ErrorMessage) message);}
             case NOTIFICATION -> printNotification((NotificationMessage) message);
             case LOAD_GAME -> loadGame((LoadGameMessage) message);
         }

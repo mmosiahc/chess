@@ -9,9 +9,15 @@ import java.util.Objects;
  * methods.
  */
 public class LeaveCommand extends UserGameCommand {
+    private final String username;
 
-    public LeaveCommand(CommandType type, String token, Integer gameID) {
+    public LeaveCommand(CommandType type, String token, Integer gameID, String username) {
         super(type, token, gameID);
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     @Override

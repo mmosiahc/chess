@@ -6,6 +6,8 @@ import jakarta.websocket.*;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
 import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -17,10 +19,11 @@ public class WebsocketCommunicator extends Endpoint {
     Session session;
 
     public WebsocketCommunicator(String url, ServerMessageObserver observer) {
+            this.messageObserver = observer;
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
-            this.messageObserver = observer;
+
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
@@ -30,6 +33,20 @@ public class WebsocketCommunicator extends Endpoint {
                 public void onMessage(String s) {
                     try {
                         ServerMessage message = new Gson().fromJson(s, ServerMessage.class);
+                        switch (message.getServerMessageType()) {
+                            case ERROR -> {
+                                ErrorMessage msg = new Gson().fromJson(s, ErrorMessage.class);
+                                observer.notifyClient(msg);
+                            }
+                            case NOTIFICATION -> {
+                                NotificationMessage msg = new Gson().fromJson(s, NotificationMessage.class);
+                                observer.notifyClient(msg);
+                            }
+                            case LOAD_GAME -> {
+                                LoadGameMessage msg = new Gson().fromJson(s, LoadGameMessage.class);
+                                observer.notifyClient(msg);
+                            }
+                        }
                         observer.notifyClient(message);
                     } catch (JsonSyntaxException e) {
                         observer.notifyClient(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
@@ -37,8 +54,13 @@ public class WebsocketCommunicator extends Endpoint {
                 }
             });
         } catch (URISyntaxException | DeploymentException | IOException e) {
-            throw new RuntimeException(e);
+            observer.notifyClient(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
         }
+    }
+
+    @Override
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+
     }
 
     public void playerJoins(ConnectCommand connect) {
@@ -55,13 +77,9 @@ public class WebsocketCommunicator extends Endpoint {
             this.session.getBasicRemote().sendText(new Gson().toJson(leave, LeaveCommand.class));
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
         }
     }
 
 
-    @Override
-    public void onOpen(Session session, EndpointConfig endpointConfig) {
 
-    }
 }

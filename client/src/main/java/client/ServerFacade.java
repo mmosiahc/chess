@@ -83,9 +83,8 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    public void sendLeaveMessage(Integer gameID) {
-        LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID);
-
+    public void sendLeaveCommand(String username, Integer gameID) {
+        LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID, username);
         ws.playerLeaves(leave);
     }
 

@@ -2,9 +2,10 @@ package websocket;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import exceptions.DataAccessException;
 import io.javalin.websocket.*;
-import jakarta.websocket.Session;
 import model.GameData;
+import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import websocket.commands.*;
@@ -34,13 +35,23 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
-        Session session = (Session) ctx.session;
+        Session session = ctx.session;
         try {
             UserGameCommand message = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            System.out.println("Received Client websocket message.");
             switch (message.getCommandType()) {
-                case CONNECT -> joinPlayer((ConnectCommand) message, session);
-                case MAKE_MOVE -> makeMove((MoveCommand) message);
-                case LEAVE -> leave((LeaveCommand) message);
+                case CONNECT -> {
+                    ConnectCommand connect = new Gson().fromJson(ctx.message(), ConnectCommand.class);
+                    joinPlayer(connect, session);
+                }
+                case MAKE_MOVE -> {
+                    MoveCommand makeMove = new Gson().fromJson(ctx.message(), MoveCommand.class);
+                    makeMove(makeMove, session);
+                }
+                case LEAVE -> {
+                    LeaveCommand leave = new Gson().fromJson(ctx.message(), LeaveCommand.class);
+                    leave(leave, session);
+                }
                 case RESIGN -> resign((ResignCommand) message);
             }
         } catch (JsonSyntaxException e) {
@@ -57,12 +68,24 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData);
         connections.sendLoadGame(loadGame, session);
     }
-    private void makeMove(MoveCommand command) {
+
+    private void makeMove(MoveCommand command, Session session) {
 
     }
-    private void leave(LeaveCommand command) {
 
+    private void leave(LeaveCommand command, Session session) throws DataAccessException {
+        //Remove player from game
+        GameData g = gameService.getGame(command.getGameID());
+        boolean playingWhite = g.whiteUsername().equals(command.getUsername());
+        if(playingWhite) {
+            g = new GameData(g.gameID(), null, g.blackUsername(), g.gameName(), g.game());
+        } else {
+            g = new GameData(g.gameID(), g.whiteUsername(), null, g.gameName(), g.game());
+        }
+        gameService.updateGame(g);
+        //Send websocket notification
     }
+
     private void resign(ResignCommand command) {
 
     }

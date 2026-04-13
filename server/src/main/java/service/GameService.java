@@ -94,4 +94,8 @@ public class GameService {
     public GameData getGame(int gameID) throws DataAccessException {
         return games.getGame(gameID);
     }
+
+    public void updateGame(GameData gameData) throws DataAccessException {
+        games.updateGame(gameData);
+    }
 }

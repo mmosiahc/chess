@@ -1,8 +1,7 @@
 package websocket;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
-import jakarta.websocket.Session;
+import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
@@ -22,9 +21,8 @@ public class ConnectionManager {
 
     public void sendLoadGame(LoadGameMessage message, Session session) throws Exception {
         try {
-            ChessGame game = message.getGame().game();
-            String jsonGame = new Gson().toJson(game);
-            session.getBasicRemote().sendText(jsonGame);
+            String jsonLoadGame = new Gson().toJson(message);
+            session.getRemote().sendString(jsonLoadGame);
         } catch (IOException e) {
             throw new Exception("Failed to send load game message");
         }
@@ -36,7 +34,7 @@ public class ConnectionManager {
             for(Session c : wsConnections.values()) {
                 if(c.isOpen()) {
                     if(!c.equals(excludeSession)) {
-                        c.getBasicRemote().sendText(msg);
+                        c.getRemote().sendString(msg);
                     }
                 }
             }

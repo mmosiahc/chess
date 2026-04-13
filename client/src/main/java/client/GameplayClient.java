@@ -1,7 +1,5 @@
 package client;
 
-import chess.ChessGame;
-import data_transfer.JoinGameBody;
 import model.GameData;
 
 import java.util.Arrays;
@@ -74,44 +72,17 @@ public class GameplayClient implements ChessClient{
     }
 
     public String highlight() {
-        return "Valid moves";
+        return "Valid moves\n";
     }
 
     public String move(String... params) {
-        if(params.length != 2) {
-            return "Expected <game_id> <white|black>\n";
-        }
-        int id;
-        ChessGame.TeamColor teamColor;
-        try {
-            id = Integer.parseInt(params[0]);
-        } catch (NumberFormatException e) {
-            return String.format("\"%s\" wasn't a valid number.\n", params[0]);
-        }
-        try {
-            teamColor = ChessGame.TeamColor.valueOf(params[1].trim().toUpperCase());
-        } catch (IllegalArgumentException | NullPointerException e) {
-            return String.format("Invalid team color selected \"" + params[1] + ".\"\n");
-        }
-        String gameName = getGameName(id);
-        try {
-            JoinGameBody request = new JoinGameBody(teamColor, id);
-            facade.joinGame(request, Repl.username);
-            return (String.format("You joined \"" + gameName + "\" as %s\n", teamColor));
-        } catch (Exception e) {
-            return e.getMessage() + "\n";
-        }
+        return "Made move\n";
     }
 
     public String leave() {
         try {
-            if(gameData.whiteUsername().equals(Repl.username)) {
-                gameData = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
-            } else {
-                gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
-            }
             repl.setState(new PostLoginClient(facade, repl));
-            facade.sendLeaveMessage(gameData.gameID());
+            facade.sendLeaveCommand(Repl.username, gameData.gameID());
             return String.format("You left \"" + gameData.gameName() + "\"\n");
         } catch (Exception e) {
             return e.getMessage() + "\n";
