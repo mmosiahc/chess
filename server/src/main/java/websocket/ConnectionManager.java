@@ -40,12 +40,12 @@ public class ConnectionManager {
 
     public void broadcast(Session excludeSession, NotificationMessage message) throws Exception {
         try {
-            String msg = message.getMessage();
+            String json = new Gson().toJson(message, NotificationMessage.class);
             for(Set<Session> sessions : wsConnections.values()) {
                 for(Session s : sessions) {
                     if(s.isOpen()) {
                         if(!s.equals(excludeSession)) {
-                            s.getRemote().sendString(msg);
+                            s.getRemote().sendString(json);
                         }
                     }
                 }

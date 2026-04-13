@@ -9,15 +9,15 @@ import java.util.Objects;
  * methods.
  */
 public class NotificationMessage extends ServerMessage {
-    final String message;
+    final String notification;
 
     public NotificationMessage(ServerMessageType type, String message) {
         super(type);
-        this.message = message;
+        this.notification = message;
     }
 
     public String getMessage() {
-        return message;
+        return notification;
     }
 
     @Override
@@ -28,11 +28,11 @@ public class NotificationMessage extends ServerMessage {
         if (!super.equals(o)) {
             return false;
         }
-        return Objects.equals(message, that.message);
+        return Objects.equals(notification, that.notification);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), message);
+        return Objects.hash(super.hashCode(), notification);
     }
 }
