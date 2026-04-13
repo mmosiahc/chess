@@ -1,6 +1,9 @@
 package websocket;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import jakarta.websocket.Session;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
@@ -15,6 +18,16 @@ public class ConnectionManager {
 
     public void remove(Integer gameID) {
         wsConnections.remove(gameID);
+    }
+
+    public void sendLoadGame(LoadGameMessage message, Session session) throws Exception {
+        try {
+            ChessGame game = message.getGame().game();
+            String jsonGame = new Gson().toJson(game);
+            session.getBasicRemote().sendText(jsonGame);
+        } catch (IOException e) {
+            throw new Exception("Failed to send load game message");
+        }
     }
 
     public void broadcast(Session excludeSession, NotificationMessage message) throws Exception {

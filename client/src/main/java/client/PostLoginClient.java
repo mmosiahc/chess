@@ -135,7 +135,7 @@ public class PostLoginClient implements ChessClient{
             //Call join endpoint & open websocket connection
             facade.joinGame(request, Repl.username);
             repl.setState(new GameplayClient(facade, repl, game));
-            DrawChessBoard.drawNewBoard(isWhite);
+//            DrawChessBoard.drawNewBoard(isWhite);
             return (String.format("You joined \"" + game.gameName() + "\" as %s\n", teamColor));
         } catch (Exception e) {
             return e.getMessage() + "\n";

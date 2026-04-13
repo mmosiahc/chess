@@ -4,13 +4,22 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import io.javalin.websocket.*;
 import jakarta.websocket.Session;
+import model.GameData;
 import org.jetbrains.annotations.NotNull;
+import service.GameService;
 import websocket.commands.*;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
-    private final ConnectionManager connections = new ConnectionManager();
+    private final ConnectionManager connections;
+    private final GameService gameService;
+
+    public WebsocketHandler(GameService service) {
+        this.gameService = service;
+        this.connections = new ConnectionManager();
+    }
 
     @Override
     public void handleClose(@NotNull WsCloseContext ctx) throws Exception {
@@ -44,6 +53,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var msg = String.format("%s joined the game as %s\n", command.getUsername(), command.getColor());
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
         connections.broadcast(session, notification);
+        GameData gameData = gameService.getGame(command.getGameID());
+        LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData);
+        connections.sendLoadGame(loadGame, session);
     }
     private void makeMove(MoveCommand command) {
 

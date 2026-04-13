@@ -9,6 +9,7 @@ import exceptions.DataAccessException;
 import exceptions.UnauthorizedException;
 import model.GameData;
 import websocket.commands.ConnectCommand;
+import websocket.commands.LeaveCommand;
 import websocket.commands.UserGameCommand;
 
 import java.lang.reflect.Type;
@@ -82,7 +83,11 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-//    public void sendLeaveMessage()
+    public void sendLeaveMessage(Integer gameID) {
+        LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID);
+
+        ws.playerLeaves(leave);
+    }
 
     private HttpRequest buildRequest(String method, String path, Object body, String token) {
         var request = HttpRequest.newBuilder()

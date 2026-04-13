@@ -1,16 +1,20 @@
 package service;
 
-import data_transfer.*;
+import chess.ChessGame;
+import data_transfer.CreateGameRequest;
+import data_transfer.CreateGameResult;
+import data_transfer.JoinGameRequest;
+import data_transfer.ListGamesRequest;
+import dataaccess.AuthDatabase;
+import dataaccess.GameDatabase;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.DataAccessException;
 import exceptions.UnauthorizedException;
-import chess.ChessGame;
-import dataaccess.*;
-import model.*;
+import model.AuthData;
+import model.GameData;
 
 import java.util.Collection;
-import java.util.Map;
 
 
 public class GameService {
@@ -86,7 +90,8 @@ public class GameService {
         String bUser = gameData.blackUsername();
         return color.equals(ChessGame.TeamColor.WHITE) && wUser != null || color.equals(ChessGame.TeamColor.BLACK) && bUser != null;
     }
-    public Map<Integer, GameData> getGames() {
-        return null;
+
+    public GameData getGame(int gameID) throws DataAccessException {
+        return games.getGame(gameID);
     }
 }

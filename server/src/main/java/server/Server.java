@@ -43,7 +43,7 @@ public class Server {
         ListGamesHandler listGamesHandler = new ListGamesHandler(gameService);
         CreateGameHandler createGameHandler = new CreateGameHandler(gameService);
         JoinGameHandler joinGameHandler = new JoinGameHandler(gameService);
-        WebsocketHandler websocketHandler = new WebsocketHandler();
+        WebsocketHandler websocketHandler = new WebsocketHandler(gameService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", registerHandler::register)

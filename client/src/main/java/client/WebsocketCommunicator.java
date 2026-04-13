@@ -51,7 +51,12 @@ public class WebsocketCommunicator extends Endpoint {
     }
 
     public void playerLeaves(LeaveCommand leave) {
-
+        try {
+            this.session.getBasicRemote().sendText(new Gson().toJson(leave, LeaveCommand.class));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
 
