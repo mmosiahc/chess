@@ -2,7 +2,6 @@ package websocket;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import exceptions.DataAccessException;
 import io.javalin.websocket.*;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -38,7 +37,6 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         Session session = ctx.session;
         try {
             UserGameCommand message = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            System.out.println("Received Client websocket message.");
             switch (message.getCommandType()) {
                 case CONNECT -> {
                     ConnectCommand connect = new Gson().fromJson(ctx.message(), ConnectCommand.class);
@@ -73,7 +71,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void leave(LeaveCommand command, Session session) throws DataAccessException {
+    private void leave(LeaveCommand command, Session session) throws Exception {
         //Remove player from game
         GameData g = gameService.getGame(command.getGameID());
         boolean playingWhite = g.whiteUsername().equals(command.getUsername());
@@ -84,6 +82,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         gameService.updateGame(g);
         //Send websocket notification
+        String msg = String.format("%s left the game", command.getUsername());
+        NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+        connections.broadcast(session, notification);
     }
 
     private void resign(ResignCommand command) {

@@ -1,5 +1,6 @@
 package client;
 
+import com.google.gson.Gson;
 import model.GameData;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -55,25 +56,30 @@ public class Repl implements ServerMessageObserver {
         System.out.println();
     }
 
-    public void notifyClient(ServerMessage message) {
-        switch (message.getServerMessageType()) {
-            case ERROR -> {printServerErrorMessage((ErrorMessage) message);}
-            case NOTIFICATION -> printNotification((NotificationMessage) message);
-            case LOAD_GAME -> loadGame((LoadGameMessage) message);
+    public void notifyClient(ServerMessage message, String json) {
+        if(message.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+            loadGame(message, json);
         }
+        printMessage(message, json);
     }
 
-    public void printServerErrorMessage(ErrorMessage message) {
-        System.out.print(message.getErrorMessage() + "\n");
+    public void printMessage(ServerMessage message, String json) {
+        String msg;
+        if (message.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
+            ErrorMessage eMsg = new Gson().fromJson(json, ErrorMessage.class);
+            msg = eMsg.getErrorMessage();
+        } else {
+            NotificationMessage nMsg = new Gson().fromJson(json, NotificationMessage.class);
+            msg = nMsg.getMessage();
+        }
+        System.out.print(msg+ "\n");
     }
 
-    public void printNotification(NotificationMessage message) {
-        System.out.print(message.getMessage() + "\n");
-    }
 
-    public void loadGame(LoadGameMessage message) {
-        GameData data = message.getGame();
-        GameplayClient.gameData = message.getGame();
+    public void loadGame(ServerMessage message, String json) {
+        LoadGameMessage msg = new Gson().fromJson(json, LoadGameMessage.class);
+        GameData data = msg.getGame();
+        GameplayClient.gameData = msg.getGame();
         boolean isWhite = username.equals(data.whiteUsername());
 //        DrawChessBoard.drawBoardFromGame(data.game(), isWhite);
         System.out.print(data.game().toString());
