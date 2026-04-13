@@ -12,15 +12,19 @@ import java.util.Objects;
  */
 public class MoveCommand extends UserGameCommand {
     private final ChessMove move;
+    private final String username;
 
-    public MoveCommand(CommandType type, String token, Integer gameID, ChessMove move) {
+    public MoveCommand(CommandType type, String token, Integer gameID, ChessMove move, String username) {
         super(type, token, gameID);
         this.move = move;
+        this.username = username;
     }
 
     public ChessMove getMove() {
         return move;
     }
+
+    public String getUsername() {return username;}
 
     @Override
     public boolean equals(Object o) {

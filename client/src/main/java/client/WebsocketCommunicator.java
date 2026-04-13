@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
+import websocket.commands.MoveCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -68,6 +69,12 @@ public class WebsocketCommunicator extends Endpoint {
         }
     }
 
+    /**
+     * Sends leave command for a user to
+     * leave the game.
+     *
+     * @param leave info to send to server
+     */
     public void playerLeaves(LeaveCommand leave) {
         try {
             this.session.getBasicRemote().sendText(new Gson().toJson(leave, LeaveCommand.class));
@@ -76,6 +83,17 @@ public class WebsocketCommunicator extends Endpoint {
         }
     }
 
-
-
+    /**
+     * Sends make move command for player to
+     * make a move in the game.
+     *
+     * @param move information to send to server
+     */
+    public void makeMove(MoveCommand move) {
+        try {
+            this.session.getBasicRemote().sendText(new Gson().toJson(move, MoveCommand.class));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

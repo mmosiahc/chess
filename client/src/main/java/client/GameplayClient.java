@@ -1,5 +1,6 @@
 package client;
 
+import chess.*;
 import model.GameData;
 
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.Map;
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
+    private final boolean isWhite = Repl.username.equals(gameData.whiteUsername());
     static GameData gameData;
 //    static DrawChessBoard boardPrinter;
     private final HashMap<Integer, Integer> gamesList = new HashMap<>();
@@ -48,7 +50,7 @@ public class GameplayClient implements ChessClient{
                     case "-hi" -> highlight();
                     case "-m" -> move(params);
                     case "-l" -> leave();
-                    case "-rs" -> logout();
+                    case "-rs" -> resign();
                     default -> help(cmd);
                 };
             }else {
@@ -57,7 +59,7 @@ public class GameplayClient implements ChessClient{
                     case "highlight" -> highlight();
                     case "move" -> move(params);
                     case "leave" -> leave();
-                    case "resign" -> logout();
+                    case "resign" -> resign();
                     default -> help(cmd);
                 };
             }
@@ -75,9 +77,50 @@ public class GameplayClient implements ChessClient{
         return "Valid moves\n";
     }
 
+    /**
+     * Allows the user to input what move they want to make.
+     * The board is updated to reflect the result of the move,
+     * and the board automatically updates on all clients involved in the game.
+     *
+     * @param params input from client
+     */
     public String move(String... params) {
+        //Validate number of parameters
+        if(params.length != 2) {
+            return "Expected <start> <end>\n";
+        }
+        //Get parameters
+        String start = params[0];
+        String end = params[1];
+        //Validate start coordinate
+        if(isBadCoordinate(start)) {
+            return "\"" + start + "\" is not a valid start position  (e.g., \"a2\")";
+        }
+        //Validate end coordinate
+        if(isBadCoordinate(end)) {
+            return "\"" + end + "\" is not a valid end position  (e.g., \"a2\")";
+        }
+        //Get start position
+        ChessPosition startPosition = getChessPosition(start);
+        //Get end position
+        ChessPosition endPosition = getChessPosition(end);
+        //Construct chess move
+        ChessMove move = new ChessMove(startPosition, endPosition, null);
+        //Client side validation
+        ChessGame game = gameData.game();
+        ChessBoard board = game.getBoard();
+        ChessPiece piece = board.getPiece(startPosition);
+        if(piece == null) {return "No piece at \"" + start + "\"";}
+        ChessGame.TeamColor pieceColor = piece.getTeamColor();
+        if(isWhite && pieceColor == ChessGame.TeamColor.BLACK) {
+            return String.format("Wrong team. Piece at %s is %s", start, pieceColor);
+        } else if (!isWhite && pieceColor == ChessGame.TeamColor.WHITE) {
+            return String.format("Wrong team. Piece at %s is %s", start, pieceColor);
+        }
+//        game.is
         return "Made move\n";
     }
+
 
     public String leave() {
         try {
@@ -89,14 +132,8 @@ public class GameplayClient implements ChessClient{
         }
     }
 
-    public String logout() {
-        try {
-            facade.logout();
-            repl.setState(new PreLoginClient(facade, repl));
-            return "Signed out.\n";
-        } catch (Exception e) {
-            return e.getMessage() + "\n";
-        }
+    public String resign() {
+        return "You resigned\n";
     }
 
 
@@ -108,7 +145,7 @@ public class GameplayClient implements ChessClient{
 
         sb.append(String.format("%-35s | %s%n", "redraw (-r)", "Redraws the chess board"));
         sb.append(String.format("%-35s | %s%n", "highlight (-hi)", "Show legal moves for a piece"));
-        sb.append(String.format("%-35s | %s%n", "move (-m)", "Make a move"));
+        sb.append(String.format("%-35s | %s%n", "move <FROM> <TO> (-m)", "Make a move"));
         sb.append(String.format("%-35s | %s%n", "leave (-l)", "Exit the game"));
         sb.append(String.format("%-35s | %s%n", "resign (-rs)", "Forfeit the game"));
         sb.append(String.format("%-35s | %s%n", "help (-h)", "Show these options again"));
@@ -125,19 +162,30 @@ public class GameplayClient implements ChessClient{
         return gamesListIndex++;
     }
 
-    private String getGameName(int id) {
-        String gameName = null;
+    private GameData getGame(int id) throws Exception {
+        GameData game = null;
         try{
             Map<String, Collection<GameData>> games = facade.listGames();
             Collection<GameData> results = games.get("games");
             for(GameData result : results) {
                 if(result.gameID() == id) {
-                    gameName = result.gameName();
+                    game = result;
                 }
             }
-            return gameName;
+            return game;
         } catch (Exception e) {
-            return e.getMessage() + "\n";
+            throw new Exception(e.getMessage());
         }
+    }
+
+    private boolean isBadCoordinate(String s) {
+        return !s.matches("[a-h][1-8]");
+    }
+
+    private ChessPosition getChessPosition(String coordinate) {
+        //Construct chess position
+        int col = coordinate.charAt(0) - 'a' + 1;
+        int row = coordinate.charAt(1) - '0';
+        return new ChessPosition(row, col);
     }
 }

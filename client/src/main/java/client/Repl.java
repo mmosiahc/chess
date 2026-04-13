@@ -34,17 +34,6 @@ public class Repl implements ServerMessageObserver {
                 setUsername(result);
                 System.out.print(result);
                 System.out.println();
-//                if(result.startsWith("You joined")) {
-//                    boolean isWhite = result.endsWith("WHITE\n");
-//                    boolean isObserver = result.endsWith("observer\n");
-//                    if(isWhite) {
-//                        DrawChessBoard.main(true);
-//                    } else if (isObserver) {
-//                        DrawChessBoard.main(true);
-//                    } else {
-//                        DrawChessBoard.main(false);
-//                    }
-//                }
                 if(!result.equals("quit")) {
                     System.out.print(printPrompt(client));
                 }
@@ -53,7 +42,10 @@ public class Repl implements ServerMessageObserver {
                 System.out.print(msg);
             }
         }
-        System.out.println();
+        boolean inGameplay = client instanceof GameplayClient;
+        if(!inGameplay){
+            System.out.println();
+        }
     }
 
     public void notifyClient(ServerMessage message, String json) {
@@ -75,7 +67,7 @@ public class Repl implements ServerMessageObserver {
             NotificationMessage nMsg = new Gson().fromJson(json, NotificationMessage.class);
             msg = nMsg.getMessage();
         }
-        System.out.print(msg + "\n");
+        System.out.print(msg);
     }
 
 

@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import data_transfer.*;
 import com.google.gson.reflect.TypeToken;
@@ -10,6 +11,7 @@ import exceptions.UnauthorizedException;
 import model.GameData;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
+import websocket.commands.MoveCommand;
 import websocket.commands.UserGameCommand;
 
 import java.lang.reflect.Type;
@@ -91,6 +93,19 @@ public class ServerFacade {
     public void observerJoins(String username, Integer gameID) {
         ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, gameID, username, null);
         ws.observerJoins(connect);
+    }
+
+    /**
+     * Constructs make move command to
+     * pass to websocket communicator
+     *
+     * @param username name of player
+     * @param gameID id of game
+     * @param move chess move being made
+     */
+    public void makeMove(String username, Integer gameID, ChessMove move) {
+        MoveCommand moveCommand = new MoveCommand(UserGameCommand.CommandType.MAKE_MOVE, token, gameID, move, username);
+        ws.makeMove(moveCommand);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String token) {

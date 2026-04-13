@@ -71,9 +71,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(command.getGameID(), session);
         //Prepare message depending on player or observer
         if(command.getColor() != null) {
-            msg = String.format("\n%s joined the game as %s\n", command.getUsername(), command.getColor());
+            msg = String.format("\n%s joined the game as %s", command.getUsername(), command.getColor());
         } else {
-            msg = String.format("\n%s joined the game as an observer\n", command.getUsername());
+            msg = String.format("\n%s joined the game as an observer", command.getUsername());
         }
         //Make notification
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
@@ -98,7 +98,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * users in the game. Removes websocket
      * connection.
      *
-     * @param connect info to send
+     * @param command information sent from client
+     * @param session websocket handle
      */
     private void leave(LeaveCommand command, Session session) throws Exception {
         //Remove player from game
@@ -113,7 +114,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Update game data
         gameService.updateGame(g);
         //Broadcast websocket notification
-        String msg = String.format("\n%s left the game\n", command.getUsername());
+        String msg = String.format("\n%s left the game", command.getUsername());
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
         connections.broadcast(session, notification);
         //Remove websocket connection
