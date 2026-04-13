@@ -88,6 +88,11 @@ public class ServerFacade {
         ws.playerLeaves(leave);
     }
 
+    public void observerJoins(String username, Integer gameID) {
+        ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, gameID, username, null);
+        ws.observerJoins(connect);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body, String token) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(url + path))

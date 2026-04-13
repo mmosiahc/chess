@@ -57,13 +57,33 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
+    /**
+     * Adds websocket connection for user
+     * and broadcasts actions to all users
+     * of the game
+     *
+     * @param command information sent from client
+     * @param session websocket handle
+     */
     private void joinPlayer(ConnectCommand command, Session session) throws Exception {
+        String msg;
+        //Add session to set of connections
         connections.add(command.getGameID(), session);
-        var msg = String.format("%s joined the game as %s\n", command.getUsername(), command.getColor());
+        //Prepare message depending on player or observer
+        if(command.getColor() != null) {
+            msg = String.format("\n%s joined the game as %s\n", command.getUsername(), command.getColor());
+        } else {
+            msg = String.format("\n%s joined the game as an observer\n", command.getUsername());
+        }
+        //Make notification
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+        //Broadcast notification to all users in game
         connections.broadcast(session, notification);
+        //Get game data from database
         GameData gameData = gameService.getGame(command.getGameID());
+        //Prepare load game message to client
         LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData);
+        //Send load game message
         connections.sendLoadGame(loadGame, session);
     }
 
@@ -71,20 +91,33 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
+    /**
+     * Removes user from the game
+     * and updatest the game.
+     * Broadcasts notification to all
+     * users in the game. Removes websocket
+     * connection.
+     *
+     * @param connect info to send
+     */
     private void leave(LeaveCommand command, Session session) throws Exception {
         //Remove player from game
         GameData g = gameService.getGame(command.getGameID());
+        //Check for team color
         boolean playingWhite = g.whiteUsername().equals(command.getUsername());
         if(playingWhite) {
             g = new GameData(g.gameID(), null, g.blackUsername(), g.gameName(), g.game());
         } else {
             g = new GameData(g.gameID(), g.whiteUsername(), null, g.gameName(), g.game());
         }
+        //Update game data
         gameService.updateGame(g);
-        //Send websocket notification
-        String msg = String.format("%s left the game", command.getUsername());
+        //Broadcast websocket notification
+        String msg = String.format("\n%s left the game\n", command.getUsername());
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
         connections.broadcast(session, notification);
+        //Remove websocket connection
+        connections.remove(g.gameID(), session);
     }
 
     private void resign(ResignCommand command) {

@@ -4,7 +4,6 @@ import chess.ChessGame;
 import data_transfer.CreateGameResult;
 import data_transfer.JoinGameBody;
 import model.GameData;
-import ui.DrawChessBoard;
 import ui.EscapeSequences;
 
 import java.util.Arrays;
@@ -161,22 +160,29 @@ public class PostLoginClient implements ChessClient{
     }
 
     public String observe(String... params) {
+        //Validate parameters
         if(params.length != 1) {
             return "Expected <game_id>\n";
         }
         int id;
+        //Validate id
         try {
             id = Integer.parseInt(params[0]);
         } catch (NumberFormatException e) {
             return String.format("\"%s\" wasn't a valid number.\n", params[0]);
         }
         try {
+            //Get game by id
             GameData game = getGame(id);
+            //Check for valid id
             if(game == null) {
                 return String.format("Invalid game id \"%s\"\n", id);
             }
+            //Change client repl loop
             repl.setState(new GameplayClient(facade, repl, game));
-            DrawChessBoard.drawNewBoard(true);
+            //Open websocket connection
+            facade.observerJoins(Repl.username, game.gameID());
+//            DrawChessBoard.drawNewBoard(true);
             return String.format("You joined \"" + game.gameName() + "\" as an %s\n", "observer");
         } catch (Exception e) {
             return e.getMessage() + "\n";
