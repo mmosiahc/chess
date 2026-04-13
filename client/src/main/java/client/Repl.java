@@ -59,20 +59,23 @@ public class Repl implements ServerMessageObserver {
     public void notifyClient(ServerMessage message, String json) {
         if(message.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             loadGame(message, json);
+        } else {
+            printMessage(message, json);
         }
-        printMessage(message, json);
     }
 
     public void printMessage(ServerMessage message, String json) {
         String msg;
         if (message.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
-            ErrorMessage eMsg = new Gson().fromJson(json, ErrorMessage.class);
-            msg = eMsg.getErrorMessage();
+            if(json != null) {
+                ErrorMessage eMsg = new Gson().fromJson(json, ErrorMessage.class);
+                msg = eMsg.getErrorMessage();
+            } else {msg = message.getMessage();}
         } else {
             NotificationMessage nMsg = new Gson().fromJson(json, NotificationMessage.class);
             msg = nMsg.getMessage();
         }
-        System.out.print(msg+ "\n");
+        System.out.print(msg + "\n");
     }
 
 
@@ -82,7 +85,7 @@ public class Repl implements ServerMessageObserver {
         GameplayClient.gameData = msg.getGame();
         boolean isWhite = username.equals(data.whiteUsername());
 //        DrawChessBoard.drawBoardFromGame(data.game(), isWhite);
-        System.out.print(data.game().toString());
+        System.out.print("\n" + data.game().toString());
     }
 
     String printPrompt(ChessClient client) {

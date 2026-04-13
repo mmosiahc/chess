@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
-import websocket.messages.ErrorMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -32,12 +31,12 @@ public class WebsocketCommunicator extends Endpoint {
                         ServerMessage message = new Gson().fromJson(s, ServerMessage.class);
                         observer.notifyClient(message, s);
                     } catch (Exception e) {
-                        observer.notifyClient(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), null);
+                        observer.notifyClient(new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), null);
                     }
                 }
             });
         } catch (URISyntaxException | DeploymentException | IOException e) {
-            observer.notifyClient(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), null);
+            observer.notifyClient(new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), null);
         }
     }
 

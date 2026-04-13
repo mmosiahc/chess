@@ -38,6 +38,23 @@ public class PostLoginClient implements ChessClient{
 
     }
 
+    private void updateGamesList() {
+        try {
+            Map<String, Collection<GameData>> games = facade.listGames();
+            Collection<GameData> results = games.get("games");
+            for(GameData result : results) {
+                boolean exists = gamesList.containsKey(result.gameID());
+                int id = result.gameID();
+                if(!exists) {
+                    gamesList.put(id, generateIndex());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage()  + "\n");
+        }
+
+    }
+
     public String eval(String input) {
         try {
             String[] tokens = input.toLowerCase().split(" ");
@@ -83,6 +100,7 @@ public class PostLoginClient implements ChessClient{
     }
 
     public String list() {
+        updateGamesList();
         System.out.print(EscapeSequences.ERASE_SCREEN);
         System.out.flush();
 
