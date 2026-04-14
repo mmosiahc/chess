@@ -88,6 +88,7 @@ public class GameplayClient implements ChessClient{
      * @param params input from client
      */
     public String move(String... params) {
+        if(gameData.game().isGameOver()) {return "The game is over. You cannot make any more moves.\n";}
         //Check for observer
         if(isObserver) {return "Just observing. Remember?\n";}
         //Validate number of parameters
@@ -95,8 +96,8 @@ public class GameplayClient implements ChessClient{
             return "Expected <start> <end>\n";
         }
         //Get parameters
-        String start = params[0];
-        String end = params[1];
+        String start = params[0].toLowerCase();
+        String end = params[1].toLowerCase();
         //Check if same positon
         if(start.equals(end)) {return String.format("%s and %s are the same position\n", start, end);}
         //Validate start coordinate syntax
@@ -171,7 +172,7 @@ public class GameplayClient implements ChessClient{
     }
 
     private String chessMoveValidation(String[] params, ChessMove move) {
-        String validationMsg = "";
+        String validationMsg = ""; //Passes validation
         //Get parameters
         String start = params[0];
         String end = params[1];
@@ -180,13 +181,15 @@ public class GameplayClient implements ChessClient{
         ChessBoard board = game.getBoard();
         ChessPiece startPiece = board.getPiece(move.getStartPosition());
         ChessPiece endPiece = board.getPiece(move.getEndPosition());
+        //Check for no piece
         if(startPiece == null) {return String.format("No piece at %s\n", start);}
+        //Check for wrong team
         ChessGame.TeamColor pieceColor = startPiece.getTeamColor();
         if(!teamColor.equals(pieceColor)) {
             return String.format("Wrong team. Piece at %s is %s\n", start, pieceColor);
         }
+        //Capture own team
         if(endPiece.getTeamColor().equals(teamColor)) {return String.format("Piece at %s is your team's piece\n", end);}
-        if(game.getGameOver(teamColor)) {return "The game is over. You cannot make any more moves.\n";}
         return validationMsg;
     }
 
