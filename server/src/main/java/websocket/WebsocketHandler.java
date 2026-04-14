@@ -1,7 +1,6 @@
 package websocket;
 
-import chess.ChessGame;
-import chess.InvalidMoveException;
+import chess.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import io.javalin.websocket.*;
@@ -105,7 +104,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ChessGame game = g.game();
         //Check for valid move
         boolean isValid = game.testMove(command.getMove());
-        if(!isValid) {throw new InvalidMoveException("Move is invalid\n");}
+        if(!isValid) {throw new InvalidMoveException("\nMove is invalid");}
         //Make move in game
         game.makeMove(command.getMove());
         //Save new game data to database
@@ -115,7 +114,58 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newG);
         //Broadcast load game message
         connections.broadcastAll(loadGame);
+        //Prepare move notification
+        ChessBoard originalBoard = g.game().getBoard();
+        String moveMessage = prepareMoveMsg(originalBoard, command);
+        NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
+        //Broadcast move notification
+        connections.broadcastExclude(session, moveNotification);
+        //Prepare game status notification
+        String status = getStatusNotification(newG, command);
+        if(status != null) {
+            //Broadcast game status notification
+            NotificationMessage gameStatus = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, status);
+            connections.broadcastAll(gameStatus);
+        }
+    }
 
+    private String getStatusNotification(GameData gameData, MoveCommand command) {
+        ChessGame.TeamColor opponentColor;
+        ChessGame game = gameData.game();
+        boolean isOpponentBlack = command.getUsername().equals(gameData.whiteUsername());
+        if(isOpponentBlack) {
+            opponentColor = ChessGame.TeamColor.BLACK;
+        } else {
+            opponentColor = ChessGame.TeamColor.WHITE;
+        }
+        if (game.isInCheckmate(opponentColor)) {
+            return String.format("\nCheckmate! %s wins.", command.getUsername());
+        }
+        if (game.isInStalemate(opponentColor)) {
+            return "\nStalemate! The game is a draw.";
+        }
+        if (game.isInCheck(opponentColor)) {
+            if(isOpponentBlack) {
+                return String.format("\n%s is in check!", gameData.blackUsername());
+            }
+            return String.format("\n%s is in check!", gameData.whiteUsername());
+        }
+        return null; // No special status
+    }
+
+    private String prepareMoveMsg(ChessBoard board, MoveCommand command) {
+        ChessPiece.PieceType type = board.getPiece(command.getMove().getStartPosition()).getPieceType();
+        String start = getRankAndFile(command.getMove().getStartPosition());
+        String end = getRankAndFile(command.getMove().getEndPosition());
+        return String.format("\n%s moved %s at %s to %s", command.getUsername(), type, start, end);
+    }
+
+    private String getRankAndFile(ChessPosition position) {
+        int col = position.getColumn();
+        int row = position.getRow();
+        char file  = (char) ((char) col - 1 + 'a');
+        char rank  = (char) ((char) row + '0');
+        return "" + file + rank;
     }
 
     /**
