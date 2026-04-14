@@ -37,15 +37,14 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastExclude(Session excludeSession, ServerMessage message) throws Exception {
+    public void broadcastExclude(Session excludeSession, ServerMessage message, Integer gameID) throws Exception {
         try {
-            String json = new Gson().toJson(message, ServerMessage.class);
-            for(Set<Session> sessions : wsConnections.values()) {
-                for(Session s : sessions) {
-                    if(s.isOpen()) {
-                        if(!s.equals(excludeSession)) {
-                            s.getRemote().sendString(json);
-                        }
+            String json = new Gson().toJson(message);
+            Set<Session> sessions = wsConnections.get(gameID);
+            for(Session s : sessions) {
+                if(s.isOpen()) {
+                    if(!s.equals(excludeSession)) {
+                        s.getRemote().sendString(json);
                     }
                 }
             }
@@ -54,14 +53,13 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastAll(ServerMessage message) throws Exception {
+    public void broadcastAll(ServerMessage message, Integer gameID) throws Exception {
         try {
-            String json = new Gson().toJson(message, ServerMessage.class);
-            for(Set<Session> sessions : wsConnections.values()) {
-                for(Session s : sessions) {
-                    if(s.isOpen()) {
-                        s.getRemote().sendString(json);
-                    }
+            String json = new Gson().toJson(message);
+            Set<Session> sessions = wsConnections.get(gameID);
+            for(Session s : sessions) {
+                if(s.isOpen()) {
+                    s.getRemote().sendString(json);
                 }
             }
         } catch (IOException e) {

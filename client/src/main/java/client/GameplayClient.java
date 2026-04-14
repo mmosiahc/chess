@@ -4,42 +4,22 @@ import chess.*;
 import model.GameData;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
     private boolean isObserver;
     private ChessGame.TeamColor teamColor;
-    static GameData gameData;
+    private GameData gameData;
 //    static DrawChessBoard boardPrinter;
-    private final HashMap<Integer, Integer> gamesList = new HashMap<>();
-    private int gamesListIndex = 1;
 
     public GameplayClient(ServerFacade facade, Repl repl, GameData game) {
         this.facade = facade;
         this.repl = repl;
-        GameplayClient.gameData = game;
+        this.gameData = game;
 //        boardPrinter = new DrawChessBoard(game.game());
-        initializeGamesList();
-        setTeamColor();
         setIsObserver();
-    }
-
-    private void initializeGamesList() {
-        try {
-            Map<String, Collection<GameData>> games = facade.listGames();
-            Collection<GameData> results = games.get("games");
-            for(GameData result : results) {
-                int id = result.gameID();
-                gamesList.put(id, generateIndex());
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage()  + "\n");
-        }
-
+        setTeamColor();
     }
 
     public String eval(String input) {
@@ -73,7 +53,7 @@ public class GameplayClient implements ChessClient{
 
 
     public String redraw() {
-        return GameplayClient.gameData.game().toString();
+        return gameData.game().toString();
     }
 
     public String highlight() {
@@ -91,6 +71,10 @@ public class GameplayClient implements ChessClient{
         if(gameData.game().isGameOver()) {return "The game is over. You cannot make any more moves.\n";}
         //Check for observer
         if(isObserver) {return "Just observing. Remember?\n";}
+        //Check whose turn it is
+        ChessGame.TeamColor teamTurn = gameData.game().getTeamTurn();
+        if(!teamTurn.equals(teamColor)) {return String.format("It is %s turn\n", teamTurn);
+        }
         //Validate number of parameters
         if(params.length != 2) {
             return "Expected <start> <end>\n";
@@ -156,9 +140,11 @@ public class GameplayClient implements ChessClient{
         return sb.toString();
     }
 
-    private int generateIndex() {
-        return gamesListIndex++;
+    public void updateGameState(ChessGame game) {
+        GameData g = this.gameData;
+        this.gameData = new GameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName(), game);
     }
+
 
     private boolean isBadCoordinate(String s) {
         return !s.matches("[a-h][1-8]");
@@ -189,22 +175,30 @@ public class GameplayClient implements ChessClient{
             return String.format("Wrong team. Piece at %s is %s\n", start, pieceColor);
         }
         //Capture own team
-        if(endPiece.getTeamColor().equals(teamColor)) {return String.format("Piece at %s is your team's piece\n", end);}
+        if(endPiece != null) {
+            if(endPiece.getTeamColor().equals(teamColor)) {return String.format("Piece at %s is your team's piece\n", end);}
+        }
         return validationMsg;
     }
 
     private void setTeamColor() {
-        boolean isWhite = Repl.username.equals(gameData.whiteUsername());
-        if (isWhite) {
-            teamColor = ChessGame.TeamColor.WHITE;
-        } else {
-            teamColor = ChessGame.TeamColor.BLACK;
+        if(!isObserver) {
+            if(gameData.whiteUsername() != null) {
+                if(Repl.username.equals(gameData.whiteUsername())) {
+                    teamColor = ChessGame.TeamColor.WHITE;
+                }
+            }
+            if(gameData.blackUsername() != null) {
+                if(Repl.username.equals(gameData.blackUsername())) {
+                    teamColor = ChessGame.TeamColor.BLACK;
+                }
+            }
         }
     }
 
+
     private void setIsObserver() {
-        String user = Repl.username;
-        if(!user.equals(gameData.whiteUsername()) && !user.equals(gameData.blackUsername())) {
+        if(gameData.whiteUsername() == null && gameData.blackUsername() == null) {
             isObserver = true;
         }
     }

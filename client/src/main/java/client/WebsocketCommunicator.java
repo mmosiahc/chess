@@ -5,6 +5,9 @@ import jakarta.websocket.*;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
 import websocket.commands.MoveCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -30,14 +33,28 @@ public class WebsocketCommunicator extends Endpoint {
                 public void onMessage(String s) {
                     try {
                         ServerMessage message = new Gson().fromJson(s, ServerMessage.class);
-                        observer.notifyClient(message, s);
+                        switch (message.getServerMessageType()) {
+                            case LOAD_GAME -> {
+                                LoadGameMessage loadGame = new Gson().fromJson(s, LoadGameMessage.class);
+                                observer.notifyClientLoadMessage(loadGame);
+                            }
+                            case NOTIFICATION -> {
+                                NotificationMessage notification = new Gson().fromJson(s, NotificationMessage.class);
+                                observer.notifyClientNotification(notification);
+                            }
+                            case ERROR -> {
+                                ErrorMessage error = new Gson().fromJson(s, ErrorMessage.class);
+                                observer.notifyClientError(error);
+                            }
+                        }
                     } catch (Exception e) {
-                        observer.notifyClient(new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), null);
+                        observer.notifyClientError(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
                     }
                 }
             });
         } catch (URISyntaxException | DeploymentException | IOException e) {
-            observer.notifyClient(new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), null);
+            observer.notifyClientError(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+
         }
     }
 

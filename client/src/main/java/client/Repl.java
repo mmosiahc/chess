@@ -1,11 +1,9 @@
 package client;
 
-import com.google.gson.Gson;
 import model.GameData;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 
@@ -48,35 +46,21 @@ public class Repl implements ServerMessageObserver {
         }
     }
 
-    public void notifyClient(ServerMessage message, String json) {
-        if(message.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
-            loadGame(message, json);
-        } else {
-            printMessage(message, json);
-        }
+    public void notifyClientNotification(NotificationMessage message) {
+        System.out.print(message.getMessage());
+
     }
 
-    public void printMessage(ServerMessage message, String json) {
-        String msg;
-        if (message.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
-            if(json != null) {
-                ErrorMessage eMsg = new Gson().fromJson(json, ErrorMessage.class);
-                msg = eMsg.getErrorMessage();
-            } else {msg = message.getMessage();}
-        } else {
-            NotificationMessage nMsg = new Gson().fromJson(json, NotificationMessage.class);
-            msg = nMsg.getMessage();
-        }
-        System.out.print(msg);
+    public void notifyClientError(ErrorMessage message) {
+        System.out.print(message.getErrorMessage());
     }
 
 
-    public void loadGame(ServerMessage message, String json) {
-        LoadGameMessage msg = new Gson().fromJson(json, LoadGameMessage.class);
-        GameData data = msg.getGame();
-        GameplayClient.gameData = msg.getGame();
-        boolean isWhite = username.equals(data.whiteUsername());
-//        DrawChessBoard.drawBoardFromGame(data.game(), isWhite);
+    public void notifyClientLoadMessage(LoadGameMessage message) {
+        GameData data = message.getGame();
+        if(client instanceof GameplayClient) {
+            ((GameplayClient) client).updateGameState(message.getGame().game());
+        }
         System.out.print("\n" + data.game().toString());
     }
 

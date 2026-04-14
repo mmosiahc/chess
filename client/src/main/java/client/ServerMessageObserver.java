@@ -1,8 +1,11 @@
 package client;
 
-import websocket.messages.ServerMessage;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 
 public interface ServerMessageObserver {
-    void notifyClient(ServerMessage message, String json);
-    void printMessage(ServerMessage message, String json);
+    void notifyClientLoadMessage(LoadGameMessage message);
+    void notifyClientNotification(NotificationMessage message);
+    void notifyClientError(ErrorMessage message);
 }

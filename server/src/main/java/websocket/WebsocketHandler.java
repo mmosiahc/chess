@@ -79,7 +79,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Make notification
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
         //Broadcast notification to all users in game
-        connections.broadcastExclude(session, notification);
+        connections.broadcastExclude(session, notification, command.getGameID());
         //Get game data from database
         GameData gameData = gameService.getGame(command.getGameID());
         //Prepare load game message to client
@@ -106,26 +106,28 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         boolean isValid = game.testMove(command.getMove());
         if(!isValid) {throw new InvalidMoveException("\nMove is invalid");}
         //Make move in game
+        System.out.println(game.toString());
         game.makeMove(command.getMove());
+        System.out.println(game.toString());
         //Save new game data to database
         GameData newG = new GameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName(), game);
         gameService.updateGame(newG);
         //Prepare load game message to client
         LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newG);
         //Broadcast load game message
-        connections.broadcastAll(loadGame);
+        connections.broadcastAll(loadGame, command.getGameID());
         //Prepare move notification
-        ChessBoard originalBoard = g.game().getBoard();
-        String moveMessage = prepareMoveMsg(originalBoard, command);
-        NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
-        //Broadcast move notification
-        connections.broadcastExclude(session, moveNotification);
+//        ChessBoard originalBoard = g.game().getBoard();
+//        String moveMessage = prepareMoveMsg(originalBoard, command);
+//        NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
+//        //Broadcast move notification
+//        connections.broadcastExclude(session, moveNotification, command.getGameID());
         //Prepare game status notification
         String status = getStatusNotification(newG, command);
         if(status != null) {
             //Broadcast game status notification
             NotificationMessage gameStatus = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, status);
-            connections.broadcastAll(gameStatus);
+            connections.broadcastAll(gameStatus, command.getGameID());
         }
     }
 
@@ -179,21 +181,31 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * @param session websocket handle
      */
     private void leave(LeaveCommand command, Session session) throws Exception {
-        //Remove player from game
+        //Get game by game id
         GameData g = gameService.getGame(command.getGameID());
-        //Check for team color
-        boolean playingWhite = g.whiteUsername().equals(command.getUsername());
-        if(playingWhite) {
-            g = new GameData(g.gameID(), null, g.blackUsername(), g.gameName(), g.game());
-        } else {
-            g = new GameData(g.gameID(), g.whiteUsername(), null, g.gameName(), g.game());
+        //Check for player or observer
+        boolean isObserver = g.whiteUsername() == null && g.blackUsername() == null;
+        if(!isObserver) {
+            //Check for team color
+            boolean playingWhite = false;
+            if(g.whiteUsername() != null) {
+                if(command.getUsername().equals(g.whiteUsername())) {
+                    playingWhite = true;
+                }
+            }
+            if(playingWhite) {
+                g = new GameData(g.gameID(), null, g.blackUsername(), g.gameName(), g.game());
+            } else {
+                g = new GameData(g.gameID(), g.whiteUsername(), null, g.gameName(), g.game());
+            }
+            //Update game data
+            gameService.updateGame(g);
         }
-        //Update game data
-        gameService.updateGame(g);
+
         //Broadcast websocket notification
         String msg = String.format("\n%s left the game", command.getUsername());
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
-        connections.broadcastExclude(session, notification);
+        connections.broadcastExclude(session, notification, command.getGameID());
         //Remove websocket connection
         connections.remove(g.gameID(), session);
     }
