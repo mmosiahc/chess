@@ -72,7 +72,7 @@ public class GameplayClient implements ChessClient{
     }
 
 
-    public String redraw(String... params) {
+    public String redraw() {
         return GameplayClient.gameData.game().toString();
     }
 
@@ -114,6 +114,7 @@ public class GameplayClient implements ChessClient{
         //Validate move
         String validateMsg = chessMoveValidation(params, move);
         if(!validateMsg.isEmpty()) {return validateMsg;}
+        facade.makeMove(Repl.username, gameData.gameID(), move);
         return "Made move\n";
     }
 

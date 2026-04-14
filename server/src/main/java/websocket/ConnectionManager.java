@@ -2,8 +2,7 @@ package websocket;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,24 +28,39 @@ public class ConnectionManager {
         }
     }
 
-    public void sendLoadGame(LoadGameMessage message, Session session) throws Exception {
+    public void sendServerMessage(ServerMessage message, Session session) throws Exception {
         try {
-            String jsonLoadGame = new Gson().toJson(message);
-            session.getRemote().sendString(jsonLoadGame);
+            String jsonMessage = new Gson().toJson(message);
+            session.getRemote().sendString(jsonMessage);
         } catch (IOException e) {
-            throw new Exception("Failed to send load game message");
+            throw new Exception("Failed to send websocket message");
         }
     }
 
-    public void broadcast(Session excludeSession, NotificationMessage message) throws Exception {
+    public void broadcastExclude(Session excludeSession, ServerMessage message) throws Exception {
         try {
-            String json = new Gson().toJson(message, NotificationMessage.class);
+            String json = new Gson().toJson(message, ServerMessage.class);
             for(Set<Session> sessions : wsConnections.values()) {
                 for(Session s : sessions) {
                     if(s.isOpen()) {
                         if(!s.equals(excludeSession)) {
                             s.getRemote().sendString(json);
                         }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Failed to send websocket notification");
+        }
+    }
+
+    public void broadcastAll(ServerMessage message) throws Exception {
+        try {
+            String json = new Gson().toJson(message, ServerMessage.class);
+            for(Set<Session> sessions : wsConnections.values()) {
+                for(Session s : sessions) {
+                    if(s.isOpen()) {
+                        s.getRemote().sendString(json);
                     }
                 }
             }

@@ -226,7 +226,7 @@ public class ChessGame {
         return board;
     }
 
-    private boolean testMove(ChessMove move) {
+    public boolean testMove(ChessMove move) {
         boolean badMove = false;
         ChessPiece piece = board.getPiece(move.getStartPosition());
         ChessPiece takenPiece = null;

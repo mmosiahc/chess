@@ -1,5 +1,7 @@
 package websocket;
 
+import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import io.javalin.websocket.*;
@@ -78,16 +80,41 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Make notification
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
         //Broadcast notification to all users in game
-        connections.broadcast(session, notification);
+        connections.broadcastExclude(session, notification);
         //Get game data from database
         GameData gameData = gameService.getGame(command.getGameID());
         //Prepare load game message to client
         LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData);
         //Send load game message
-        connections.sendLoadGame(loadGame, session);
+        connections.sendServerMessage(loadGame, session);
     }
 
-    private void makeMove(MoveCommand command, Session session) {
+    /**
+     * Validates the chess move. Updates game
+     * state and saves it in the database. Sends
+     * load game message to all clients in game.
+     * Broadcasts move and status of check, checkmate,
+     * and stalemate to clients.
+     *
+     * @param command chess move information sent from client
+     * @param session websocket handle
+     */
+    private void makeMove(MoveCommand command, Session session) throws Exception {
+        //Get game by game id
+        GameData g = gameService.getGame(command.getGameID());
+        ChessGame game = g.game();
+        //Check for valid move
+        boolean isValid = game.testMove(command.getMove());
+        if(!isValid) {throw new InvalidMoveException("Move is invalid\n");}
+        //Make move in game
+        game.makeMove(command.getMove());
+        //Save new game data to database
+        GameData newG = new GameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName(), game);
+        gameService.updateGame(newG);
+        //Prepare load game message to client
+        LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newG);
+        //Broadcast load game message
+        connections.broadcastAll(loadGame);
 
     }
 
@@ -116,7 +143,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Broadcast websocket notification
         String msg = String.format("\n%s left the game", command.getUsername());
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
-        connections.broadcast(session, notification);
+        connections.broadcastExclude(session, notification);
         //Remove websocket connection
         connections.remove(g.gameID(), session);
     }
