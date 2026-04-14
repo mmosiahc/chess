@@ -197,6 +197,10 @@ public class ChessGame {
         }
     }
 
+    public boolean getGameOver(TeamColor teamColor) {
+        return isInCheckmate(teamColor) || isInStalemate(teamColor);
+    }
+
     public boolean checkTeamMoves(TeamColor teamColor) {
         Collection<ChessMove> teamMoves = board.getTeamMoves(teamColor);
         Collection<ChessMove> validTeamMoves;

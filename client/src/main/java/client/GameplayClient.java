@@ -11,7 +11,8 @@ import java.util.Map;
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
-    private final boolean isWhite = Repl.username.equals(gameData.whiteUsername());
+    private boolean isObserver;
+    private ChessGame.TeamColor teamColor;
     static GameData gameData;
 //    static DrawChessBoard boardPrinter;
     private final HashMap<Integer, Integer> gamesList = new HashMap<>();
@@ -23,6 +24,8 @@ public class GameplayClient implements ChessClient{
         GameplayClient.gameData = game;
 //        boardPrinter = new DrawChessBoard(game.game());
         initializeGamesList();
+        setTeamColor();
+        setIsObserver();
     }
 
     private void initializeGamesList() {
@@ -85,6 +88,8 @@ public class GameplayClient implements ChessClient{
      * @param params input from client
      */
     public String move(String... params) {
+        //Check for observer
+        if(isObserver) {return "Just observing. Remember?\n";}
         //Validate number of parameters
         if(params.length != 2) {
             return "Expected <start> <end>\n";
@@ -92,13 +97,13 @@ public class GameplayClient implements ChessClient{
         //Get parameters
         String start = params[0];
         String end = params[1];
-        //Validate start coordinate
-        if(isBadCoordinate(start)) {
-            return "\"" + start + "\" is not a valid start position  (e.g., \"a2\")";
+        //Check if same positon
+        if(start.equals(end)) {return String.format("%s and %s are the same position\n", start, end);}
+        //Validate start coordinate syntax
+        if(isBadCoordinate(start)) {return String.format("%s is not a valid start position (e.g., \"a2\")\n", start);
         }
-        //Validate end coordinate
-        if(isBadCoordinate(end)) {
-            return "\"" + end + "\" is not a valid end position  (e.g., \"a2\")";
+        //Validate end coordinate syntax
+        if(isBadCoordinate(end)) {return String.format("%s is not a valid end position (e.g., \"a2\")\n", end);
         }
         //Get start position
         ChessPosition startPosition = getChessPosition(start);
@@ -106,18 +111,9 @@ public class GameplayClient implements ChessClient{
         ChessPosition endPosition = getChessPosition(end);
         //Construct chess move
         ChessMove move = new ChessMove(startPosition, endPosition, null);
-        //Client side validation
-        ChessGame game = gameData.game();
-        ChessBoard board = game.getBoard();
-        ChessPiece piece = board.getPiece(startPosition);
-        if(piece == null) {return "No piece at \"" + start + "\"";}
-        ChessGame.TeamColor pieceColor = piece.getTeamColor();
-        if(isWhite && pieceColor == ChessGame.TeamColor.BLACK) {
-            return String.format("Wrong team. Piece at %s is %s", start, pieceColor);
-        } else if (!isWhite && pieceColor == ChessGame.TeamColor.WHITE) {
-            return String.format("Wrong team. Piece at %s is %s", start, pieceColor);
-        }
-//        game.is
+        //Validate move
+        String validateMsg = chessMoveValidation(params, move);
+        if(!validateMsg.isEmpty()) {return validateMsg;}
         return "Made move\n";
     }
 
@@ -162,22 +158,6 @@ public class GameplayClient implements ChessClient{
         return gamesListIndex++;
     }
 
-    private GameData getGame(int id) throws Exception {
-        GameData game = null;
-        try{
-            Map<String, Collection<GameData>> games = facade.listGames();
-            Collection<GameData> results = games.get("games");
-            for(GameData result : results) {
-                if(result.gameID() == id) {
-                    game = result;
-                }
-            }
-            return game;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
     private boolean isBadCoordinate(String s) {
         return !s.matches("[a-h][1-8]");
     }
@@ -187,5 +167,41 @@ public class GameplayClient implements ChessClient{
         int col = coordinate.charAt(0) - 'a' + 1;
         int row = coordinate.charAt(1) - '0';
         return new ChessPosition(row, col);
+    }
+
+    private String chessMoveValidation(String[] params, ChessMove move) {
+        String validationMsg = "";
+        //Get parameters
+        String start = params[0];
+        String end = params[1];
+        //Client side validation
+        ChessGame game = gameData.game();
+        ChessBoard board = game.getBoard();
+        ChessPiece startPiece = board.getPiece(move.getStartPosition());
+        ChessPiece endPiece = board.getPiece(move.getEndPosition());
+        if(startPiece == null) {return String.format("No piece at %s\n", start);}
+        ChessGame.TeamColor pieceColor = startPiece.getTeamColor();
+        if(!teamColor.equals(pieceColor)) {
+            return String.format("Wrong team. Piece at %s is %s\n", start, pieceColor);
+        }
+        if(endPiece.getTeamColor().equals(teamColor)) {return String.format("Piece at %s is your team's piece\n", end);}
+        if(game.getGameOver(teamColor)) {return "The game is over. You cannot make any more moves.\n";}
+        return validationMsg;
+    }
+
+    private void setTeamColor() {
+        boolean isWhite = Repl.username.equals(gameData.whiteUsername());
+        if (isWhite) {
+            teamColor = ChessGame.TeamColor.WHITE;
+        } else {
+            teamColor = ChessGame.TeamColor.BLACK;
+        }
+    }
+
+    private void setIsObserver() {
+        String user = Repl.username;
+        if(!user.equals(gameData.whiteUsername()) && !user.equals(gameData.blackUsername())) {
+            isObserver = true;
+        }
     }
 }
