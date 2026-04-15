@@ -3,12 +3,17 @@ package websocket;
 import chess.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import exceptions.BadRequestException;
+import exceptions.DataAccessException;
+import exceptions.UnauthorizedException;
 import io.javalin.websocket.*;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import websocket.commands.*;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -23,12 +28,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleClose(@NotNull WsCloseContext ctx) throws Exception {
+    public void handleClose(@NotNull WsCloseContext ctx) {
         System.out.println("Websocket closed");
     }
 
     @Override
-    public void handleConnect(@NotNull WsConnectContext ctx) throws Exception {
+    public void handleConnect(@NotNull WsConnectContext ctx) {
         System.out.println("Websocket connected");
         ctx.enableAutomaticPings();
     }
@@ -67,6 +72,17 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * @param session websocket handle
      */
     private void joinPlayer(ConnectCommand command, Session session) throws Exception {
+        try {
+            //Validate User authorization
+            AuthData authData = gameService.getAuthData(command.getAuthToken());
+            if(authData == null) {throw new UnauthorizedException();}
+            //Validate game request
+            GameData gameData = gameService.getGame(command.getGameID());
+            if(gameData == null) {throw new BadRequestException();}
+        } catch (DataAccessException e) {
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
+            throw new Exception(e.getMessage());
+        }
         String msg;
         //Add session to set of connections
         connections.add(command.getGameID(), session);
@@ -99,16 +115,32 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * @param session websocket handle
      */
     private void makeMove(MoveCommand command, Session session) throws Exception {
+        try {
+            //Validate User authorization
+            AuthData authData = gameService.getAuthData(command.getAuthToken());
+            if(authData == null) {throw new UnauthorizedException();}
+            //Validate game request
+            GameData gameData = gameService.getGame(command.getGameID());
+            if(gameData == null) {throw new BadRequestException();}
+        } catch (DataAccessException e) {
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
+            throw new Exception(e.getMessage());
+        }
         //Get game by game id
         GameData g = gameService.getGame(command.getGameID());
         ChessGame game = g.game();
-        //Check for valid move
-        boolean isValid = game.testMove(command.getMove());
-        if(!isValid) {throw new InvalidMoveException("\nMove is invalid");}
-        //Make move in game
-        System.out.println(game.toString());
-        game.makeMove(command.getMove());
-        System.out.println(game.toString());
+        //Prepare move notification
+        ChessBoard originalBoard = g.game().getBoard();
+        String moveMessage = prepareMoveMsg(originalBoard, command);
+        NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
+        try {
+            //Make move in game
+            game.makeMove(command.getMove());
+        } catch (InvalidMoveException e) {
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
+            throw new Exception(e.getMessage());
+        }
+
         //Save new game data to database
         GameData newG = new GameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName(), game);
         gameService.updateGame(newG);
@@ -116,12 +148,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newG);
         //Broadcast load game message
         connections.broadcastAll(loadGame, command.getGameID());
-        //Prepare move notification
-//        ChessBoard originalBoard = g.game().getBoard();
-//        String moveMessage = prepareMoveMsg(originalBoard, command);
-//        NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
-//        //Broadcast move notification
-//        connections.broadcastExclude(session, moveNotification, command.getGameID());
+        //Broadcast move notification
+        connections.broadcastExclude(session, moveNotification, command.getGameID());
         //Prepare game status notification
         String status = getStatusNotification(newG, command);
         if(status != null) {
@@ -181,6 +209,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * @param session websocket handle
      */
     private void leave(LeaveCommand command, Session session) throws Exception {
+        //Validate User authorization
+        AuthData authData = gameService.getAuthData(command.getAuthToken());
+        if(authData == null) {throw new UnauthorizedException();}
+        //Validate game request
+        GameData gameData = gameService.getGame(command.getGameID());
+        if(gameData == null) {throw new BadRequestException();}
         //Get game by game id
         GameData g = gameService.getGame(command.getGameID());
         //Check for player or observer
@@ -201,7 +235,6 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             //Update game data
             gameService.updateGame(g);
         }
-
         //Broadcast websocket notification
         String msg = String.format("\n%s left the game", command.getUsername());
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
