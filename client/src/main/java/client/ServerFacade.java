@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import data_transfer.*;
@@ -85,8 +86,8 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    public void sendLeaveCommand(String username, Integer gameID) {
-        LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID, username);
+    public void sendLeaveCommand(String username, Integer gameID, boolean isObserver, ChessGame.TeamColor teamColor) {
+        LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID, username, isObserver, teamColor);
         ws.playerLeaves(leave);
     }
 

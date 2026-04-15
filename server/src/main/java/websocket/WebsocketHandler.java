@@ -218,16 +218,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Get game by game id
         GameData g = gameService.getGame(command.getGameID());
         //Check for player or observer
-        boolean isObserver = g.whiteUsername() == null && g.blackUsername() == null;
-        if(!isObserver) {
-            //Check for team color
-            boolean playingWhite = false;
-            if(g.whiteUsername() != null) {
-                if(command.getUsername().equals(g.whiteUsername())) {
-                    playingWhite = true;
-                }
-            }
-            if(playingWhite) {
+        if(!command.getIsObserver()) {
+            if(command.getTeamColor() == ChessGame.TeamColor.WHITE) {
                 g = new GameData(g.gameID(), null, g.blackUsername(), g.gameName(), g.game());
             } else {
                 g = new GameData(g.gameID(), g.whiteUsername(), null, g.gameName(), g.game());

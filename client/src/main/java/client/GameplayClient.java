@@ -111,7 +111,7 @@ public class GameplayClient implements ChessClient{
     public String leave() {
         try {
             repl.setState(new PostLoginClient(facade, repl, username));
-            facade.sendLeaveCommand(username, gameData.gameID());
+            facade.sendLeaveCommand(username, gameData.gameID(), isObserver, teamColor);
             return String.format("You left \"" + gameData.gameName() + "\"\n");
         } catch (Exception e) {
             return e.getMessage() + "\n";

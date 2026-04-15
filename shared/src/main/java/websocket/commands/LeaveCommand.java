@@ -1,5 +1,7 @@
 package websocket.commands;
 
+import chess.ChessGame;
+
 import java.util.Objects;
 
 /**
@@ -10,14 +12,25 @@ import java.util.Objects;
  */
 public class LeaveCommand extends UserGameCommand {
     private final String username;
-
-    public LeaveCommand(CommandType type, String token, Integer gameID, String username) {
+    private final boolean isObserver;
+    private final ChessGame.TeamColor teamColor;
+    public LeaveCommand(CommandType type, String token, Integer gameID, String username, boolean isObserver, ChessGame.TeamColor teamColor) {
         super(type, token, gameID);
         this.username = username;
+        this.isObserver = isObserver;
+        this.teamColor = teamColor;
     }
 
     public String getUsername() {
         return username;
+    }
+
+    public boolean getIsObserver() {
+        return isObserver;
+    }
+
+    public ChessGame.TeamColor getTeamColor() {
+        return teamColor;
     }
 
     @Override
