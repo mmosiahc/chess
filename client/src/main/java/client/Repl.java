@@ -32,7 +32,7 @@ public class Repl implements ServerMessageObserver {
                 setUsername(result);
                 System.out.print(result);
                 System.out.println();
-                if(!result.equals("quit")) {
+                if(!result.isEmpty() && !result.equals("quit")) {
                     System.out.print(printPrompt(client));
                 }
             } catch (Throwable e) {
@@ -47,12 +47,12 @@ public class Repl implements ServerMessageObserver {
     }
 
     public void notifyClientNotification(NotificationMessage message) {
-        System.out.print(message.getMessage());
+        System.out.println(message.getMessage());
 
     }
 
     public void notifyClientError(ErrorMessage message) {
-        System.out.print(message.getErrorMessage());
+        System.out.println(message.getErrorMessage());
     }
 
 
@@ -62,6 +62,9 @@ public class Repl implements ServerMessageObserver {
             ((GameplayClient) client).updateGameState(message.getGame().game());
         }
         System.out.print("\n" + data.game().toString());
+        if(client instanceof GameplayClient) {
+            System.out.print(printPrompt(client));
+        }
     }
 
     String printPrompt(ChessClient client) {

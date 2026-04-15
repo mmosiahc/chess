@@ -36,7 +36,8 @@ public class GameplayClient implements ChessClient{
                     case "-m" -> move(params);
                     case "-l" -> leave();
                     case "-rs" -> resign();
-                    default -> help(cmd);
+                    case "-h" -> help();
+                    default -> failed(cmd);
                 };
             }else {
                 return switch (cmd) {
@@ -45,7 +46,8 @@ public class GameplayClient implements ChessClient{
                     case "move" -> move(params);
                     case "leave" -> leave();
                     case "resign" -> resign();
-                    default -> help(cmd);
+                    case "help" -> help();
+                    default -> failed(cmd);
                 };
             }
         } catch (Exception ex) {
@@ -102,7 +104,7 @@ public class GameplayClient implements ChessClient{
         String validateMsg = chessMoveValidation(params, move);
         if(!validateMsg.isEmpty()) {return validateMsg;}
         facade.makeMove(username, gameData.gameID(), move);
-        return "Made move\n";
+        return "";
     }
 
 
@@ -121,25 +123,19 @@ public class GameplayClient implements ChessClient{
     }
 
 
-    public String help(String failedCommand) {
-        StringBuilder sb = new StringBuilder();
+    public String help() {
+        return String.format("%-35s | %s%n", "Command", "Description") +
+                "-".repeat(55) + "\n" +
+                String.format("%-35s | %s%n", "redraw (-r)", "Redraws the chess board") +
+                String.format("%-35s | %s%n", "highlight (-hi)", "Show legal moves for a piece") +
+                String.format("%-35s | %s%n", "move <FROM> <TO> (-m)", "Make a move") +
+                String.format("%-35s | %s%n", "leave (-l)", "Exit the game") +
+                String.format("%-35s | %s%n", "resign (-rs)", "Forfeit the game") +
+                String.format("%-35s | %s%n", "help (-h)", "Show these options again");
+    }
 
-        sb.append(String.format("%-35s | %s%n", "Command", "Description"));
-        sb.append("-".repeat(55)).append("\n");
-
-        sb.append(String.format("%-35s | %s%n", "redraw (-r)", "Redraws the chess board"));
-        sb.append(String.format("%-35s | %s%n", "highlight (-hi)", "Show legal moves for a piece"));
-        sb.append(String.format("%-35s | %s%n", "move <FROM> <TO> (-m)", "Make a move"));
-        sb.append(String.format("%-35s | %s%n", "leave (-l)", "Exit the game"));
-        sb.append(String.format("%-35s | %s%n", "resign (-rs)", "Forfeit the game"));
-        sb.append(String.format("%-35s | %s%n", "help (-h)", "Show these options again"));
-
-        if(failedCommand.equalsIgnoreCase("help") || failedCommand.equalsIgnoreCase("-h")) {
-            return sb.toString();
-        }
-        sb.append("\nExpected <Command> got \"").append(failedCommand).append("\"\n");
-
-        return sb.toString();
+    public String failed(String failedCommand) {
+        return String.format("Expected <Command> got \"%s\" | (-h) for help\n", failedCommand);
     }
 
     public void updateGameState(ChessGame game) {

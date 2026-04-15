@@ -27,14 +27,16 @@ public class PreLoginClient implements ChessClient{
                     case "-r" -> register(params);
                     case "-l" -> login(params);
                     case "-q" -> "quit";
-                    default -> help(cmd);
+                    case "-h" -> help();
+                    default -> failed(cmd);
                 };
             }else {
                 return switch (cmd) {
                     case "register" -> register(params);
                     case "login" -> login(params);
                     case "quit" -> "quit";
-                    default -> help(cmd);
+                    case "help" -> help();
+                    default -> failed(cmd);
                 };
             }
 
@@ -71,23 +73,16 @@ public class PreLoginClient implements ChessClient{
         }
     }
 
-    public String help(String failedCommand) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(String.format("%-45s | %s%n", "Command", "Description"));
-        sb.append("-".repeat(67)).append("\n");
-
-        sb.append(String.format("%-45s | %s%n", "register <USERNAME> <PASSWORD> <EMAIL> (-r)", "Create a new account"));
-        sb.append(String.format("%-45s | %s%n", "login <USERNAME> <PASSWORD> (-l)", "Login to your account"));
-        sb.append(String.format("%-45s | %s%n", "quit (-q)", "Exit the application"));
-        sb.append(String.format("%-45s | %s%n", "help (-h)", "Show these options again"));
-
-        if(failedCommand.equalsIgnoreCase("help") || failedCommand.equalsIgnoreCase("-h")) {
-            return sb.toString();
-        }
-        sb.append("\nExpected <Command> got \"").append(failedCommand).append("\"\n");
-
-        return sb.toString();
+    public String help() {
+        return String.format("%-45s | %s%n", "Command", "Description") +
+                "-".repeat(67) + "\n" +
+                String.format("%-45s | %s%n", "register <USERNAME> <PASSWORD> <EMAIL> (-r)", "Create a new account") +
+                String.format("%-45s | %s%n", "login <USERNAME> <PASSWORD> (-l)", "Login to your account") +
+                String.format("%-45s | %s%n", "quit (-q)", "Exit the application") +
+                String.format("%-45s | %s%n", "help (-h)", "Show these options again");
     }
 
+    public String failed(String failedCommand) {
+        return String.format("Expected <Command> got \"%s\" | (-h) for help\n", failedCommand);
+    }
 }

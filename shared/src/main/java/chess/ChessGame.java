@@ -11,9 +11,11 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
+
     private TeamColor currentTeam;
     private ChessBoard board;
     private boolean isGameOver = false;
+
     public ChessGame() {
         this.currentTeam = TeamColor.WHITE;
         this.board = new ChessBoard();
@@ -254,6 +256,7 @@ public class ChessGame {
         }
         board.addPiece(move.getStartPosition(), piece);
         board.addPiece(move.getEndPosition(), takenPiece);
+
         return !badMove;
     }
 

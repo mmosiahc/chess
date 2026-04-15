@@ -69,7 +69,8 @@ public class PostLoginClient implements ChessClient{
                     case "-o" -> observe(params);
                     case "-lo" -> logout();
                     case "-q" -> "quit";
-                    default -> help(cmd);
+                    case "-h" -> help();
+                    default -> failed(cmd);
                 };
             }else {
                 return switch (cmd) {
@@ -79,7 +80,8 @@ public class PostLoginClient implements ChessClient{
                     case "observe" -> observe(params);
                     case "logout" -> logout();
                     case "quit" -> "quit";
-                    default -> help(cmd);
+                    case "help" -> help();
+                    default -> failed(cmd);
                 };
             }
         } catch (Exception ex) {
@@ -203,26 +205,20 @@ public class PostLoginClient implements ChessClient{
     }
 
 
-    public String help(String failedCommand) {
-        StringBuilder sb = new StringBuilder();
+    public String help() {
+        return String.format("%-35s | %s%n", "Command", "Description") +
+                "-".repeat(55) + "\n" +
+                String.format("%-35s | %s%n", "create <GAME_NAME> (-c)", "Create a new game") +
+                String.format("%-35s | %s%n", "list (-l)", "List all current games") +
+                String.format("%-35s | %s%n", "join <GAME_ID> [WHITE|BLACK] (-j)", "Join a game as a player") +
+                String.format("%-35s | %s%n", "observe <GAME_ID> (-o)", "Watch a game as a spectator") +
+                String.format("%-35s | %s%n", "logout (-lo)", "Log out of your account") +
+                String.format("%-35s | %s%n", "quit (-q)", "Exit the application") +
+                String.format("%-35s | %s%n", "help (-h)", "Show these options again");
+    }
 
-        sb.append(String.format("%-35s | %s%n", "Command", "Description"));
-        sb.append("-".repeat(55)).append("\n");
-
-        sb.append(String.format("%-35s | %s%n", "create <GAME_NAME> (-c)", "Create a new game"));
-        sb.append(String.format("%-35s | %s%n", "list (-l)", "List all current games"));
-        sb.append(String.format("%-35s | %s%n", "join <GAME_ID> [WHITE|BLACK] (-j)", "Join a game as a player"));
-        sb.append(String.format("%-35s | %s%n", "observe <GAME_ID> (-o)", "Watch a game as a spectator"));
-        sb.append(String.format("%-35s | %s%n", "logout (-lo)", "Log out of your account"));
-        sb.append(String.format("%-35s | %s%n", "quit (-q)", "Exit the application"));
-        sb.append(String.format("%-35s | %s%n", "help (-h)", "Show these options again"));
-
-        if(failedCommand.equalsIgnoreCase("help") || failedCommand.equalsIgnoreCase("-h")) {
-            return sb.toString();
-        }
-        sb.append("\nExpected <Command> got \"").append(failedCommand).append("\"\n");
-
-        return sb.toString();
+    public String failed(String failedCommand) {
+        return String.format("Expected <Command> got \"%s\" | (-h) for help\n", failedCommand);
     }
 
     private int generateIndex() {
