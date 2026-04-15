@@ -130,11 +130,20 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         GameData g = gameService.getGame(command.getGameID());
         ChessGame game = g.game();
         if(game.isGameOver()) {
-            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid Move: Game is over\n"), session);
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid Move: game is over\n"), session);
             throw new InvalidMoveException("Invalid Move: Game is over\n");
         }
-        //Prepare move notification
+        //Validate correct team
         ChessBoard originalBoard = g.game().getBoard();
+        ChessPosition moveStartPosition = command.getMove().getStartPosition();
+        ChessGame.TeamColor userColor = originalBoard.getPiece(moveStartPosition).getTeamColor();
+        ChessGame.TeamColor teamTurn = g.game().getTeamTurn();
+        if(userColor.equals(teamTurn)) {
+            String errorMsg = String.format("Invalid Move: piece at %s is %s\n", moveStartPosition, teamTurn);
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, errorMsg), session);
+            throw new InvalidMoveException(errorMsg);
+        }
+        //Prepare move notification
         String moveMessage = prepareMoveMsg(originalBoard, command);
         NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
         try {
