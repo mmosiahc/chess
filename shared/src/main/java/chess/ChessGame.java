@@ -83,6 +83,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if(isGameOver) {throw new InvalidMoveException("Game is over\n");}
         ChessPiece piece = board.getPiece(move.getStartPosition());
         otherHelper(piece, move);
         pawnHelper(piece, move);

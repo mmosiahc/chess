@@ -119,17 +119,16 @@ public class GameplayClient implements ChessClient{
     }
 
     public String resign(String... params) {
-        String response;
+        String response = "";
         if(params.length == 0) {
             return "Are you sure you want to resign? [y/n]\n";
         }
-        response = this.resignConfirmed(params);
+        this.resignConfirmed();
         return response;
     }
 
-    public String resignConfirmed(String... params) {
+    public void resignConfirmed() {
         facade.sendResignCommand(gameData.gameID());
-        return "You resigned\n";
     }
 
 

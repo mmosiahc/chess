@@ -125,6 +125,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             //Validate User authorization
             AuthData authData = gameService.getAuthData(command.getAuthToken());
             if(authData == null) {throw new UnauthorizedException();}
+            //Set username
             user = authData.username();
             //Validate game request
             g = gameService.getGame(command.getGameID());
@@ -169,25 +170,25 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Prepare move notification
         String moveMessage = prepareMoveMsg(originalBoard, move, user);
         NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
+        //Try to execute move
         try {
-            //Make move in game
+            //Execute move in game
             game.makeMove(move);
         } catch (InvalidMoveException e) {
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
             throw new Exception(e.getMessage());
         }
 
-        //Save new game data to database
-        GameData newG = new GameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName(), game);
-        gameService.updateGame(newG);
+        //Update game data in database
+        gameService.updateGame(g);
         //Prepare load game message to client
-        LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newG);
+        LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, g);
         //Broadcast load game message
         connections.broadcastAll(loadGame, command.getGameID());
         //Broadcast move notification
         connections.broadcastExclude(session, moveNotification, command.getGameID());
         //Prepare game status notification
-        String status = getStatusNotification(newG, move, user);
+        String status = getStatusNotification(g, move, user);
         if(status != null) {
             //Broadcast game status notification
             NotificationMessage gameStatus = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, status);
@@ -278,9 +279,36 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * users in the game that the root client resigned.
      *
      * @param command information sent from client
-     * @param session websocket handle
      */
-    private void resign(ResignCommand command, Session session) {
-
+    private void resign(ResignCommand command, Session session) throws Exception {
+        String user;
+        //Validate User authorization
+        AuthData authData = gameService.getAuthData(command.getAuthToken());
+        if(authData == null) {throw new UnauthorizedException();}
+        //Set username
+        user = authData.username();
+        //Validate game request
+        GameData gameData = gameService.getGame(command.getGameID());
+        if(gameData == null) {throw new BadRequestException();}
+        //Check for observer
+        boolean isObserver = !user.equals(gameData.whiteUsername()) && !user.equals(gameData.blackUsername());
+        if(isObserver) {
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "User is an observer\n"), session);
+            throw new InvalidMoveException("Invalid Move: user is an observer\n");
+        }
+        //Check if game is already over
+        ChessGame game = gameData.game();
+        if(game.isGameOver()) {
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Game is over\n"), session);
+            throw new InvalidMoveException("Game is over\n");
+        }
+        //Mark game as over
+        game.setGameOver(true);
+        //Update game in database
+        gameService.updateGame(gameData);
+        //Broadcast websocket notification that player resigned
+        String msg = String.format("\n%s forfeits the game", authData.username());
+        NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+        connections.broadcastAll(notification, command.getGameID());
     }
 }
