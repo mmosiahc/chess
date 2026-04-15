@@ -103,7 +103,7 @@ public class GameplayClient implements ChessClient{
         //Validate move
         String validateMsg = chessMoveValidation(params, move);
         if(!validateMsg.isEmpty()) {return validateMsg;}
-        facade.makeMove(username, gameData.gameID(), move);
+        facade.makeMove(gameData.gameID(), move);
         return "";
     }
 

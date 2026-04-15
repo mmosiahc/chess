@@ -115,31 +115,55 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * @param session websocket handle
      */
     private void makeMove(MoveCommand command, Session session) throws Exception {
+        ChessMove move = command.getMove();
+        String user;
+        GameData g;
         try {
             //Validate User authorization
             AuthData authData = gameService.getAuthData(command.getAuthToken());
             if(authData == null) {throw new UnauthorizedException();}
+            user = authData.username();
             //Validate game request
-            GameData gameData = gameService.getGame(command.getGameID());
-            if(gameData == null) {throw new BadRequestException();}
+            g = gameService.getGame(command.getGameID());
+            if(g == null) {throw new BadRequestException();}
         } catch (DataAccessException e) {
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
             throw new Exception(e.getMessage());
         }
-        //Get game by game id
-        GameData g = gameService.getGame(command.getGameID());
+        //Check if game is over
         ChessGame game = g.game();
         if(game.isGameOver()) {
-            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid Move: Game is over\n"), session);
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid Move: game is over\n"), session);
             throw new InvalidMoveException("Invalid Move: Game is over\n");
         }
-        //Prepare move notification
+        //Determine user color
+        ChessGame.TeamColor userColor = null;
+        if(g.whiteUsername() != null) {
+            if(user.equals(g.whiteUsername())) {
+                userColor = ChessGame.TeamColor.WHITE;
+            }
+        }
+        if(g.blackUsername() != null) {
+            if(user.equals(g.blackUsername())) {
+                userColor = ChessGame.TeamColor.BLACK;
+            }
+        }
+        //Validate correct team
         ChessBoard originalBoard = g.game().getBoard();
-        String moveMessage = prepareMoveMsg(originalBoard, command);
+        ChessPosition moveStartPosition = move.getStartPosition();
+        ChessGame.TeamColor teamTurn = g.game().getTeamTurn();
+        assert userColor != null;
+        if(!userColor.equals(teamTurn)) {
+            String errorMsg = String.format("Invalid Move: piece at %s is %s\n", moveStartPosition, teamTurn);
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, errorMsg), session);
+            throw new InvalidMoveException(errorMsg);
+        }
+        //Prepare move notification
+        String moveMessage = prepareMoveMsg(originalBoard, move, user);
         NotificationMessage moveNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
         try {
             //Make move in game
-            game.makeMove(command.getMove());
+            game.makeMove(move);
         } catch (InvalidMoveException e) {
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
             throw new Exception(e.getMessage());
@@ -155,7 +179,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Broadcast move notification
         connections.broadcastExclude(session, moveNotification, command.getGameID());
         //Prepare game status notification
-        String status = getStatusNotification(newG, command);
+        String status = getStatusNotification(newG, move, user);
         if(status != null) {
             //Broadcast game status notification
             NotificationMessage gameStatus = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, status);
@@ -163,18 +187,18 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private String getStatusNotification(GameData gameData, MoveCommand command) {
+    private String getStatusNotification(GameData gameData, ChessMove move, String username) {
         ChessGame.TeamColor opponentColor;
         ChessGame game = gameData.game();
         ChessBoard board = game.getBoard();
-        ChessGame.TeamColor userColor = board.getPiece(command.getMove().getEndPosition()).getTeamColor();
+        ChessGame.TeamColor userColor = board.getPiece(move.getEndPosition()).getTeamColor();
         if(userColor == ChessGame.TeamColor.BLACK) {
             opponentColor = ChessGame.TeamColor.WHITE;
         } else {
             opponentColor = ChessGame.TeamColor.BLACK;
         }
         if (game.isInCheckmate(opponentColor)) {
-            return String.format("\nCheckmate! %s wins.", command.getUsername());
+            return String.format("\nCheckmate! %s wins.", username);
         }
         if (game.isInStalemate(opponentColor)) {
             return "\nStalemate! The game is a draw.";
@@ -188,11 +212,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return null; // No special status
     }
 
-    private String prepareMoveMsg(ChessBoard board, MoveCommand command) {
-        ChessPiece.PieceType type = board.getPiece(command.getMove().getStartPosition()).getPieceType();
-        String start = getRankAndFile(command.getMove().getStartPosition());
-        String end = getRankAndFile(command.getMove().getEndPosition());
-        return String.format("\n%s moved %s at %s to %s", command.getUsername(), type, start, end);
+    private String prepareMoveMsg(ChessBoard board, ChessMove move, String user) {
+        ChessPiece.PieceType type = board.getPiece(move.getStartPosition()).getPieceType();
+        String start = getRankAndFile(move.getStartPosition());
+        String end = getRankAndFile(move.getEndPosition());
+        return String.format("\n%s moved %s at %s to %s", user, type, start, end);
     }
 
     private String getRankAndFile(ChessPosition position) {

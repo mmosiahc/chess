@@ -153,7 +153,7 @@ public class PostLoginClient implements ChessClient{
         try {
             JoinGameBody request = new JoinGameBody(teamColor, id);
             //Call join endpoint & open websocket connection
-            facade.joinGame(request, Repl.username);
+            facade.joinGame(request, username);
             GameData game = getGame(id);
             //Change client repl loop
             repl.setState(new GameplayClient(facade, repl, game, username, false));
@@ -184,7 +184,7 @@ public class PostLoginClient implements ChessClient{
                 return String.format("Invalid game id \"%s\"\n", id);
             }
             //Open websocket connection
-            facade.observerJoins(Repl.username, game.gameID());
+            facade.observerJoins(username, game.gameID());
             //Change client repl loop
             repl.setState(new GameplayClient(facade, repl, game, username, true));
 //            DrawChessBoard.drawNewBoard(true);

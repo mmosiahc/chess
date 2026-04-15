@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class Repl implements ServerMessageObserver {
 
-    static String username = null;
+    private String username = null;
     private final ServerFacade facade;
     private ChessClient client;
 

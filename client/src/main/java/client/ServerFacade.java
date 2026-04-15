@@ -100,12 +100,11 @@ public class ServerFacade {
      * Constructs make move command to
      * pass to websocket communicator
      *
-     * @param username name of player
      * @param gameID id of game
      * @param move chess move being made
      */
-    public void makeMove(String username, Integer gameID, ChessMove move) {
-        MoveCommand moveCommand = new MoveCommand(UserGameCommand.CommandType.MAKE_MOVE, token, gameID, move, username);
+    public void makeMove(Integer gameID, ChessMove move) {
+        MoveCommand moveCommand = new MoveCommand(UserGameCommand.CommandType.MAKE_MOVE, token, gameID, move);
         ws.makeMove(moveCommand);
     }
 
