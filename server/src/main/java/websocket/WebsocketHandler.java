@@ -112,9 +112,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         //Prepare message depending on player or observer
         if(Objects.nonNull(userColor)) {
-            msg = String.format("\n[Player:%s] %s joined the game", user, userColor);
+            msg = String.format("[Player:%s] %s joined the game", user, userColor);
         } else {
-            msg = String.format("\n[Observer:%s] joined the game", user);
+            msg = String.format("[Observer:%s] joined the game", user);
         }
         //Make notification
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);

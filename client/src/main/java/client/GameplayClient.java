@@ -72,12 +72,13 @@ public class GameplayClient implements ChessClient{
      * @param params input from client
      */
     public String move(String... params) {
-        if(gameData.game().isGameOver()) {return "The game is over. You cannot make any more moves.\n";}
         //Check for observer
-        if(isObserver) {return "Just observing. Remember?\n";}
+        if(isObserver) {return "Just observing. Remember?";}
+        //Check if game is over
+        if(gameData.game().isGameOver()) {return "The game is over. You cannot make any more moves.";}
         //Check whose turn it is
         ChessGame.TeamColor teamTurn = gameData.game().getTeamTurn();
-        if(!teamTurn.equals(teamColor)) {return String.format("It is %s turn\n", teamTurn);
+        if(!teamTurn.equals(teamColor)) {return String.format("It is %s turn", teamTurn);
         }
         //Validate number of parameters
         if(params.length != 2) {
@@ -87,12 +88,12 @@ public class GameplayClient implements ChessClient{
         String start = params[0].toLowerCase();
         String end = params[1].toLowerCase();
         //Check if same positon
-        if(start.equals(end)) {return String.format("%s and %s are the same position\n", start, end);}
+        if(start.equals(end)) {return String.format("%s and %s are the same position", start, end);}
         //Validate start coordinate syntax
-        if(isBadCoordinate(start)) {return String.format("%s is not a valid start position (e.g., \"a2\")\n", start);
+        if(isBadCoordinate(start)) {return String.format("%s is not a valid start position (e.g., \"a2\")", start);
         }
         //Validate end coordinate syntax
-        if(isBadCoordinate(end)) {return String.format("%s is not a valid end position (e.g., \"a2\")\n", end);
+        if(isBadCoordinate(end)) {return String.format("%s is not a valid end position (e.g., \"a2\")", end);
         }
         //Get start position
         ChessPosition startPosition = getChessPosition(start);
@@ -111,7 +112,7 @@ public class GameplayClient implements ChessClient{
     public String leave() {
         try {
             repl.setState(new PostLoginClient(facade, repl, username));
-            facade.sendLeaveCommand(username, gameData.gameID(), isObserver, teamColor);
+            facade.sendLeaveCommand(gameData.gameID());
             return String.format("You left \"" + gameData.gameName() + "\"\n");
         } catch (Exception e) {
             return e.getMessage() + "\n";
@@ -119,6 +120,9 @@ public class GameplayClient implements ChessClient{
     }
 
     public String resign(String... params) {
+        if (isObserver) {return "Your an observer";}
+        //Check if game is over
+        if(gameData.game().isGameOver()) {return "The game is over.\n";}
         String response = "";
         if(params.length == 0) {
             return "Are you sure you want to resign? [y/n]\n";

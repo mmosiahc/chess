@@ -88,7 +88,7 @@ public class ServerFacade {
     }
 
     public void sendResignCommand(Integer gameID) {
-        ResignCommand resign = new ResignCommand(UserGameCommand.CommandType.LEAVE, token, gameID);
+        ResignCommand resign = new ResignCommand(UserGameCommand.CommandType.RESIGN, token, gameID);
         ws.playerResigns(resign);
     }
 

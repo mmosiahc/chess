@@ -41,10 +41,6 @@ public class Repl implements ServerMessageObserver {
                 System.out.print(msg);
             }
         }
-//        boolean inGameplay = client instanceof GameplayClient;
-//        if(!inGameplay){
-//            System.out.println();
-//        }
     }
 
     public void notifyClientNotification(NotificationMessage message) {
@@ -64,7 +60,7 @@ public class Repl implements ServerMessageObserver {
         }
         System.out.print("\n" + data.game().toString());
         if(client instanceof GameplayClient) {
-            System.out.print(printPrompt(client));
+            System.out.println(printPrompt(client) + "\n");
         }
     }
 
@@ -96,8 +92,9 @@ public class Repl implements ServerMessageObserver {
                     break;
                 } else if (input.equals("n") || input.equals("no")) {
                      response = false;
+                } else {
+                    System.out.println("Invalid input. Please enter 'y' or 'n'.\n");
                 }
-                System.out.println("Invalid input. Please enter 'y' or 'n'.\n");
             }
             if(response) {
                 client.eval("resign confirmed");
