@@ -65,7 +65,7 @@ public class WebsocketCommunicator extends Endpoint {
 
     public void playerJoins(ConnectCommand connect) {
         try {
-            this.session.getBasicRemote().sendText(new Gson().toJson(connect, ConnectCommand.class));
+            this.session.getBasicRemote().sendText(new Gson().toJson(connect));
         } catch (IOException e) {
             System.out.print(e.getMessage() + "\n");
             throw new RuntimeException(e);
@@ -79,7 +79,7 @@ public class WebsocketCommunicator extends Endpoint {
      */
     public void observerJoins(ConnectCommand connect) {
         try {
-            this.session.getBasicRemote().sendText(new Gson().toJson(connect, ConnectCommand.class));
+            this.session.getBasicRemote().sendText(new Gson().toJson(connect));
         } catch (IOException e) {
             System.out.print(e.getMessage() + "\n");
             throw new RuntimeException(e);
@@ -94,7 +94,7 @@ public class WebsocketCommunicator extends Endpoint {
      */
     public void playerLeaves(LeaveCommand leave) {
         try {
-            this.session.getBasicRemote().sendText(new Gson().toJson(leave, LeaveCommand.class));
+            this.session.getBasicRemote().sendText(new Gson().toJson(leave));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -108,7 +108,7 @@ public class WebsocketCommunicator extends Endpoint {
      */
     public void makeMove(MoveCommand move) {
         try {
-            this.session.getBasicRemote().sendText(new Gson().toJson(move, MoveCommand.class));
+            this.session.getBasicRemote().sendText(new Gson().toJson(move));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

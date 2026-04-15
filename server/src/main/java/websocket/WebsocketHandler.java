@@ -129,6 +129,10 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         //Get game by game id
         GameData g = gameService.getGame(command.getGameID());
         ChessGame game = g.game();
+        if(game.isGameOver()) {
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid Move: Game is over\n"), session);
+            throw new InvalidMoveException("Invalid Move: Game is over\n");
+        }
         //Prepare move notification
         ChessBoard originalBoard = g.game().getBoard();
         String moveMessage = prepareMoveMsg(originalBoard, command);
@@ -162,11 +166,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private String getStatusNotification(GameData gameData, MoveCommand command) {
         ChessGame.TeamColor opponentColor;
         ChessGame game = gameData.game();
-        boolean isOpponentBlack = command.getUsername().equals(gameData.whiteUsername());
-        if(isOpponentBlack) {
-            opponentColor = ChessGame.TeamColor.BLACK;
-        } else {
+        ChessBoard board = game.getBoard();
+        ChessGame.TeamColor userColor = board.getPiece(command.getMove().getEndPosition()).getTeamColor();
+        if(userColor == ChessGame.TeamColor.BLACK) {
             opponentColor = ChessGame.TeamColor.WHITE;
+        } else {
+            opponentColor = ChessGame.TeamColor.BLACK;
         }
         if (game.isInCheckmate(opponentColor)) {
             return String.format("\nCheckmate! %s wins.", command.getUsername());
@@ -175,7 +180,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return "\nStalemate! The game is a draw.";
         }
         if (game.isInCheck(opponentColor)) {
-            if(isOpponentBlack) {
+            if(opponentColor == ChessGame.TeamColor.BLACK) {
                 return String.format("\n%s is in check!", gameData.blackUsername());
             }
             return String.format("\n%s is in check!", gameData.whiteUsername());
