@@ -130,6 +130,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
             throw new Exception(e.getMessage());
         }
+        //Check for observer
+        boolean isObserver = !user.equals(g.whiteUsername()) && !user.equals(g.blackUsername());
+        if(isObserver) {
+            connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid Move: user is an observer\n"), session);
+            throw new InvalidMoveException("Invalid Move: user is an observer\n");
+        }
         //Check if game is over
         ChessGame game = g.game();
         if(game.isGameOver()) {
@@ -148,7 +154,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 userColor = ChessGame.TeamColor.BLACK;
             }
         }
-        //Validate correct team
+        //Validate correct team and observer
         ChessBoard originalBoard = g.game().getBoard();
         ChessPosition moveStartPosition = move.getStartPosition();
         ChessGame.TeamColor teamTurn = g.game().getTeamTurn();
