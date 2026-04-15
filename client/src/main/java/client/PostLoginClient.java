@@ -14,12 +14,14 @@ import java.util.Map;
 public class PostLoginClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
+    private final String username;
     private final HashMap<Integer, Integer> gamesList = new HashMap<>();
     private int gamesListIndex = 1;
 
-    public PostLoginClient(ServerFacade facade, Repl repl) {
+    public PostLoginClient(ServerFacade facade, Repl repl, String username) {
         this.facade = facade;
         this.repl = repl;
+        this.username = username;
         initializeGamesList();
     }
 
@@ -152,7 +154,7 @@ public class PostLoginClient implements ChessClient{
             facade.joinGame(request, Repl.username);
             GameData game = getGame(id);
             //Change client repl loop
-            repl.setState(new GameplayClient(facade, repl, game));
+            repl.setState(new GameplayClient(facade, repl, game, username, false));
 //            DrawChessBoard.drawNewBoard(isWhite);
             return (String.format("You joined \"" + game.gameName() + "\" as %s\n", teamColor));
         } catch (Exception e) {
@@ -182,7 +184,7 @@ public class PostLoginClient implements ChessClient{
             //Open websocket connection
             facade.observerJoins(Repl.username, game.gameID());
             //Change client repl loop
-            repl.setState(new GameplayClient(facade, repl, game));
+            repl.setState(new GameplayClient(facade, repl, game, username, true));
 //            DrawChessBoard.drawNewBoard(true);
             return String.format("You joined \"" + game.gameName() + "\" as an %s\n", "observer");
         } catch (Exception e) {

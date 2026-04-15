@@ -8,17 +8,19 @@ import java.util.Arrays;
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
     private final Repl repl;
-    private boolean isObserver;
+    private final String username;
+    private final boolean isObserver;
     private ChessGame.TeamColor teamColor;
     private GameData gameData;
 //    static DrawChessBoard boardPrinter;
 
-    public GameplayClient(ServerFacade facade, Repl repl, GameData game) {
+    public GameplayClient(ServerFacade facade, Repl repl, GameData game, String username, boolean isObserver) {
         this.facade = facade;
         this.repl = repl;
         this.gameData = game;
+        this.username = username;
+        this.isObserver = isObserver;
 //        boardPrinter = new DrawChessBoard(game.game());
-        setIsObserver();
         setTeamColor();
     }
 
@@ -99,15 +101,15 @@ public class GameplayClient implements ChessClient{
         //Validate move
         String validateMsg = chessMoveValidation(params, move);
         if(!validateMsg.isEmpty()) {return validateMsg;}
-        facade.makeMove(Repl.username, gameData.gameID(), move);
+        facade.makeMove(username, gameData.gameID(), move);
         return "Made move\n";
     }
 
 
     public String leave() {
         try {
-            repl.setState(new PostLoginClient(facade, repl));
-            facade.sendLeaveCommand(Repl.username, gameData.gameID());
+            repl.setState(new PostLoginClient(facade, repl, username));
+            facade.sendLeaveCommand(username, gameData.gameID());
             return String.format("You left \"" + gameData.gameName() + "\"\n");
         } catch (Exception e) {
             return e.getMessage() + "\n";
@@ -184,22 +186,15 @@ public class GameplayClient implements ChessClient{
     private void setTeamColor() {
         if(!isObserver) {
             if(gameData.whiteUsername() != null) {
-                if(Repl.username.equals(gameData.whiteUsername())) {
+                if(username.equals(gameData.whiteUsername())) {
                     teamColor = ChessGame.TeamColor.WHITE;
                 }
             }
             if(gameData.blackUsername() != null) {
-                if(Repl.username.equals(gameData.blackUsername())) {
+                if(username.equals(gameData.blackUsername())) {
                     teamColor = ChessGame.TeamColor.BLACK;
                 }
             }
-        }
-    }
-
-
-    private void setIsObserver() {
-        if(gameData.whiteUsername() == null && gameData.blackUsername() == null) {
-            isObserver = true;
         }
     }
 }

@@ -50,7 +50,7 @@ public class PreLoginClient implements ChessClient{
         try {
             RegisterRequest request = new RegisterRequest(params[0], params[1], params[2]);
             RegisterResult result = facade.register(request);
-            repl.setState(new PostLoginClient(facade, repl));
+            repl.setState(new PostLoginClient(facade, repl, result.username()));
             return String.format("You signed in as %s\n", result.username());
         } catch (Exception e) {
             return e.getMessage() + "\n";
@@ -64,7 +64,7 @@ public class PreLoginClient implements ChessClient{
         try {
             LoginRequest request = new LoginRequest(params[0], params[1]);
             LoginResult result = facade.login(request);
-            repl.setState(new PostLoginClient(facade, repl));
+            repl.setState(new PostLoginClient(facade, repl, result.username()));
             return String.format("You signed in as %s\n", result.username());
         } catch (Exception e) {
             return e.getMessage() + "\n";
