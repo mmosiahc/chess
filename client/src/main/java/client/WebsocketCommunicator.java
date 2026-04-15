@@ -5,6 +5,7 @@ import jakarta.websocket.*;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
 import websocket.commands.MoveCommand;
+import websocket.commands.ResignCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -95,6 +96,20 @@ public class WebsocketCommunicator extends Endpoint {
     public void playerLeaves(LeaveCommand leave) {
         try {
             this.session.getBasicRemote().sendText(new Gson().toJson(leave));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Sends resign command for a user to
+     * forfeit the game.
+     *
+     * @param resign info to send to server
+     */
+    public void playerResigns(ResignCommand resign) {
+        try {
+            this.session.getBasicRemote().sendText(new Gson().toJson(resign));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

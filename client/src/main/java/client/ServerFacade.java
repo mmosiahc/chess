@@ -3,17 +3,14 @@ package client;
 import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
-import data_transfer.*;
 import com.google.gson.reflect.TypeToken;
+import data_transfer.*;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.DataAccessException;
 import exceptions.UnauthorizedException;
 import model.GameData;
-import websocket.commands.ConnectCommand;
-import websocket.commands.LeaveCommand;
-import websocket.commands.MoveCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -89,6 +86,11 @@ public class ServerFacade {
     public void sendLeaveCommand(String username, Integer gameID, boolean isObserver, ChessGame.TeamColor teamColor) {
         LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID, username, isObserver, teamColor);
         ws.playerLeaves(leave);
+    }
+
+    public void sendResignCommand(Integer gameID) {
+        ResignCommand resign = new ResignCommand(UserGameCommand.CommandType.LEAVE, token, gameID);
+        ws.playerResigns(resign);
     }
 
     public void observerJoins(String username, Integer gameID) {

@@ -35,7 +35,7 @@ public class GameplayClient implements ChessClient{
                     case "-hi" -> highlight();
                     case "-m" -> move(params);
                     case "-l" -> leave();
-                    case "-rs" -> resign();
+                    case "-rs" -> resign(params);
                     case "-h" -> help();
                     default -> failed(cmd);
                 };
@@ -45,7 +45,7 @@ public class GameplayClient implements ChessClient{
                     case "highlight" -> highlight();
                     case "move" -> move(params);
                     case "leave" -> leave();
-                    case "resign" -> resign();
+                    case "resign" -> resign(params);
                     case "help" -> help();
                     default -> failed(cmd);
                 };
@@ -118,7 +118,17 @@ public class GameplayClient implements ChessClient{
         }
     }
 
-    public String resign() {
+    public String resign(String... params) {
+        String response;
+        if(params.length == 0) {
+            return "Are you sure you want to resign? [y/n]\n";
+        }
+        response = this.resignConfirmed(params);
+        return response;
+    }
+
+    public String resignConfirmed(String... params) {
+        facade.sendResignCommand(gameData.gameID());
         return "You resigned\n";
     }
 

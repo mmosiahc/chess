@@ -29,9 +29,10 @@ public class Repl implements ServerMessageObserver {
 
             try {
                 result = client.eval(line);
-                setUsername(result);
                 System.out.print(result);
                 System.out.println();
+                setUsername(result);
+                askResign(scanner, result);
                 if(!result.isEmpty() && !result.equals("quit")) {
                     System.out.print(printPrompt(client));
                 }
@@ -40,10 +41,10 @@ public class Repl implements ServerMessageObserver {
                 System.out.print(msg);
             }
         }
-        boolean inGameplay = client instanceof GameplayClient;
-        if(!inGameplay){
-            System.out.println();
-        }
+//        boolean inGameplay = client instanceof GameplayClient;
+//        if(!inGameplay){
+//            System.out.println();
+//        }
     }
 
     public void notifyClientNotification(NotificationMessage message) {
@@ -81,6 +82,26 @@ public class Repl implements ServerMessageObserver {
             int start = result.indexOf(prefix) + prefix.length();
             int end = result.indexOf(suffix);
             username = result.substring(start, end);
+        }
+    }
+
+    private void askResign(Scanner scanner, String result) {
+        String prefix = "Are you sure";
+        if(result.startsWith(prefix)) {
+            String input;
+            boolean response = true;
+            while(response) {
+                input = scanner.nextLine().trim().toLowerCase();
+                if (input.equals("y") || input.equals("yes")) {
+                    break;
+                } else if (input.equals("n") || input.equals("no")) {
+                     response = false;
+                }
+                System.out.println("Invalid input. Please enter 'y' or 'n'.\n");
+            }
+            if(response) {
+                client.eval("resign confirmed");
+            }
         }
     }
 

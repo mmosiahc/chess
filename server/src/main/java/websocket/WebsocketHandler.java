@@ -56,7 +56,10 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     LeaveCommand leave = new Gson().fromJson(ctx.message(), LeaveCommand.class);
                     leave(leave, session);
                 }
-                case RESIGN -> resign((ResignCommand) message);
+                case RESIGN -> {
+                    ResignCommand resign = new Gson().fromJson(ctx.message(), ResignCommand.class);
+                    resign(resign, session);
+                }
             }
         } catch (JsonSyntaxException e) {
             throw new RuntimeException(e);
@@ -158,7 +161,6 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ChessBoard originalBoard = g.game().getBoard();
         ChessPosition moveStartPosition = move.getStartPosition();
         ChessGame.TeamColor teamTurn = g.game().getTeamTurn();
-        assert userColor != null;
         if(!userColor.equals(teamTurn)) {
             String errorMsg = String.format("Invalid Move: piece at %s is %s\n", moveStartPosition, teamTurn);
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, errorMsg), session);
@@ -270,7 +272,15 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(g.gameID(), session);
     }
 
-    private void resign(ResignCommand command) {
+    /**
+     * Marks the game as over and updatest the game.
+     * Broadcasts notification to all
+     * users in the game that the root client resigned.
+     *
+     * @param command information sent from client
+     * @param session websocket handle
+     */
+    private void resign(ResignCommand command, Session session) {
 
     }
 }
