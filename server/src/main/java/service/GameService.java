@@ -98,4 +98,8 @@ public class GameService {
     public void updateGame(GameData gameData) throws DataAccessException {
         games.updateGame(gameData);
     }
+
+    public AuthData getAuthData(String token) throws DataAccessException {
+        return authentications.getAuth(token);
+    }
 }
