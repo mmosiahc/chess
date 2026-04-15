@@ -18,6 +18,8 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
+import java.util.Objects;
+
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections;
     private final GameService gameService;
@@ -75,32 +77,49 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * @param session websocket handle
      */
     private void joinPlayer(ConnectCommand command, Session session) throws Exception {
+        String user;
+        GameData gameData;
         try {
             //Validate User authorization
             AuthData authData = gameService.getAuthData(command.getAuthToken());
             if(authData == null) {throw new UnauthorizedException();}
+            //Set username
+            user = authData.username();
             //Validate game request
-            GameData gameData = gameService.getGame(command.getGameID());
+            gameData = gameService.getGame(command.getGameID());
             if(gameData == null) {throw new BadRequestException();}
         } catch (DataAccessException e) {
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
             throw new Exception(e.getMessage());
         }
+        String wUser = gameData.whiteUsername();
+        String bUser = gameData.blackUsername();
         String msg;
         //Add session to set of connections
         connections.add(command.getGameID(), session);
+        //Check user role
+//        boolean isObserver = Objects.isNull(wUser) && Objects.isNull(bUser);
+        ChessGame.TeamColor userColor = null;
+        if(wUser != null) {
+            if(user.equals(wUser)) {
+                userColor = ChessGame.TeamColor.WHITE;
+            }
+        }
+        if(bUser != null) {
+            if(user.equals(bUser)) {
+                userColor = ChessGame.TeamColor.BLACK;
+            }
+        }
         //Prepare message depending on player or observer
-        if(command.getColor() != null) {
-            msg = String.format("\n%s joined the game as %s", command.getUsername(), command.getColor());
+        if(Objects.nonNull(userColor)) {
+            msg = String.format("\n[Player:%s] %s joined the game", user, userColor);
         } else {
-            msg = String.format("\n%s joined the game as an observer", command.getUsername());
+            msg = String.format("\n[Observer:%s] joined the game", user);
         }
         //Make notification
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
         //Broadcast notification to all users in game
         connections.broadcastExclude(session, notification, command.getGameID());
-        //Get game data from database
-        GameData gameData = gameService.getGame(command.getGameID());
         //Prepare load game message to client
         LoadGameMessage loadGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData);
         //Send load game message
@@ -280,11 +299,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             gameService.updateGame(g);
         }
         //Broadcast websocket notification
-        String msg = String.format("\n%s left the game", command.getUsername());
+        String msg = String.format("\n%s left the game", user);
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
         connections.broadcastExclude(session, notification, command.getGameID());
         //Remove websocket connection
-        connections.remove(g.gameID(), session);
+        connections.remove(command.getGameID(), session);
     }
 
     /**
@@ -308,7 +327,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         boolean isObserver = !user.equals(gameData.whiteUsername()) && !user.equals(gameData.blackUsername());
         if(isObserver) {
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "User is an observer\n"), session);
-            throw new InvalidMoveException("Invalid Move: user is an observer\n");
+            throw new InvalidMoveException("User is an observer\n");
         }
         //Check if game is already over
         ChessGame game = gameData.game();

@@ -1,6 +1,5 @@
 package client;
 
-import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -73,7 +72,7 @@ public class ServerFacade {
         var request = buildRequest("PUT", "/game", body, token);
         var response = sendRequest(request);
         handleResponse(response, null);
-        ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, body.gameID(), username, body.playerColor());
+        ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, body.gameID());
         ws.playerJoins(connect);
     }
 
@@ -83,8 +82,8 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    public void sendLeaveCommand(String username, Integer gameID, boolean isObserver, ChessGame.TeamColor teamColor) {
-        LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID, username, isObserver, teamColor);
+    public void sendLeaveCommand(Integer gameID) {
+        LeaveCommand leave = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID);
         ws.playerLeaves(leave);
     }
 
@@ -93,8 +92,8 @@ public class ServerFacade {
         ws.playerResigns(resign);
     }
 
-    public void observerJoins(String username, Integer gameID) {
-        ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, gameID, username, null);
+    public void observerJoins(Integer gameID) {
+        ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, gameID);
         ws.observerJoins(connect);
     }
 

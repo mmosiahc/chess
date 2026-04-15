@@ -184,7 +184,7 @@ public class PostLoginClient implements ChessClient{
                 return String.format("Invalid game id \"%s\"\n", id);
             }
             //Open websocket connection
-            facade.observerJoins(username, game.gameID());
+            facade.observerJoins(game.gameID());
             //Change client repl loop
             repl.setState(new GameplayClient(facade, repl, game, username, true));
 //            DrawChessBoard.drawNewBoard(true);
