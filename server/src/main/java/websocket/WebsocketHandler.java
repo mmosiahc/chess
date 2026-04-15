@@ -158,7 +158,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 userColor = ChessGame.TeamColor.BLACK;
             }
         }
-        //Validate correct team and observer
+        //Validate correct team
         ChessBoard originalBoard = g.game().getBoard();
         ChessPosition moveStartPosition = move.getStartPosition();
         ChessGame.TeamColor teamTurn = g.game().getTeamTurn();
@@ -247,17 +247,31 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
      * @param session websocket handle
      */
     private void leave(LeaveCommand command, Session session) throws Exception {
+        String user;
         //Validate User authorization
         AuthData authData = gameService.getAuthData(command.getAuthToken());
         if(authData == null) {throw new UnauthorizedException();}
         //Validate game request
-        GameData gameData = gameService.getGame(command.getGameID());
-        if(gameData == null) {throw new BadRequestException();}
-        //Get game by game id
         GameData g = gameService.getGame(command.getGameID());
-        //Check for player or observer
-        if(!command.getIsObserver()) {
-            if(command.getTeamColor() == ChessGame.TeamColor.WHITE) {
+        if(g == null) {throw new BadRequestException();}
+        //Set username
+        user = authData.username();
+        //Check user role
+        boolean isObserver = !user.equals(g.whiteUsername()) && !user.equals(g.blackUsername());
+        ChessGame.TeamColor userColor = null;
+        if(g.whiteUsername() != null) {
+            if(user.equals(g.whiteUsername())) {
+                userColor = ChessGame.TeamColor.WHITE;
+            }
+        }
+        if(g.blackUsername() != null) {
+            if(user.equals(g.blackUsername())) {
+                userColor = ChessGame.TeamColor.BLACK;
+            }
+        }
+        //Update game data to reflect leaving
+        if(!isObserver) {
+            if(userColor == ChessGame.TeamColor.WHITE) {
                 g = new GameData(g.gameID(), null, g.blackUsername(), g.gameName(), g.game());
             } else {
                 g = new GameData(g.gameID(), g.whiteUsername(), null, g.gameName(), g.game());
