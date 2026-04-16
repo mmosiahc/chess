@@ -1,17 +1,22 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static ui.EscapeSequences.*;
 
 public class DrawChessBoard {
 
     private final ChessGame game;
+    private final ChessBoard board;
     private static final int ROWS = 10;
     private static final int BOARD_LENGTH = 8;
     private static final int BLACK_OFFSET = 95;
@@ -29,30 +34,45 @@ public class DrawChessBoard {
     private static final ArrayList<String> BLACK_PAWNS = new ArrayList<>(List.of(
             BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN));
 
+
     public DrawChessBoard(ChessGame game) {
         this.game = game;
+        this.board = game.getBoard();
     }
 
     public String toString() {
         return game.toString();
     }
 
-    public static void main() {
+    public static void main(String[] args) {
+        // 1. Create a real game and board
+        ChessGame testGame = new ChessGame();
+        ChessBoard testBoard = new ChessBoard();
 
+        // 2. Initialize with standard pieces
+        testBoard.resetBoard();
+        testGame.setBoard(testBoard);
+
+        // 3. Create the printer instance
+        DrawChessBoard ui = new DrawChessBoard(testGame);
+
+        // 4. Test White View
+        System.out.println("White Perspective:");
+        ui.drawBoardFromGame(true);
+
+        System.out.print(RESET_BG_COLOR);
+        System.out.print(RESET_TEXT_COLOR);
+        System.out.println();
+
+        // 5. Test Black View
+        System.out.println("\nBlack Perspective:");
+        ui.drawBoardFromGame(false);
     }
 
-    public static void drawBoardFromGame(ChessGame game, boolean isWhite) {
+    public void drawBoardFromGame(boolean isWhite) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
-        if(isWhite) {
-            printBoardWhiteFromGame(out, game);
-            printLine(out);
-        } else {
-            printBoardBlackFromGame(out, game);
-            printLine(out);
-        }
-        out.print(RESET_BG_COLOR);
-        out.print(RESET_TEXT_COLOR);
+        mainLoop(out, isWhite);
     }
 
     public static void drawNewBoard(boolean isWhite) {
@@ -156,7 +176,7 @@ public class DrawChessBoard {
                 char file = (char) (i + BLACK_OFFSET);
                 printRankORFile(out, String.valueOf(file));
             } else {
-                out.print(EscapeSequences.EMPTY);
+                out.print(EMPTY);
             }
         }
         printLine(out);
@@ -169,7 +189,7 @@ public class DrawChessBoard {
                 char file = (char) (i + WHITE_OFFSET);
                 printRankORFile(out, String.valueOf(file));
             } else {
-                out.print(EscapeSequences.EMPTY);
+                out.print(EMPTY);
             }
         }
         printLine(out);
@@ -179,10 +199,10 @@ public class DrawChessBoard {
         for(int i = 0; i < BOARD_LENGTH; i++) {
             if(isEven(i)) {
                 setLightSquareColor(out);
-                out.print(EscapeSequences.EMPTY);
+                out.print(EMPTY);
             } else {
                 setDarkSquareColor(out);
-                out.print(EscapeSequences.EMPTY);
+                out.print(EMPTY);
             }
         }
     }
@@ -197,10 +217,10 @@ public class DrawChessBoard {
         for(int i = 0; i < BOARD_LENGTH; i++) {
             if(isEven(i)) {
                 setLightSquareColor(out);
-                printPiece(out, pieces.get(i), color);
+                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
             } else {
                 setDarkSquareColor(out);
-                printPiece(out, pieces.get(i), color);
+                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
             }
         }
     }
@@ -209,10 +229,10 @@ public class DrawChessBoard {
         for(int i = 0; i < BOARD_LENGTH; i++) {
             if(isEven(i)) {
                 setDarkSquareColor(out);
-                out.print(EscapeSequences.EMPTY);
+                out.print(EMPTY);
             } else {
                 setLightSquareColor(out);
-                out.print(EscapeSequences.EMPTY);
+                out.print(EMPTY);
             }
         }
     }
@@ -227,10 +247,10 @@ public class DrawChessBoard {
         for(int i = 0; i < BOARD_LENGTH; i++) {
             if(isEven(i)) {
                 setDarkSquareColor(out);
-                printPiece(out, pieces.get(i), color);
+                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
             } else {
                 setLightSquareColor(out);
-                printPiece(out, pieces.get(i), color);
+                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
             }
         }
     }
@@ -241,8 +261,8 @@ public class DrawChessBoard {
         out.print("\u2003" + rank + " ");
     }
 
-    private static void printPiece(PrintStream out, String piece, String color) {
-        if(color.equalsIgnoreCase("white")) {
+    private static void printPiece(PrintStream out, String piece, ChessGame.TeamColor color) {
+        if(color.equals(ChessGame.TeamColor.WHITE)) {
             setWhitePieceColor(out);
         } else {
             setBlackPieceColor(out);
@@ -314,5 +334,54 @@ public class DrawChessBoard {
 
     private static void setBorderSquareColor(PrintStream out) {
         out.print(BORDER_SQUARE);
+    }
+
+    private void mainLoop(PrintStream out, boolean isWhiteView) {
+        //Change row/column to fit perspective
+        int startRow = isWhiteView ? 8 : 1;
+        int endRow = isWhiteView ? 1 : 8;
+        int direction = isWhiteView ? -1 : 1;
+
+        for(int r = startRow; r != endRow; r += direction) {
+            for(int c = 1; c <= 8; c++) {
+                int actualCol = isWhiteView ? c : (9 - c);
+                if(Objects.isNull(board.getPiece(new ChessPosition(r, actualCol)))) {
+                    printNull(out, calcCoordinateSum(r, actualCol));
+                } else {
+                    ChessPiece piece = board.getPiece(new ChessPosition(r, actualCol));
+                    ChessGame.TeamColor color = piece.getTeamColor();
+                    printPiece(out, getPieceString(piece, color), color);
+                }
+
+            }
+        }
+    }
+
+    private String getPieceString(ChessPiece piece, ChessGame.TeamColor color) {
+        boolean isWhite = color == ChessGame.TeamColor.WHITE;
+
+        return switch (piece.getPieceType()) {
+            case PAWN -> isWhite ? WHITE_PAWN : BLACK_PAWN;
+            case KING -> isWhite ? WHITE_KING : BLACK_KING;
+            case QUEEN -> isWhite ? WHITE_QUEEN : BLACK_QUEEN;
+            case BISHOP -> isWhite ? WHITE_BISHOP : BLACK_BISHOP;
+            case KNIGHT -> isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case ROOK -> isWhite ? WHITE_ROOK : BLACK_ROOK;
+        };
+    }
+
+    private void printNull(PrintStream out, int coordinateSum) {
+        if(isEven(coordinateSum)) {
+            setDarkSquareColor(out);
+            out.print(EMPTY);
+        } else {
+            setLightSquareColor(out);
+            out.print(EMPTY);
+        }
+
+    }
+
+    private int calcCoordinateSum(int row, int col) {
+        return row + col;
     }
 }

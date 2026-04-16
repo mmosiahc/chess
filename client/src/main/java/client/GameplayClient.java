@@ -2,6 +2,7 @@ package client;
 
 import chess.*;
 import model.GameData;
+import ui.DrawChessBoard;
 
 import java.util.Arrays;
 
@@ -12,7 +13,7 @@ public class GameplayClient implements ChessClient{
     private final boolean isObserver;
     private ChessGame.TeamColor teamColor;
     private GameData gameData;
-//    static DrawChessBoard boardPrinter;
+    static DrawChessBoard boardPrinter;
 
     public GameplayClient(ServerFacade facade, Repl repl, GameData game, String username, boolean isObserver) {
         this.facade = facade;
@@ -20,7 +21,7 @@ public class GameplayClient implements ChessClient{
         this.gameData = game;
         this.username = username;
         this.isObserver = isObserver;
-//        boardPrinter = new DrawChessBoard(game.game());
+        boardPrinter = new DrawChessBoard(game.game());
         setTeamColor();
     }
 
@@ -57,7 +58,9 @@ public class GameplayClient implements ChessClient{
 
 
     public String redraw() {
-        return gameData.game().toString();
+        boardPrinter.drawBoardFromGame(true);
+//        return gameData.game().toString();
+        return "";
     }
 
     public String highlight() {

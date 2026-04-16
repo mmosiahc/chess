@@ -54,13 +54,10 @@ public class Repl implements ServerMessageObserver {
 
 
     public void notifyClientLoadMessage(LoadGameMessage message) {
-        GameData data = message.getGame();
-        if(client instanceof GameplayClient) {
-            ((GameplayClient) client).updateGameState(message.getGame().game());
-        }
-        System.out.print("\n" + data.game().toString());
-        if(client instanceof GameplayClient) {
-            System.out.println(printPrompt(client) + "\n");
+        if(client instanceof GameplayClient gameplayClient) {
+            gameplayClient.updateGameState(message.getGame().game());
+            gameplayClient.redraw();
+            System.out.println(printPrompt(gameplayClient) + "\n");
         }
     }
 
