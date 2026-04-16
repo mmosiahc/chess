@@ -7,8 +7,6 @@ import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import static ui.EscapeSequences.*;
@@ -18,21 +16,8 @@ public class DrawChessBoard {
     private final ChessGame game;
     private final ChessBoard board;
     private static final int ROWS = 10;
-    private static final int BOARD_LENGTH = 8;
     private static final int BLACK_OFFSET = 95;
     private static final int WHITE_OFFSET = 96;
-    private static final ArrayList<String> BLACK_PIECES_PRINT_WHITE = new ArrayList<>(List.of(
-            BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK));
-    private static final ArrayList<String> BLACK_PIECES_PRINT_BLACK = new ArrayList<>(List.of(
-            BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK));
-    private static final ArrayList<String> WHITE_PIECES_PRINT_WHITE = new ArrayList<>(List.of(
-            WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK));
-    private static final ArrayList<String> WHITE_PIECES_PRINT_BLACK = new ArrayList<>(List.of(
-            WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING,WHITE_QUEEN, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK));
-    private static final ArrayList<String> WHITE_PAWNS = new ArrayList<>(List.of(
-            WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN));
-    private static final ArrayList<String> BLACK_PAWNS = new ArrayList<>(List.of(
-            BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN));
 
 
     public DrawChessBoard(ChessGame game) {
@@ -44,7 +29,7 @@ public class DrawChessBoard {
         return game.toString();
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         // 1. Create a real game and board
         ChessGame testGame = new ChessGame();
         ChessBoard testBoard = new ChessBoard();
@@ -73,100 +58,8 @@ public class DrawChessBoard {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         mainLoop(out, isWhite);
-    }
-
-    public static void drawNewBoard(boolean isWhite) {
-        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        out.print(ERASE_SCREEN);
-        if(isWhite) {
-            printBoardWhite(out);
-            printLine(out);
-        } else {
-            printBoardBlack(out);
-            printLine(out);
-        }
         out.print(RESET_BG_COLOR);
         out.print(RESET_TEXT_COLOR);
-    }
-
-    private static void printBoardBlack(PrintStream out) {
-        for(int i = 0; i < ROWS; i++) {
-            if(i == 0 || i == ROWS - 1) {
-                printHeaderAndFooterBlack(out);
-            } else {
-                if(i == 1) {
-                    printRowOnBoardWithPieces(out, i, "white", WHITE_PIECES_PRINT_BLACK);
-                } else if (i == 2) {
-                    printRowOnBoardWithPieces(out, i, "black", WHITE_PAWNS);
-                } else if (i == 7) {
-                    printRowOnBoardWithPieces(out, i, "white", BLACK_PAWNS);
-                } else if (i == 8) {
-                    printRowOnBoardWithPieces(out, i, "black", BLACK_PIECES_PRINT_BLACK);
-                } else {
-                    printRowOnBoardNoPiecesBlack(out, i);
-                }
-            }
-        }
-    }
-
-    private static void printBoardBlackFromGame(PrintStream out, ChessGame game) {
-        for(int i = 0; i < ROWS; i++) {
-            if(i == 0 || i == ROWS - 1) {
-                printHeaderAndFooterBlack(out);
-            } else {
-                if(i == 1) {
-                    printRowOnBoardWithPieces(out, i, "white", WHITE_PIECES_PRINT_BLACK);
-                } else if (i == 2) {
-                    printRowOnBoardWithPieces(out, i, "black", WHITE_PAWNS);
-                } else if (i == 7) {
-                    printRowOnBoardWithPieces(out, i, "white", BLACK_PAWNS);
-                } else if (i == 8) {
-                    printRowOnBoardWithPieces(out, i, "black", BLACK_PIECES_PRINT_BLACK);
-                } else {
-                    printRowOnBoardNoPiecesBlack(out, i);
-                }
-            }
-        }
-    }
-
-    private static void printBoardWhite(PrintStream out) {
-        for(int i = ROWS - 1; i >= 0; i--) {
-            if(i == ROWS - 1 || i == 0) {
-                printHeaderAndFooterWhite(out);
-            } else {
-                if(i == 8) {
-                    printRowOnBoardWithPieces(out, i, "white", BLACK_PIECES_PRINT_WHITE);
-                } else if (i == 7) {
-                    printRowOnBoardWithPieces(out, i, "black", BLACK_PAWNS);
-                } else if (i == 2) {
-                    printRowOnBoardWithPieces(out, i, "white", WHITE_PAWNS);
-                } else if (i == 1) {
-                    printRowOnBoardWithPieces(out, i, "black", WHITE_PIECES_PRINT_WHITE);
-                } else {
-                    printRowOnBoardNoPiecesWhite(out, i);
-                }
-            }
-        }
-    }
-
-    private static void printBoardWhiteFromGame(PrintStream out, ChessGame game) {
-        for(int i = ROWS - 1; i >= 0; i--) {
-            if(i == ROWS - 1 || i == 0) {
-                printHeaderAndFooterWhite(out);
-            } else {
-                if(i == 8) {
-                    printRowOnBoardWithPieces(out, i, "white", BLACK_PIECES_PRINT_WHITE);
-                } else if (i == 7) {
-                    printRowOnBoardWithPieces(out, i, "black", BLACK_PAWNS);
-                } else if (i == 2) {
-                    printRowOnBoardWithPieces(out, i, "white", WHITE_PAWNS);
-                } else if (i == 1) {
-                    printRowOnBoardWithPieces(out, i, "black", WHITE_PIECES_PRINT_WHITE);
-                } else {
-                    printRowOnBoardNoPiecesWhite(out, i);
-                }
-            }
-        }
     }
 
     private static void printHeaderAndFooterBlack(PrintStream out) {
@@ -195,66 +88,6 @@ public class DrawChessBoard {
         printLine(out);
     }
 
-    private static void printBoardLineWhiteFirst(PrintStream out) {
-        for(int i = 0; i < BOARD_LENGTH; i++) {
-            if(isEven(i)) {
-                setLightSquareColor(out);
-                out.print(EMPTY);
-            } else {
-                setDarkSquareColor(out);
-                out.print(EMPTY);
-            }
-        }
-    }
-
-    private static void printBoardLineWhiteFirstWithPieces(PrintStream out, ArrayList<String> pieces) {
-        String color;
-        if(pieces.contains(WHITE_ROOK) || pieces.contains(WHITE_PAWN)) {
-            color = "white";
-        } else {
-            color = "black";
-        }
-        for(int i = 0; i < BOARD_LENGTH; i++) {
-            if(isEven(i)) {
-                setLightSquareColor(out);
-                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
-            } else {
-                setDarkSquareColor(out);
-                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
-            }
-        }
-    }
-
-    private static void printBoardLineBlackFirst(PrintStream out) {
-        for(int i = 0; i < BOARD_LENGTH; i++) {
-            if(isEven(i)) {
-                setDarkSquareColor(out);
-                out.print(EMPTY);
-            } else {
-                setLightSquareColor(out);
-                out.print(EMPTY);
-            }
-        }
-    }
-
-    private static void printBoardLineBlackFirstWithPieces(PrintStream out, ArrayList<String> pieces) {
-        String color;
-        if(pieces.contains(WHITE_ROOK) || pieces.contains(WHITE_PAWN)) {
-            color = "white";
-        } else {
-            color = "black";
-        }
-        for(int i = 0; i < BOARD_LENGTH; i++) {
-            if(isEven(i)) {
-                setDarkSquareColor(out);
-                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
-            } else {
-                setLightSquareColor(out);
-                printPiece(out, pieces.get(i), ChessGame.TeamColor.valueOf(color));
-            }
-        }
-    }
-
     private static void printRankORFile(PrintStream out, String rank) {
         setBorderSquareColor(out);
         setRankAndFileColor(out);
@@ -269,38 +102,6 @@ public class DrawChessBoard {
         }
         out.print(SET_TEXT_BOLD);
         out.print(piece);
-    }
-
-    private static void printRowOnBoardWithPieces(PrintStream out, int rowNumber, String firstSpaceColor, ArrayList<String> pieces) {
-        printRankORFile(out, String.valueOf(rowNumber));
-        if(firstSpaceColor.equals("white")) {
-            printBoardLineWhiteFirstWithPieces(out, pieces);
-        } else {
-            printBoardLineBlackFirstWithPieces(out, pieces);
-        }
-        printRankORFile(out, String.valueOf(rowNumber));
-        printLine(out);
-    }
-    private static void printRowOnBoardNoPiecesWhite(PrintStream out, int rowNumber) {
-        printRankORFile(out, String.valueOf(rowNumber));
-        if(isEven(rowNumber)) {
-            printBoardLineWhiteFirst(out);
-        } else {
-            printBoardLineBlackFirst(out);
-        }
-        printRankORFile(out, String.valueOf(rowNumber));
-        printLine(out);
-    }
-
-    private static void printRowOnBoardNoPiecesBlack(PrintStream out, int rowNumber) {
-        printRankORFile(out, String.valueOf(rowNumber));
-        if(isEven(rowNumber)) {
-            printBoardLineBlackFirst(out);
-        } else {
-            printBoardLineWhiteFirst(out);
-        }
-        printRankORFile(out, String.valueOf(rowNumber));
-        printLine(out);
     }
 
     private static boolean isEven (int iteration) {
@@ -339,22 +140,35 @@ public class DrawChessBoard {
     private void mainLoop(PrintStream out, boolean isWhiteView) {
         //Change row/column to fit perspective
         int startRow = isWhiteView ? 8 : 1;
-        int endRow = isWhiteView ? 1 : 8;
+        int endRow = isWhiteView ? 0 : 9;
         int direction = isWhiteView ? -1 : 1;
 
-        for(int r = startRow; r != endRow; r += direction) {
-            for(int c = 1; c <= 8; c++) {
+        if(isWhiteView) {printHeaderAndFooterWhite(out);}
+        else {printHeaderAndFooterBlack(out);}
+
+        for (int r = startRow; r != endRow; r += direction) {
+            printRankORFile(out, String.valueOf(r));
+            for (int c = 1; c <= 8; c++) {
                 int actualCol = isWhiteView ? c : (9 - c);
-                if(Objects.isNull(board.getPiece(new ChessPosition(r, actualCol)))) {
-                    printNull(out, calcCoordinateSum(r, actualCol));
+
+                if (isEven(r + actualCol)) {
+                    setDarkSquareColor(out);
                 } else {
-                    ChessPiece piece = board.getPiece(new ChessPosition(r, actualCol));
+                    setLightSquareColor(out);
+                }
+                ChessPiece piece = board.getPiece(new ChessPosition(r, actualCol));
+                if (Objects.isNull(piece)) {
+                    out.print(EMPTY);
+                } else {
                     ChessGame.TeamColor color = piece.getTeamColor();
                     printPiece(out, getPieceString(piece, color), color);
                 }
-
             }
+            printRankORFile(out, String.valueOf(r));
+            printLine(out);
         }
+        if(isWhiteView) {printHeaderAndFooterWhite(out);}
+        else {printHeaderAndFooterBlack(out);}
     }
 
     private String getPieceString(ChessPiece piece, ChessGame.TeamColor color) {
@@ -368,20 +182,5 @@ public class DrawChessBoard {
             case KNIGHT -> isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
             case ROOK -> isWhite ? WHITE_ROOK : BLACK_ROOK;
         };
-    }
-
-    private void printNull(PrintStream out, int coordinateSum) {
-        if(isEven(coordinateSum)) {
-            setDarkSquareColor(out);
-            out.print(EMPTY);
-        } else {
-            setLightSquareColor(out);
-            out.print(EMPTY);
-        }
-
-    }
-
-    private int calcCoordinateSum(int row, int col) {
-        return row + col;
     }
 }

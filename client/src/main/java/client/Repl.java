@@ -1,6 +1,5 @@
 package client;
 
-import model.GameData;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -56,6 +55,7 @@ public class Repl implements ServerMessageObserver {
     public void notifyClientLoadMessage(LoadGameMessage message) {
         if(client instanceof GameplayClient gameplayClient) {
             gameplayClient.updateGameState(message.getGame().game());
+            System.out.println();
             gameplayClient.redraw();
             System.out.println(printPrompt(gameplayClient) + "\n");
         }

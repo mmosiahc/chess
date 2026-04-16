@@ -12,6 +12,7 @@ public class GameplayClient implements ChessClient{
     private final String username;
     private final boolean isObserver;
     private ChessGame.TeamColor teamColor;
+    private  boolean perspective = true;
     private GameData gameData;
     static DrawChessBoard boardPrinter;
 
@@ -23,6 +24,7 @@ public class GameplayClient implements ChessClient{
         this.isObserver = isObserver;
         boardPrinter = new DrawChessBoard(game.game());
         setTeamColor();
+        setPerspective();
     }
 
     public String eval(String input) {
@@ -58,9 +60,15 @@ public class GameplayClient implements ChessClient{
 
 
     public String redraw() {
-        boardPrinter.drawBoardFromGame(true);
-//        return gameData.game().toString();
+        boardPrinter = new DrawChessBoard(gameData.game());
+        boardPrinter.drawBoardFromGame(perspective);
         return "";
+    }
+
+    private void setPerspective() {
+        if(!isObserver && !username.equals(gameData.whiteUsername())) {
+            perspective = false;
+        }
     }
 
     public String highlight() {
