@@ -4,7 +4,7 @@ import exceptions.DataAccessException;
 import chess.ChessGame;
 import dataaccess.*;
 import model.GameData;
-import data_transfer.RegisterRequest;
+import datatransfer.RegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

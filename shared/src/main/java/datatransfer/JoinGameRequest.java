@@ -1,4 +1,4 @@
-package data_transfer;
+package datatransfer;
 
 import chess.ChessGame;
 

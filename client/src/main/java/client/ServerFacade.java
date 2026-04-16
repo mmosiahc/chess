@@ -3,7 +3,7 @@ package client;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import data_transfer.*;
+import datatransfer.*;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.DataAccessException;
@@ -73,7 +73,7 @@ public class ServerFacade {
         var response = sendRequest(request);
         handleResponse(response, null);
         ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, body.gameID());
-        ws.playerJoins(connect);
+        ws.userJoins(connect);
     }
 
     public void clear() throws Exception {
@@ -94,7 +94,7 @@ public class ServerFacade {
 
     public void observerJoins(Integer gameID) {
         ConnectCommand connect = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, gameID);
-        ws.observerJoins(connect);
+        ws.userJoins(connect);
     }
 
     /**

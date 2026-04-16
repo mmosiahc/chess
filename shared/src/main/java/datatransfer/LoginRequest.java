@@ -1,3 +1,3 @@
-package data_transfer;
+package datatransfer;
 
 public record LoginRequest(String username, String password) {}

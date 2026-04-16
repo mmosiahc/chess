@@ -32,30 +32,24 @@ public class WebsocketCommunicator extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String s) {
-                    try {
-                        ServerMessage message = new Gson().fromJson(s, ServerMessage.class);
-                        switch (message.getServerMessageType()) {
-                            case LOAD_GAME -> {
-                                LoadGameMessage loadGame = new Gson().fromJson(s, LoadGameMessage.class);
-                                observer.notifyClientLoadMessage(loadGame);
-                            }
-                            case NOTIFICATION -> {
-                                NotificationMessage notification = new Gson().fromJson(s, NotificationMessage.class);
-                                observer.notifyClientNotification(notification);
-                            }
-                            case ERROR -> {
-                                ErrorMessage error = new Gson().fromJson(s, ErrorMessage.class);
-                                observer.notifyClientError(error);
-                            }
-                        }
-                    } catch (Exception e) {
-                        observer.notifyClientError(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
-                    }
+                    processMessage(s, observer);
                 }
             });
         } catch (URISyntaxException | DeploymentException | IOException e) {
             observer.notifyClientError(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+        }
+    }
 
+    private void processMessage(String s, ServerMessageObserver observer) {
+        try {
+            ServerMessage message = new Gson().fromJson(s, ServerMessage.class);
+            switch (message.getServerMessageType()) {
+                case LOAD_GAME -> {observer.notifyClientLoadMessage(new Gson().fromJson(s, LoadGameMessage.class));}
+                case NOTIFICATION -> {observer.notifyClientNotification(new Gson().fromJson(s, NotificationMessage.class));}
+                case ERROR -> {observer.notifyClientError(new Gson().fromJson(s, ErrorMessage.class));}
+            }
+        } catch (Exception e) {
+            observer.notifyClientError(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
         }
     }
 
@@ -64,21 +58,12 @@ public class WebsocketCommunicator extends Endpoint {
 
     }
 
-    public void playerJoins(ConnectCommand connect) {
-        try {
-            this.session.getBasicRemote().sendText(new Gson().toJson(connect));
-        } catch (IOException e) {
-            System.out.print(e.getMessage() + "\n");
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * Sends connect command for observer
      *
      * @param connect info to send
      */
-    public void observerJoins(ConnectCommand connect) {
+    public void userJoins(ConnectCommand connect) {
         try {
             this.session.getBasicRemote().sendText(new Gson().toJson(connect));
         } catch (IOException e) {

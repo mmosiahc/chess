@@ -1,7 +1,7 @@
 package client;
 
 import chess.ChessGame;
-import data_transfer.*;
+import datatransfer.*;
 import dataaccess.DatabaseManager;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;

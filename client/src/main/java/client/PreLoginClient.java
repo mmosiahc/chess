@@ -1,9 +1,9 @@
 package client;
 
-import data_transfer.LoginRequest;
-import data_transfer.LoginResult;
-import data_transfer.RegisterRequest;
-import data_transfer.RegisterResult;
+import datatransfer.LoginRequest;
+import datatransfer.LoginResult;
+import datatransfer.RegisterRequest;
+import datatransfer.RegisterResult;
 
 import java.util.Arrays;
 

@@ -3,8 +3,8 @@ package server;
 import com.google.gson.Gson;
 import exceptions.DataAccessException;
 import io.javalin.http.Context;
-import data_transfer.LoginRequest;
-import data_transfer.LoginResult;
+import datatransfer.LoginRequest;
+import datatransfer.LoginResult;
 import service.UserService;
 
 public class LoginHandler extends BaseHandler{

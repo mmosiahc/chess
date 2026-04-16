@@ -247,7 +247,7 @@ public class GameplayClient implements ChessClient{
     }
 
     private boolean isPromotion(ChessPiece piece, ChessPosition end) {
-        if (piece.getPieceType() != ChessPiece.PieceType.PAWN) return false;
+        if (piece.getPieceType() != ChessPiece.PieceType.PAWN) {return false;}
         int row = end.getRow();
         return (piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 8) ||
                 (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 1);

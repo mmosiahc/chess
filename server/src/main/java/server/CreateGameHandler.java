@@ -3,9 +3,9 @@ package server;
 import com.google.gson.Gson;
 import exceptions.DataAccessException;
 import io.javalin.http.Context;
-import data_transfer.CreateGameBody;
-import data_transfer.CreateGameRequest;
-import data_transfer.CreateGameResult;
+import datatransfer.CreateGameBody;
+import datatransfer.CreateGameRequest;
+import datatransfer.CreateGameResult;
 import service.GameService;
 
 public class CreateGameHandler extends BaseHandler{

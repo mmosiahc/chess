@@ -1,8 +1,8 @@
 package client;
 
 import chess.ChessGame;
-import data_transfer.CreateGameResult;
-import data_transfer.JoinGameBody;
+import datatransfer.CreateGameResult;
+import datatransfer.JoinGameBody;
 import model.GameData;
 import ui.EscapeSequences;
 
@@ -125,7 +125,7 @@ public class PostLoginClient implements ChessClient{
                         listIndex, name, white, black);
                 sb.append(line);
             }
-            if(gamesList.isEmpty()) return gamesList + " There are no games currently being played.\n";
+            if(gamesList.isEmpty()) {return gamesList + " There are no games currently being played.\n";}
             return sb.toString();
         } catch (Exception e) {
             return e.getMessage() + "\n";

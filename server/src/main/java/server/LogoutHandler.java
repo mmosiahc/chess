@@ -3,7 +3,7 @@ package server;
 import com.google.gson.Gson;
 import exceptions.DataAccessException;
 import io.javalin.http.Context;
-import data_transfer.LogoutRequest;
+import datatransfer.LogoutRequest;
 import service.UserService;
 
 import java.util.Map;

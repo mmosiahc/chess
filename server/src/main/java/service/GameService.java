@@ -1,10 +1,10 @@
 package service;
 
 import chess.ChessGame;
-import data_transfer.CreateGameRequest;
-import data_transfer.CreateGameResult;
-import data_transfer.JoinGameRequest;
-import data_transfer.ListGamesRequest;
+import datatransfer.CreateGameRequest;
+import datatransfer.CreateGameResult;
+import datatransfer.JoinGameRequest;
+import datatransfer.ListGamesRequest;
 import dataaccess.AuthDatabase;
 import dataaccess.GameDatabase;
 import exceptions.AlreadyTakenException;
