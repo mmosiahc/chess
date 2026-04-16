@@ -1,13 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 
@@ -57,9 +55,58 @@ public class DrawChessBoard {
     public void drawBoardFromGame(boolean isWhite) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
-        mainLoop(out, isWhite);
+        mainLoop(out, isWhite, null, null);
         out.print(RESET_BG_COLOR);
         out.print(RESET_TEXT_COLOR);
+    }
+
+    public void drawBoardWithHighlights(boolean isWhiteView, ChessPosition start, Collection<ChessMove> validMoves) {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        out.print(ERASE_SCREEN);
+        Collection<ChessPosition> endPositions = new ArrayList<>();
+        for (ChessMove move : validMoves) {
+            endPositions.add(move.getEndPosition());
+        }
+        mainLoop(out, isWhiteView, start, endPositions);
+    }
+
+    private void mainLoop(PrintStream out, boolean isWhiteView, ChessPosition selected, Collection<ChessPosition> targets) {
+        //Change row/column to fit perspective
+        int startRow = isWhiteView ? 8 : 1;
+        int endRow = isWhiteView ? 0 : 9;
+        int direction = isWhiteView ? -1 : 1;
+
+        if(isWhiteView) {printHeaderAndFooterWhite(out);}
+        else {printHeaderAndFooterBlack(out);}
+
+        for (int r = startRow; r != endRow; r += direction) {
+            printRankORFile(out, String.valueOf(r));
+            for (int c = 1; c <= 8; c++) {
+                int actualCol = isWhiteView ? c : (9 - c);
+                ChessPosition currentPos = new ChessPosition(r, actualCol);
+                ChessPiece piece = board.getPiece(currentPos);
+                if(currentPos.equals(selected)) {
+                    out.print(SET_BG_COLOR_RED);
+                } else if (targets != null && targets.contains(currentPos)) {
+                    out.print(SET_BG_COLOR_GREEN);
+                }
+                else {
+                    if(isEven(r + actualCol)) {setDarkSquareColor(out);}
+                    else {setLightSquareColor(out);}
+                }
+
+                if (piece == null) {
+                    out.print(EMPTY);
+                } else {
+                    ChessGame.TeamColor pieceColor = piece.getTeamColor();
+                    printPiece(out, getPieceString(piece), pieceColor);
+                }
+            }
+            printRankORFile(out, String.valueOf(r));
+            printLine(out);
+        }
+        if(isWhiteView) {printHeaderAndFooterWhite(out);}
+        else {printHeaderAndFooterBlack(out);}
     }
 
     private static void printHeaderAndFooterBlack(PrintStream out) {
@@ -95,11 +142,14 @@ public class DrawChessBoard {
     }
 
     private static void printPiece(PrintStream out, String piece, ChessGame.TeamColor color) {
-        if(color.equals(ChessGame.TeamColor.WHITE)) {
-            setWhitePieceColor(out);
-        } else {
-            setBlackPieceColor(out);
+        if(color != null) {
+            if(color.equals(ChessGame.TeamColor.WHITE)) {
+                setWhitePieceColor(out);
+            } else {
+                setBlackPieceColor(out);
+            }
         }
+
         out.print(SET_TEXT_BOLD);
         out.print(piece);
     }
@@ -137,50 +187,17 @@ public class DrawChessBoard {
         out.print(BORDER_SQUARE);
     }
 
-    private void mainLoop(PrintStream out, boolean isWhiteView) {
-        //Change row/column to fit perspective
-        int startRow = isWhiteView ? 8 : 1;
-        int endRow = isWhiteView ? 0 : 9;
-        int direction = isWhiteView ? -1 : 1;
 
-        if(isWhiteView) {printHeaderAndFooterWhite(out);}
-        else {printHeaderAndFooterBlack(out);}
 
-        for (int r = startRow; r != endRow; r += direction) {
-            printRankORFile(out, String.valueOf(r));
-            for (int c = 1; c <= 8; c++) {
-                int actualCol = isWhiteView ? c : (9 - c);
-
-                if (isEven(r + actualCol)) {
-                    setDarkSquareColor(out);
-                } else {
-                    setLightSquareColor(out);
-                }
-                ChessPiece piece = board.getPiece(new ChessPosition(r, actualCol));
-                if (Objects.isNull(piece)) {
-                    out.print(EMPTY);
-                } else {
-                    ChessGame.TeamColor color = piece.getTeamColor();
-                    printPiece(out, getPieceString(piece, color), color);
-                }
-            }
-            printRankORFile(out, String.valueOf(r));
-            printLine(out);
-        }
-        if(isWhiteView) {printHeaderAndFooterWhite(out);}
-        else {printHeaderAndFooterBlack(out);}
-    }
-
-    private String getPieceString(ChessPiece piece, ChessGame.TeamColor color) {
-        boolean isWhite = color == ChessGame.TeamColor.WHITE;
+    private String getPieceString(ChessPiece piece) {
 
         return switch (piece.getPieceType()) {
-            case PAWN -> isWhite ? WHITE_PAWN : BLACK_PAWN;
-            case KING -> isWhite ? WHITE_KING : BLACK_KING;
-            case QUEEN -> isWhite ? WHITE_QUEEN : BLACK_QUEEN;
-            case BISHOP -> isWhite ? WHITE_BISHOP : BLACK_BISHOP;
-            case KNIGHT -> isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
-            case ROOK -> isWhite ? WHITE_ROOK : BLACK_ROOK;
+            case PAWN -> BLACK_PAWN;
+            case KING -> BLACK_KING;
+            case QUEEN -> BLACK_QUEEN;
+            case BISHOP -> BLACK_BISHOP;
+            case KNIGHT -> BLACK_KNIGHT;
+            case ROOK -> BLACK_ROOK;
         };
     }
 }

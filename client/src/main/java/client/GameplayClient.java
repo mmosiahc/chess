@@ -5,6 +5,8 @@ import model.GameData;
 import ui.DrawChessBoard;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Scanner;
 
 public class GameplayClient implements ChessClient{
     private final ServerFacade facade;
@@ -35,7 +37,7 @@ public class GameplayClient implements ChessClient{
             if(cmd.startsWith("-")) {
                 return switch (cmd) {
                     case "-r" -> redraw();
-                    case "-hi" -> highlight();
+                    case "-hi" -> highlight(params);
                     case "-m" -> move(params);
                     case "-l" -> leave();
                     case "-rs" -> resign(params);
@@ -45,7 +47,7 @@ public class GameplayClient implements ChessClient{
             }else {
                 return switch (cmd) {
                     case "redraw" -> redraw();
-                    case "highlight" -> highlight();
+                    case "highlight" -> highlight(params);
                     case "move" -> move(params);
                     case "leave" -> leave();
                     case "resign" -> resign(params);
@@ -59,7 +61,7 @@ public class GameplayClient implements ChessClient{
     }
 
 
-    public String redraw() {
+    String redraw() {
         boardPrinter = new DrawChessBoard(gameData.game());
         boardPrinter.drawBoardFromGame(perspective);
         return "";
@@ -71,8 +73,27 @@ public class GameplayClient implements ChessClient{
         }
     }
 
-    public String highlight() {
-        return "Valid moves\n";
+    public String highlight(String... params) {
+        if (params.length < 1) {
+            return "Expected <COORDINATE> (e.g., a2)\n";
+        }
+        String input = params[0].toLowerCase();
+        if (isBadCoordinate(input)) {
+            return String.format("'%s' is not a valid coordinate (e.g., \"a2\")\n", input);
+        }
+        ChessPosition startPos = getChessPosition(input);
+        ChessGame game = gameData.game();
+        ChessPiece piece = game.getBoard().getPiece(startPos);
+        if (piece == null) {
+            return "There is no piece at " + input + ".\n";
+        }
+        Collection<ChessMove> validMoves = game.validMoves(startPos);
+        if (validMoves.isEmpty()) {
+            return "The " + piece.getPieceType() + " at " + input + " has no legal moves.\n";
+        }
+        boardPrinter = new DrawChessBoard(game);
+        boardPrinter.drawBoardWithHighlights(perspective, startPos, validMoves);
+        return "";
     }
 
     /**
@@ -112,6 +133,26 @@ public class GameplayClient implements ChessClient{
         ChessPosition endPosition = getChessPosition(end);
         //Construct chess move
         ChessMove move = new ChessMove(startPosition, endPosition, null);
+        ChessGame game = gameData.game();
+        ChessBoard board = game.getBoard();
+        ChessPiece startPiece = board.getPiece(move.getStartPosition());
+        //Check for pawn promotion
+        ChessPiece.PieceType promotionType = null;
+
+        // Detect if we need a promotion piece
+        if (isPromotion(startPiece, move.getEndPosition())) {
+            System.out.print("Pawn Promotion! Choose piece (Q, R, B, N): ");
+            Scanner scanner = new Scanner(System.in);
+            String choice = scanner.nextLine().trim().toUpperCase();
+
+            promotionType = switch (choice) {
+                case "R" -> ChessPiece.PieceType.ROOK;
+                case "B" -> ChessPiece.PieceType.BISHOP;
+                case "N" -> ChessPiece.PieceType.KNIGHT;
+                default -> ChessPiece.PieceType.QUEEN; // Default to Queen
+            };
+            move = new ChessMove(startPosition, endPosition, promotionType);
+        }
         //Validate move
         String validateMsg = chessMoveValidation(params, move);
         if(!validateMsg.isEmpty()) {return validateMsg;}
@@ -165,6 +206,8 @@ public class GameplayClient implements ChessClient{
     public void updateGameState(ChessGame game) {
         GameData g = this.gameData;
         this.gameData = new GameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName(), game);
+        setTeamColor();
+        setPerspective();
     }
 
 
@@ -201,6 +244,13 @@ public class GameplayClient implements ChessClient{
             if(endPiece.getTeamColor().equals(teamColor)) {return String.format("Piece at %s is your team's piece\n", end);}
         }
         return validationMsg;
+    }
+
+    private boolean isPromotion(ChessPiece piece, ChessPosition end) {
+        if (piece.getPieceType() != ChessPiece.PieceType.PAWN) return false;
+        int row = end.getRow();
+        return (piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 8) ||
+                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 1);
     }
 
     private void setTeamColor() {

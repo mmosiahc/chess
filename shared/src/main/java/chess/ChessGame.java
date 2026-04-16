@@ -118,7 +118,7 @@ public class ChessGame {
     }
 
     public void pawnHelper(ChessPiece piece, ChessMove move) throws InvalidMoveException {
-        int rowDiff = move.getEndPosition().getRow() - move. getStartPosition().getRow();
+        int rowDiff = move.getEndPosition().getRow() - move.getStartPosition().getRow();
         if(piece.getPieceType() == ChessPiece.PieceType.PAWN && rowDiff > 2) {
             throw new InvalidMoveException("Invalid Move: Pawn " + piece + " moved too far.");
         }
