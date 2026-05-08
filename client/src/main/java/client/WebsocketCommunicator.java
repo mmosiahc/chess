@@ -44,9 +44,9 @@ public class WebsocketCommunicator extends Endpoint {
         try {
             ServerMessage message = new Gson().fromJson(s, ServerMessage.class);
             switch (message.getServerMessageType()) {
-                case LOAD_GAME -> {observer.notifyClientLoadMessage(new Gson().fromJson(s, LoadGameMessage.class));}
-                case NOTIFICATION -> {observer.notifyClientNotification(new Gson().fromJson(s, NotificationMessage.class));}
-                case ERROR -> {observer.notifyClientError(new Gson().fromJson(s, ErrorMessage.class));}
+                case LOAD_GAME -> observer.notifyClientLoadMessage(new Gson().fromJson(s, LoadGameMessage.class));
+                case NOTIFICATION -> observer.notifyClientNotification(new Gson().fromJson(s, NotificationMessage.class));
+                case ERROR -> observer.notifyClientError(new Gson().fromJson(s, ErrorMessage.class));
             }
         } catch (Exception e) {
             observer.notifyClientError(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
@@ -68,7 +68,6 @@ public class WebsocketCommunicator extends Endpoint {
             this.session.getBasicRemote().sendText(new Gson().toJson(connect));
         } catch (IOException e) {
             System.out.print(e.getMessage() + "\n");
-            throw new RuntimeException(e);
         }
     }
 

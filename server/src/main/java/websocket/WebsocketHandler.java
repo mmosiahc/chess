@@ -195,7 +195,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             game.makeMove(move);
         } catch (InvalidMoveException e) {
             connections.sendServerMessage(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()), session);
-            throw new Exception(e.getMessage());
+            return;
         }
 
         //Update game data in database
@@ -226,7 +226,10 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             opponentColor = ChessGame.TeamColor.BLACK;
         }
         if (game.isInCheckmate(opponentColor)) {
-            return String.format("\nCheckmate! %s wins.", username);
+            if(opponentColor == ChessGame.TeamColor.BLACK) {
+                return String.format("\n%s is in checkmate!", gameData.blackUsername());
+            }
+            return String.format("\n%s is in checkmate!", gameData.whiteUsername());
         }
         if (game.isInStalemate(opponentColor)) {
             return "\nStalemate! The game is a draw.";

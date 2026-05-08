@@ -55,6 +55,7 @@ public class DrawChessBoard {
     public void drawBoardFromGame(boolean isWhite) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
+        out.print(SET_TEXT_BOLD);
         mainLoop(out, isWhite, null, null);
         out.print(RESET_BG_COLOR);
         out.print(RESET_TEXT_COLOR);
@@ -138,7 +139,7 @@ public class DrawChessBoard {
     private static void printRankORFile(PrintStream out, String rank) {
         setBorderSquareColor(out);
         setRankAndFileColor(out);
-        out.print("\u2003" + rank + " ");
+        out.print(" " + rank + "\u2003");
     }
 
     private static void printPiece(PrintStream out, String piece, ChessGame.TeamColor color) {
@@ -149,8 +150,6 @@ public class DrawChessBoard {
                 setBlackPieceColor(out);
             }
         }
-
-        out.print(SET_TEXT_BOLD);
         out.print(piece);
     }
 
